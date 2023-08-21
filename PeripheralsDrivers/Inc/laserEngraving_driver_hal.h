@@ -5,8 +5,8 @@
  *      Author: mauricio
  */
 
-#ifndef LASER_ENGRAVING_DRIVER_H_
-#define LASER_ENGRAVING_DRIVER_H_
+#ifndef LASERENGRAVING_DRIVER_HAL_H_
+#define LASERENGRAVING_DRIVER_HAL_H_
 
 #include "stm32f4xx.h"
 #include "pwm_driver_hal.h"
@@ -70,21 +70,21 @@ typedef struct
 	laser_engraving_Config_t 	config;
 } 	laser_engraving_t;
 
-void laser_init_config(laser_engraving_t *laser_engraving_t);
-void motor_enable(laser_engraving_t *laser_engraving_t);
-void x_movement(laser_engraving_t *laser_engraving_t);
-void y_movement(laser_engraving_t *laser_engraving_t);
-void set_velocity(laser_engraving_t *laser_engraving_t);
-void set_power(laser_engraving_t *laser_engraving_t);
-void engraving(laser_engraving_t *laser_engraving_t);
-void make_circle(laser_engraving_t *laser_engraving_t);
-void make_square(laser_engraving_t *laser_engraving_t);
-void start_continuous_engraving(laser_engraving_t *laser_engraving_t);
-void stop_continuous_engraving(laser_engraving_t *laser_engraving_t);
-void change_motor_direction(laser_engraving_t *laser_engraving_t);
+void laser_init_config(laser_engraving_t *pLaser_engraving_t);
+void motor_enable(laser_engraving_t *pLaser_engraving_t);
+void x_movement(laser_engraving_t *pLaser_engraving_t);
+void y_movement(laser_engraving_t *pLaser_engraving_t);
+void set_velocity(laser_engraving_t *pLaser_engraving_t);
+void set_power(laser_engraving_t *pLaser_engraving_t);
+void engraving(laser_engraving_t *pLaser_engraving_t);
+void make_circle(laser_engraving_t *pLaser_engraving_t);
+void make_square(laser_engraving_t *pLaser_engraving_t);
+void start_continuous_engraving(laser_engraving_t *pLaser_engraving_t);
+void stop_continuous_engraving(laser_engraving_t *pLaser_engraving_t);
+void change_motor_direction(laser_engraving_t *pLaser_engraving_t);
 
 
 
 
-#endif /*LASER_ENGRAVING_DRIVER_H_ */
+#endif /*LASERENGRAVING_DRIVER_HAL_H_ */
 
