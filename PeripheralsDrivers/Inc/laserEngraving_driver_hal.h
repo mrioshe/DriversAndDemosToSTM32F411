@@ -46,7 +46,7 @@ typedef struct
 	uint16_t	laser_power;
 	uint16_t	velocity;
 	uint8_t		direction;
-	uint8_t		time_step; //Variable que controla la resolución
+	uint16_t		time_step; //Variable que controla la resolución
 
 	} laser_engraving_Config_t;
 

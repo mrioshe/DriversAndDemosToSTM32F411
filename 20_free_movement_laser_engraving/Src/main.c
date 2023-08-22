@@ -83,14 +83,16 @@ int main() {
 initSys();
 while (1) {
 
-
 	if(receivedChar=='w'){
+		usart_writeMsg(&commSerial, "Moviendo hacia arriba\n\r");
 		set_motor_direction(&motory,1);
 		movement(&motory);
+
 		receivedChar=0;
 	}
 
 	if(receivedChar=='a'){
+		usart_writeMsg(&commSerial, "Moviendo hacia la izquierda\n\r");
 		set_motor_direction(&motorx,1);
 		movement(&motorx);
 		receivedChar=0;
@@ -98,18 +100,21 @@ while (1) {
 	}
 
 	if(receivedChar=='s'){
+		usart_writeMsg(&commSerial, "Moviendo hacia abajo\n\r");
 		set_motor_direction(&motory,0);
 		movement(&motory);
 		receivedChar=0;
 	}
 
 	if(receivedChar == 'd'){
+		usart_writeMsg(&commSerial, "Moviendo hacia la derecha\n\r");
 		set_motor_direction(&motorx,0);
 		movement(&motorx);
 		receivedChar=0;
 	}
 
 	if(receivedChar == 'l'){
+		usart_writeMsg(&commSerial, "Grabando \n\rs");
 		engraving(&motorx);
 		receivedChar=0;
 	}
@@ -143,12 +148,6 @@ void initSys(void) {
 	timer_Config(&blinkTimer);
 	timer_SetState(&blinkTimer, SET);
 
-	tempSensor.channel				= CHANNEL_15;
-	tempSensor.resolution			= RESOLUTION_12_BIT;
-	tempSensor.dataAlignment 		= ALIGNMENT_RIGHT;
-	tempSensor.samplingPeriod		= SAMPLING_PERIOD_84_CYCLES;
-	tempSensor.interrupState		= ADC_INT_ENABLE;
-	adc_ConfigSingleChannel(&tempSensor);
 
 	/*Configuración pines para control de motores y laser*/
 
@@ -225,15 +224,22 @@ void initSys(void) {
 
 	/*Configuración de los PWM*/
 
-	PWMlaser.pTIMx			 	= TIM5;
-	PWMlaser.config.timer		= TIMER_TIM5;
+//	PWMlaser.pTIMx			 	= TIM5;
+//	PWMlaser.config.timer		= TIMER_TIM5;
+//	PWMlaser.config.dutty		= duttyValue;
+//	PWMlaser.config.channel		= PWM_CHANNEL_2;
+//	PWMlaser.config.prescaler	= 16;
+//	PWMlaser.config.period		= PWMperiod;
+
+	PWMlaser.pTIMx			 	= TIM4;
+	PWMlaser.config.timer		= TIMER_TIM4;
 	PWMlaser.config.dutty		= duttyValue;
 	PWMlaser.config.channel		= PWM_CHANNEL_2;
 	PWMlaser.config.prescaler	= 16;
 	PWMlaser.config.period		= PWMperiod;
 
-	PWMmotorx.pTIMx			 	= TIM4;
-	PWMmotorx.config.timer		= TIMER_TIM4;
+	PWMmotorx.pTIMx			 	= TIM5;
+	PWMmotorx.config.timer		= TIMER_TIM5;
 	PWMmotorx.config.dutty		= duttyValue;
 	PWMmotorx.config.channel	= PWM_CHANNEL_2;
 	PWMmotorx.config.prescaler	= 16;
@@ -250,6 +256,12 @@ void initSys(void) {
 	pwm_Config(&PWMlaser);
 	pwm_Config(&PWMmotorx);
 	pwm_Config(&PWMmotory);
+
+//	startPWMsignal(&PWMlaser);
+	startPWMsignal(&PWMmotorx);
+	startPWMsignal(&PWMmotory);
+	gpio_WritePin(&enablePinMotorx,1);
+	gpio_WritePin(&enablePinMotory,1);
 
 
 	/*Activamos FPU*/
@@ -302,8 +314,8 @@ void initSys(void) {
 	motorx.pPWM_motor 				= &PWMmotorx;
 	motorx.config.direction			= DIRECTION1;
 	motorx.config.laser_power		= LASER_POWER_1000Hz;
-	motorx.config.time_step			= 20;					//valor en ms
-	motorx.config.velocity			= LASER_VELOCITY_200Hz;
+	motorx.config.time_step			= 1000;					//valor en ms
+	motorx.config.velocity			= LASER_VELOCITY_2000Hz;
 
 	motory.pGIPO_enable_laser 		= &enablePinLaser;
 	motory.pGIPO_enable_motor 		= &enablePinMotory;
@@ -312,11 +324,12 @@ void initSys(void) {
 	motory.pPWM_motor 				= &PWMmotory;
 	motory.config.direction			= DIRECTION1;
 	motory.config.laser_power		= LASER_POWER_1000Hz;
-	motory.config.time_step			= 20;					//valor en ms
-	motory.config.velocity			= LASER_VELOCITY_200Hz;
+	motory.config.time_step			= 1000;					//valor en ms
+	motory.config.velocity			= LASER_VELOCITY_2000Hz;
 
 	laser_init_config(&motorx);
 	laser_init_config(&motory);
+
 
 }
 
