@@ -71,7 +71,7 @@ void set_power(laser_engraving_t *pLaser_engraving_t,uint8_t newPower);
 void engraving(laser_engraving_t *pLaser_engraving_t);
 void start_continuous_engraving(laser_engraving_t *pLaser_engraving_t);
 void stop_continuous_engraving(laser_engraving_t *pLaser_engraving_t);
-void set_motor_direction(laser_engraving_t *pLaser_engraving_t);
+void set_motor_direction(laser_engraving_t *pLaser_engraving_t, uint8_t newDirection);
 
 
 

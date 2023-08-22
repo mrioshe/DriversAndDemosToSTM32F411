@@ -84,27 +84,35 @@ initSys();
 while (1) {
 
 
-	if(receivedChar=='p'){
-		usart_writeMsg(&commSerial, "Testing, testing!!\n\r");
+	if(receivedChar=='w'){
+		set_motor_direction(&motory,1);
+		movement(&motory);
+		receivedChar=0;
+	}
+
+	if(receivedChar=='a'){
+		set_motor_direction(&motorx,1);
+		movement(&motorx);
+		receivedChar=0;
+
 	}
 
 	if(receivedChar=='s'){
-		usart_writeMsg(&commSerial,"make simple ADC\n\r");
-		adc_StartSingleConv();
-
+		set_motor_direction(&motory,0);
+		movement(&motory);
+		receivedChar=0;
 	}
 
-	if(receivedChar=='C'){
-		usart_writeMsg(&commSerial,"make continuous ADC\n\r");
-		adc_StartContinuousConv();
+	if(receivedChar == 'd'){
+		set_motor_direction(&motorx,0);
+		movement(&motorx);
+		receivedChar=0;
 	}
 
-	if(receivedChar == 'S'){
-		usart_writeMsg(&commSerial,"stop continuous ADC\n\r");
-		adc_StopContinuousConv();
+	if(receivedChar == 'l'){
+		engraving(&motorx);
+		receivedChar=0;
 	}
-
-	receivedChar=0;
 
 
 	}
@@ -144,33 +152,26 @@ void initSys(void) {
 
 	/*Configuración pines para control de motores y laser*/
 
-	enablePinLaser.pGPIOx = GPIOB;
-	enablePinLaser.pinConfig.GPIO_PinNumber 	= PIN_6;
+	enablePinLaser.pGPIOx = GPIOC;
+	enablePinLaser.pinConfig.GPIO_PinNumber 	= 4;
 	enablePinLaser.pinConfig.GPIO_PinMode 		= GPIO_MODE_OUT;
 	enablePinLaser.pinConfig.GPIO_PinOutputType = GPIO_OTYPE_PUSHPULL;
 	enablePinLaser.pinConfig.GPIO_PinOutputSpeed = GPIO_OSPEEDR_MEDIUM;
 	enablePinLaser.pinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
 
-	enablePinMotorx.pGPIOx = GPIOB;
-	enablePinMotorx.pinConfig.GPIO_PinNumber 	= PIN_8;
+	enablePinMotorx.pGPIOx = GPIOA;
+	enablePinMotorx.pinConfig.GPIO_PinNumber 	= PIN_12;
 	enablePinMotorx.pinConfig.GPIO_PinMode 		= GPIO_MODE_OUT;
 	enablePinMotorx.pinConfig.GPIO_PinOutputType = GPIO_OTYPE_PUSHPULL;
 	enablePinMotorx.pinConfig.GPIO_PinOutputSpeed = GPIO_OSPEEDR_MEDIUM;
 	enablePinMotorx.pinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
 
-	enablePinMotory.pGPIOx = GPIOB;
-	enablePinMotory.pinConfig.GPIO_PinNumber 	= PIN_9;
+	enablePinMotory.pGPIOx = GPIOC;
+	enablePinMotory.pinConfig.GPIO_PinNumber 	= PIN_7;
 	enablePinMotory.pinConfig.GPIO_PinMode 		= GPIO_MODE_OUT;
 	enablePinMotory.pinConfig.GPIO_PinOutputType = GPIO_OTYPE_PUSHPULL;
 	enablePinMotory.pinConfig.GPIO_PinOutputSpeed = GPIO_OSPEEDR_MEDIUM;
 	enablePinMotory.pinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
-
-	directionPinMotorx.pGPIOx = GPIOA;
-	directionPinMotorx.pinConfig.GPIO_PinNumber 	= PIN_4;
-	directionPinMotorx.pinConfig.GPIO_PinMode 		= GPIO_MODE_OUT;
-	directionPinMotorx.pinConfig.GPIO_PinOutputType = GPIO_OTYPE_PUSHPULL;
-	directionPinMotorx.pinConfig.GPIO_PinOutputSpeed = GPIO_OSPEEDR_MEDIUM;
-	directionPinMotorx.pinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
 
 	directionPinMotorx.pGPIOx = GPIOA;
 	directionPinMotorx.pinConfig.GPIO_PinNumber 	= PIN_7;
@@ -178,6 +179,13 @@ void initSys(void) {
 	directionPinMotorx.pinConfig.GPIO_PinOutputType = GPIO_OTYPE_PUSHPULL;
 	directionPinMotorx.pinConfig.GPIO_PinOutputSpeed = GPIO_OSPEEDR_MEDIUM;
 	directionPinMotorx.pinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+
+	directionPinMotory.pGPIOx = GPIOB;
+	directionPinMotory.pinConfig.GPIO_PinNumber 	= PIN_8;
+	directionPinMotory.pinConfig.GPIO_PinMode 		= GPIO_MODE_OUT;
+	directionPinMotory.pinConfig.GPIO_PinOutputType = GPIO_OTYPE_PUSHPULL;
+	directionPinMotory.pinConfig.GPIO_PinOutputSpeed = GPIO_OSPEEDR_MEDIUM;
+	directionPinMotory.pinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
 
 	gpio_Config(&enablePinLaser);
 	gpio_Config(&enablePinMotorx);
@@ -243,6 +251,7 @@ void initSys(void) {
 	pwm_Config(&PWMmotorx);
 	pwm_Config(&PWMmotory);
 
+
 	/*Activamos FPU*/
 	SCB->CPACR |= (0xF<<20);
 
@@ -306,6 +315,8 @@ void initSys(void) {
 	motory.config.time_step			= 20;					//valor en ms
 	motory.config.velocity			= LASER_VELOCITY_200Hz;
 
+	laser_init_config(&motorx);
+	laser_init_config(&motory);
 
 }
 
