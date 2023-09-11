@@ -123,12 +123,12 @@ AF15 	= 0b1111
 
 typedef struct
 		{
-		unit8_t GPIO_PinNumber;			// Working Pin
-		unit8_t	GPIO_PinMode;			// Config mode: input, output, analog, alternate func
-		unit8_t GPIO_PinOutputSpeed;	// Output speed for working pin
-		unit8_t GPIO_PinPuPdControl;	// Turn ON-OFF the pull_up and pull_down resistor for working pin
-		unit8_t GPIO_PinOutputType;		// Selects output type: push-pull or openDrain
-		unit8_t GPIO_PinAltFunMode;		// Type of alternate function assigned to working pin.
+		uint8_t GPIO_PinNumber;			// Working Pin
+		uint8_t	GPIO_PinMode;			// Config mode: input, output, analog, alternate func
+		uint8_t GPIO_PinOutputSpeed;	// Output speed for working pin
+		uint8_t GPIO_PinPuPdControl;	// Turn ON-OFF the pull_up and pull_down resistor for working pin
+		uint8_t GPIO_PinOutputType;		// Selects output type: push-pull or openDrain
+		uint8_t GPIO_PinAltFunMode;		// Type of alternate function assigned to working pin.
 		} GPIO_PinConfig_t;
 
 	/*
@@ -143,7 +143,7 @@ typedef struct
 {
 	GPIO_TypeDef		*pGPIOx;		// Pointer to the port of selected PinX
 	GPIO_PinConfig_t	pinConfig;		// Holds the configuration for selected PinX
-}GPIO_Handler_t;
+} GPIO_Handler_t;
 
 /*For testing assert parameters - checking basic configurations. */
 
@@ -170,8 +170,8 @@ typedef struct
 
 /*Header definitions for the "public functions" of gpio_driver_hal*/
 void gpio_Config (GPIO_Handler_t *pGPIOHandler);
-void gpio_WritePin (GPIO_Handler_t *pPinHandler,uint8_t,newState);
-void gpio_Config (GPIO_Handler_t *pPinHandler);
+void gpio_WritePin (GPIO_Handler_t *pPinHandler,uint8_t newState);
+void gpio_TooglePin (GPIO_Handler_t *pPinHandler);
 uint32_t gpio_ReadPin (GPIO_Handler_t*pPinHandler);
 
 

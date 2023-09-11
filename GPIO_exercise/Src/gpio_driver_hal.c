@@ -26,31 +26,29 @@ void gpio_config_alternate_function(GPIO_Handler_t * pGPIOHandler);
  * simplemente "activar el periférico o activar la señal de reloj del periferico)"
  */
 
-void gpio_Config (GPIO_Handler_t*pGPIOHandler)
-
-{
+void gpio_Config (GPIO_Handler_t*pGPIOHandler) {
 	/* Verificamos que el pin seleccionado es correcto */
-	aasert_param(IS_GPIO_PIN(pGPIOHandler ->pinConfig.GPIO_PinNumber));
+	assert_param(IS_GPIO_PIN(pGPIOHandler ->pinConfig.GPIO_PinNumber));
 
 	// 1) Activar el periférico
-	gpio_enable_clock_peripheral (pGPIOHanler);
+	gpio_enable_clock_peripheral (pGPIOHandler);
 
 	// Después de activado, podemos comenzar a configurar.
 
 	// 2) Configurando el registro GPIOx_MODER
-	gpio_config_output_type(pGPIOHanler);
+	gpio_config_output_type(pGPIOHandler);
 
 	// 3) Configurando el registro GPIOx_OTYPER
-	gpio_config_output_type(pGPIOHanler);
+	gpio_config_output_type(pGPIOHandler);
 
 	// 4) Configurando ahora la velocidad
-	gpio_config_output_speed(pGPIOHanler);
+	gpio_config_output_speed(pGPIOHandler);
 
 	// 5) Configurando si se desea pull-up, pull-down o flotante
-	gpio_config_pullup_pulldown(pGPIOHanler);
+	gpio_config_pullup_pulldown(pGPIOHandler);
 
 	// 6) Configuración de las funciones altervativas...
-	gpio_config_alternate_function(pGPIOHanler);
+	gpio_config_alternate_function(pGPIOHandler);
 }
 
 void gpio_enable_clock_peripheral(GPIO_Handler_t*pGPIOHandler){
@@ -107,7 +105,7 @@ void gpio_config_mode(GPIO_Handler_t*pGPIOHandler){
 	assert_param(IS_GPIO_MODE(pGPIOHandler->pinConfig.GPIO_PinMode));
 
 	//Acá estamos leyendo la config, moviendo "PinNumber" veces hacia la izquierda ese valor (shift left)
-	//y todo eso lo cargamos en la variable auxConfig
+	//y _todo eso lo cargamos en la variable auxConfig
 
 	auxConfig = (pGPIOHandler -> pinConfig.GPIO_PinMode << 2 * pGPIOHandler -> pinConfig.GPIO_PinNumber);
 
@@ -118,13 +116,13 @@ void gpio_config_mode(GPIO_Handler_t*pGPIOHandler){
 
 	// Cargamos a auxConfig en el registro MODER
 
-	pGPIOHandler -> pGPIOx -> moder |= auxConfig;
+	pGPIOHandler -> pGPIOx -> MODER |= auxConfig;
 
 }
 
 void gpio_config_output_type(GPIO_Handler_t*pGPIOHandler){
 
-	uint32_t auxconfig = 0;
+	uint32_t auxConfig = 0;
 
 	/*Verificamos que el tipo de salida corresponda a los que se pueden utilizar*/
 	assert_param(IS_GPIO_OUTPUT_TYPE(pGPIOHandler ->pinConfig.GPIO_PinOutputType));
@@ -142,7 +140,7 @@ void gpio_config_output_type(GPIO_Handler_t*pGPIOHandler){
 
 void gpio_config_output_speed(GPIO_Handler_t*pGPIOHandler){
 
-	uint32_t auxconfig = 0;
+	uint32_t auxConfig = 0;
 
 
 	assert_param(IS_GPIO_OSPEED(pGPIOHandler ->pinConfig.GPIO_PinOutputSpeed));
@@ -159,12 +157,12 @@ void gpio_config_output_speed(GPIO_Handler_t*pGPIOHandler){
 
 void gpio_config_pullup_pulldown(GPIO_Handler_t*pGPIOHandler){
 
-	uint32_t auxconfig = 0;
+	uint32_t auxConfig = 0;
 
 
 	assert_param(IS_GPIO_PUPDR(pGPIOHandler ->pinConfig.GPIO_PinPuPdCOntrol));
 
-	auxConfig = (pGPIOHandler -> pinConfig.GPIO_PinPuPdCOntrol << 2*pGPIOHandler ->pinConfig.GPIO_PinNumber);
+	auxConfig = (pGPIOHandler -> pinConfig.GPIO_PinPuPdControl << 2*pGPIOHandler ->pinConfig.GPIO_PinNumber);
 
 	// Limpiamos la posición antes de cargar la nueva configuración
 	pGPIOHandler -> pGPIOx -> PUPDR &= ~(0b11 << 2*pGPIOHandler-> pinConfig.GPIO_PinNumber);
@@ -187,7 +185,7 @@ void gpio_config_alternate_function(GPIO_Handler_t*pGPIOHandler){
 			auxPosition = 4*pGPIOHandler->pinConfig.GPIO_PinNumber;
 
 			// Limpiamos primero la posición del registro que deseamos escribir a continuación
-			pGPIOHandler -> pGPIOx> AFR[0] &= ~(0b1111 << auxPosition);
+			pGPIOHandler -> pGPIOx-> AFR[0] &= ~(0b1111 << auxPosition);
 
 			// Y escribimos el valor configurado en la posición seleccionada
 			pGPIOHandler -> pGPIOx -> AFR[0] |= (pGPIOHandler -> pinConfig.GPIO_PinAltFunMode << auxPosition);
@@ -199,7 +197,7 @@ void gpio_config_alternate_function(GPIO_Handler_t*pGPIOHandler){
 			auxPosition=4*(pGPIOHandler ->pinConfig.GPIO_PinNumber -8);
 
 			// Limpiamos primero la posición del registro que deseamos escribir a continuación
-			pGPIOHandler -> pGPIOx> AFR[1] &= ~(0b1111 << auxPosition);
+			pGPIOHandler -> pGPIOx-> AFR[1] &= ~(0b1111 << auxPosition);
 
 			// Y escribimos el valor configurado en la posición seleccionada
 			pGPIOHandler -> pGPIOx -> AFR[1] |= (pGPIOHandler -> pinConfig.GPIO_PinAltFunMode << auxPosition);
@@ -208,7 +206,7 @@ void gpio_config_alternate_function(GPIO_Handler_t*pGPIOHandler){
 	}
 }
 
-void gpio_writePin(GPIO_Handler_t*pPinHandler,uint8_t newState){
+void gpio_WritePin(GPIO_Handler_t*pPinHandler,uint8_t newState){
 
 	/*Verficiamos si lacción que deseamos realizar es permitida*/
 	assert_param(IS_GPIO_PIN_ACTION(newState));
@@ -231,7 +229,7 @@ void gpio_writePin(GPIO_Handler_t*pPinHandler,uint8_t newState){
  * Función para leer el estado de un pin específico
  */
 
-unit32_t gpio_ReadPin(){
+	uint32_t gpio_ReadPin(GPIO_Handler_t *pPinHandler){
 	//Creamos una variable auxiliar la cual luego retornaremos
 	uint32_t pinValue=0;
 
@@ -245,5 +243,7 @@ unit32_t gpio_ReadPin(){
 	return pinValue;
 
 	void gpio_Tooglepin(GPIO_Handler_t *pPinHandler){}
+
+
 
 }

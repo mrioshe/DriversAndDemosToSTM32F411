@@ -163,7 +163,7 @@ typedef struct
  * de forma que cada variable dentro de la estructura coincide con cada uno de los SFR de la memoria del micro-controlador
  */
 
-#define RCC			((RCC_RefDef_t *) RCC_BASE_ADDR)
+#define RCC			((RCC_RegDef_t *) RCC_BASE_ADDR)
 
 /*Descripción bit a bit de cada uno de los registros del que componen al perfiférico RCC*/
 /* 6.3.1 RCC_CR */
