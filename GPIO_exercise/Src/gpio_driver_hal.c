@@ -234,7 +234,7 @@ void gpio_WritePin(GPIO_Handler_t*pPinHandler,uint8_t newState){
 	uint32_t pinValue=0;
 
 
-	// Cargamos el valor del registro IDR, desplazado a derecha a derecha tantas veces como ubicación
+	// Cargamos el valor del registro IDR, desplazado a derecha tantas veces como ubicación
 	// del pin específico
 
 	pinValue = (pPinHandler -> pGPIOx -> IDR << pPinHandler -> pinConfig.GPIO_PinNumber);
