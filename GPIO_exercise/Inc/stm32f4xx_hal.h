@@ -248,7 +248,7 @@ typedef struct
 									(GPIOx == GPIOE) || \
 									(GPIOx == GPIOH))
 
-/
+
 
 /*Incluimos las librerías de cada periférico*/
 
