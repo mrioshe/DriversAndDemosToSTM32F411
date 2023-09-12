@@ -237,12 +237,23 @@ void gpio_WritePin(GPIO_Handler_t*pPinHandler,uint8_t newState){
 	// Cargamos el valor del registro IDR, desplazado a derecha tantas veces como ubicación
 	// del pin específico
 
-	pinValue = (pPinHandler -> pGPIOx -> IDR << pPinHandler -> pinConfig.GPIO_PinNumber);
-	pinValue = pinValue;
+	pinValue = (pPinHandler -> pGPIOx -> IDR >> pPinHandler -> pinConfig.GPIO_PinNumber);
+	/*a) En la ultima linea se encontraba el error, pues se está haciendo shift hacia la izquierda
+	 * pero realmente debe ser un shift a la derecha
+	 * b) la idea de estar desplazando hacia derecha lo que hay en el IDR (luego de cargarle lo
+	 * que hay en la configuración del pin especificamente el número del pin) hasta llevarlo hasta
+	 * el primer bit del IDR, pero en este caso se arrastró los valores que había a la izquierda del
+	 * del bit pinNumber en el IDR.
+	 * c) Se debe hacer una mascara para borrar los valores que estaban a la izquierda del bit para
+	 * esto basta hacer una operación bitwise AND con el número 0b1, de esta forma dejaremos en 0 los
+	 * otros bits (a la izquierda) y se guarda en la variable pin value como se muestra en la siguiente
+	 * linea
+	 *  */
+	pinValue &0b1;
 
 	return pinValue;
 
-	void gpio_Tooglepin(GPIO_Handler_t *pPinHandler){}
+	void gpio_Tooglepin(GPIO_Handler_t *pPinHandler){ }
 
 
 
