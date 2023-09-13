@@ -171,7 +171,7 @@ typedef struct
 /*Header definitions for the "public functions" of gpio_driver_hal*/
 void gpio_Config (GPIO_Handler_t *pGPIOHandler);
 void gpio_WritePin (GPIO_Handler_t *pPinHandler,uint8_t newState);
-void gpio_TooglePin (GPIO_Handler_t *pPinHandler);
+void gpio_Tooglepin (GPIO_Handler_t *pPinHandler);
 uint32_t gpio_ReadPin (GPIO_Handler_t*pPinHandler);
 
 
