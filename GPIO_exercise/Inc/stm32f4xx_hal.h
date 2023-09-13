@@ -59,10 +59,10 @@
  * AHBx and APBx Bus peripherals base addresses
  */
 
-#define APB1_BASE_ADDR			0x400000000U
-#define APB2_BASE_ADDR			0x400100000U
-#define AHB1_BASE_ADDR			0x400200000U
-#define AHB2_BASE_ADDR			0x500000000U
+#define APB1_BASE_ADDR			0x40000000U
+#define APB2_BASE_ADDR			0x40010000U
+#define AHB1_BASE_ADDR			0x40020000U
+#define AHB2_BASE_ADDR			0x50000000U
 
 /**
  * Y ahora debemos hacer lo mismo pero cada una de las posiciones de memoria de cada uno de los

@@ -37,18 +37,23 @@ int main(void)
     /* Configuramos el pin*/
 	userLed.pGPIOx							= GPIOA;
 	userLed.pinConfig.GPIO_PinNumber		= PIN_5;
-	userLed.pinConfig.GPIO_PinMode			= GPIO_MODE_IN;
+	userLed.pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
 	userLed.pinConfig.GPIO_PinOutputType	= GPIO_OTYPE_PUSHPULL;
 	userLed.pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
 	userLed.pinConfig.GPIO_PinPuPdControl	= GPIO_PUPDR_NOTHING;
 
 	/* Cargamos la configuración en los registros que gobiernan el puerto*/
+
+	/*
+	 * gpio_Config(&userLed);
+	uint8_t a=gpio_ReadPin(&userLed); condigo de prueba del ReadPin
+	para probar este se dene temer eñ user led en modo salida (MODE_IN)
+	*/
 	gpio_Config(&userLed);
-	uint8_t a=gpio_ReadPin(&userLed);
 
 
 	while(1){
-
+		gpio_WritePin(&userLed,1);
 	}
 }
 
