@@ -35,6 +35,7 @@ void delay(){
 //Definimos un Pin de prueba
 GPIO_Handler_t userLed={0}; // pinA5
 
+
 /*
  * the main function, where everything happens
  */
@@ -62,14 +63,156 @@ int main(void)
 	gpio_WritePin(&userLed, SET); Código para probar el Tooglepin (MODE OUT)
 	gpio_Tooglepin(&userLed);
 	 * */
+
 	/* Configuración de los pines:*/
 
-	gpio_Config(&userLed);
-	gpio_WritePin(&userLed, SET);
+	/*Se identifican los pines con una variable bit_x*/
+
+	/*pin PA7*/
+	GPIO_Handler_t bit_0 ={0};
+
+	bit_0.pGPIOx						= GPIOA;
+	bit_0.pinConfig.GPIO_PinNumber		= PIN_7;
+	bit_0.pinConfig.GPIO_PinMode		= GPIO_MODE_OUT;
+	bit_0.pinConfig.GPIO_PinOutputType	= GPIO_OTYPE_PUSHPULL;
+	bit_0.pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
+	bit_0.pinConfig.GPIO_PinPuPdControl	= GPIO_PUPDR_NOTHING;
+
+	/*pin PC8*/
+
+	GPIO_Handler_t bit_1 ={0};
+
+	bit_1.pGPIOx						= GPIOC;
+	bit_1.pinConfig.GPIO_PinNumber		= PIN_8;
+	bit_1.pinConfig.GPIO_PinMode		= GPIO_MODE_OUT;
+	bit_1.pinConfig.GPIO_PinOutputType	= GPIO_OTYPE_PUSHPULL;
+	bit_1.pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
+	bit_1.pinConfig.GPIO_PinPuPdControl	= GPIO_PUPDR_NOTHING;
+
+	/*pin PC8*/
+
+	GPIO_Handler_t bit_2 ={0};
+
+	bit_2.pGPIOx						= GPIOC;
+	bit_2.pinConfig.GPIO_PinNumber		= PIN_7;
+	bit_2.pinConfig.GPIO_PinMode		= GPIO_MODE_OUT;
+	bit_2.pinConfig.GPIO_PinOutputType	= GPIO_OTYPE_PUSHPULL;
+	bit_2.pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
+	bit_2.pinConfig.GPIO_PinPuPdControl	= GPIO_PUPDR_NOTHING;
+
+	/*pin PA6*/
+
+	GPIO_Handler_t bit_3 ={0};
+
+	bit_3.pGPIOx						= GPIOA;
+	bit_3.pinConfig.GPIO_PinNumber		= PIN_6;
+	bit_3.pinConfig.GPIO_PinMode		= GPIO_MODE_OUT;
+	bit_3.pinConfig.GPIO_PinOutputType	= GPIO_OTYPE_PUSHPULL;
+	bit_3.pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
+	bit_3.pinConfig.GPIO_PinPuPdControl	= GPIO_PUPDR_NOTHING;
+
+	/*pin PB8*/
+
+	GPIO_Handler_t bit_4 ={0};
+
+	bit_4.pGPIOx						= GPIOB;
+	bit_4.pinConfig.GPIO_PinNumber		= PIN_8;
+	bit_4.pinConfig.GPIO_PinMode		= GPIO_MODE_OUT;
+	bit_4.pinConfig.GPIO_PinOutputType	= GPIO_OTYPE_PUSHPULL;
+	bit_4.pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
+	bit_4.pinConfig.GPIO_PinPuPdControl	= GPIO_PUPDR_NOTHING;
+
+	/*pin PC6*/
+
+	GPIO_Handler_t bit_5 ={0};
+
+	bit_5.pGPIOx						= GPIOC;
+	bit_5.pinConfig.GPIO_PinNumber		= PIN_6;
+	bit_5.pinConfig.GPIO_PinMode		= GPIO_MODE_OUT;
+	bit_5.pinConfig.GPIO_PinOutputType	= GPIO_OTYPE_PUSHPULL;
+	bit_5.pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
+	bit_5.pinConfig.GPIO_PinPuPdControl	= GPIO_PUPDR_NOTHING;
+
+	/*pin PC9*/
+
+	GPIO_Handler_t bit_6 ={0};
+
+	bit_6.pGPIOx						= GPIOC;
+	bit_6.pinConfig.GPIO_PinNumber		= PIN_9;
+	bit_6.pinConfig.GPIO_PinMode		= GPIO_MODE_OUT;
+	bit_6.pinConfig.GPIO_PinOutputType	= GPIO_OTYPE_PUSHPULL;
+	bit_6.pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
+	bit_6.pinConfig.GPIO_PinPuPdControl	= GPIO_PUPDR_NOTHING;
+
+	/*Como se debe usar el botón azul de la tarjeta, se debe configurar este botón como entrada,
+	 * el cual está conectado internamente al pin 13 (ver diagrama de referencia)*/
+
+	GPIO_Handler_t blue_button={0};
+
+	blue_button.pGPIOx							= GPIOC;
+	blue_button.pinConfig.GPIO_PinNumber		= PIN_13;
+	blue_button.pinConfig.GPIO_PinMode			= GPIO_MODE_IN;
+	blue_button.pinConfig.GPIO_PinOutputType	= GPIO_OTYPE_PUSHPULL;
+	blue_button.pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
+	blue_button.pinConfig.GPIO_PinPuPdControl	= GPIO_PUPDR_NOTHING;
+
+	/*Configuramos todos_ los pines*/
+
+	gpio_Config(&bit_0);
+	gpio_Config(&bit_1);
+	gpio_Config(&bit_2);
+	gpio_Config(&bit_3);
+	gpio_Config(&bit_4);
+	gpio_Config(&bit_5);
+	gpio_Config(&bit_6);
+	gpio_Config(&blue_button);
+
+
+	GPIO_Handler_t location[7];
+
+	location[0] = bit_0;
+	location[1] = bit_1;
+	location[2] = bit_2;
+	location[3] = bit_3;
+	location[4] = bit_4;
+	location[5] = bit_5;
+	location[6] = bit_6;
+	location[7] = blue_button;
+
+
+	/*
+	gpio_Config(&bit_0);
+	gpio_WritePin(&bit_0, SET);
 	delay();
-	gpio_TooglePin(&userLed);
+	gpio_TooglePin(&bit_0);
+	*/
+
+	uint8_t counter=0;
+	uint8_t number=0;
+	uint32_t button=1;
+
 
 while(1){
+
+	button=gpio_ReadPin(&blue_button);
+
+	if (button>=1){
+		counter++;
+		if (counter<=60 && counter >=0){
+			for(uint8_t j=0; j<=6;j++){
+				number=(counter>>j);
+				number &=1;
+				gpio_WritePin(&location[j],number);
+
+			}
+			delay();
+
+		}
+		else if(counter >60){
+			counter=0;
+		}
+
+	}
 
 
 }
