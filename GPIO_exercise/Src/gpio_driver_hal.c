@@ -280,7 +280,7 @@ uint32_t gpio_ReadPin(GPIO_Handler_t *pPinHandler) {
 
 }
 
-void gpio_Tooglepin(GPIO_Handler_t *pPinHandler) {
+void gpio_TooglePin(GPIO_Handler_t *pPinHandler) {
 
 	pPinHandler->pGPIOx->ODR ^= 1 << pPinHandler->pinConfig.GPIO_PinNumber;
 }

@@ -24,6 +24,13 @@
 //headers definition
 
 int add(int x, int y);
+void delay(){
+	uint32_t  counter =0;
+		for(uint32_t i=1;i<=1300000;i++){
+			counter++;
+		}
+}
+
 
 //Definimos un Pin de prueba
 GPIO_Handler_t userLed={0}; // pinA5
@@ -57,13 +64,15 @@ int main(void)
 	 * */
 	/* Configuración de los pines:*/
 
-	userLed.pGPIOx							= GPIOA;
-	userLed.pinConfig.GPIO_PinNumber		= PIN_5;
-	userLed.pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
-	userLed.pinConfig.GPIO_PinOutputType	= GPIO_OTYPE_PUSHPULL;
-	userLed.pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
-	userLed.pinConfig.GPIO_PinPuPdControl	= GPIO_PUPDR_NOTHING;
+	gpio_Config(&userLed);
+	gpio_WritePin(&userLed, SET);
+	delay();
+	gpio_TooglePin(&userLed);
 
+while(1){
+
+
+}
 
 
 
@@ -79,4 +88,5 @@ void assert_failed(uint8_t*file,uint32_t line){
 		//problems
 	}
 }
+
 
