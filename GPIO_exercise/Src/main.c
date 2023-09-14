@@ -188,38 +188,57 @@ int main(void)
 	*/
 
 	uint8_t counter=0;
-	uint8_t number=0;
+	uint8_t aux=0;
 	uint32_t button=1;
 
 
-while(1){
+	while(1){
 
-	button=gpio_ReadPin(&blue_button);
+		button=gpio_ReadPin(&blue_button); //Leemos estado del pin y lo guardamos en la variable button
 
-	if (button>=1){
-		counter++;
-		if (counter<=60 && counter >=0){
-			for(uint8_t j=0; j<=6;j++){
-				number=(counter>>j);
-				number &=1;
-				gpio_WritePin(&location[j],number);
+		if (button>=1){ //si el boton==1
+			counter++; //incrementamos el contador
+			if (counter<=60 && counter >=0){
+				for(uint8_t j=0; j<=6;j++){ //variamos j de 0 hasta 6, con incrementos de 1 en 1
+					aux=(counter>>j); // la variable aux tomará el valor del contador desplazado j posiciones a la derecha
+					aux &=1; // se realiza máscara con and
+					gpio_WritePin(&location[j],aux); //se escribe en el pin_j el valor de la variable auxiliar
+
+				}
+				delay(); // se hace llamada a función de tiempo
 
 			}
-			delay();
+			else if(counter >60){ //el valor del contador llegará a superar a 60, en este caso se le da un valor de 0
+				counter=0; //para reiniciar el ciclo
+			}
 
 		}
-		else if(counter >60){
-			counter=0;
+		else if(button==0){ //caso totalmente análogo a lo anterior pero el contador se decrementa en 1
+
+			counter--;
+
+			if (counter<=60 && counter >=0){
+							for(uint8_t j=0; j<=6;j++){
+								aux=(counter>>j);
+								aux &=1;
+								gpio_WritePin(&location[j],aux);
+
+							}
+							delay();
+
+						}
+						else if(counter <0){ //cual valor llega a 0, se le da el valor de 60 para seguir decrementando
+							counter=60;
+						}
+
+
+
+			}
 		}
+
+
 
 	}
-
-
-}
-
-
-
-}
 
 /*
  * Esta función sirve para detectar problemas de parámetros
