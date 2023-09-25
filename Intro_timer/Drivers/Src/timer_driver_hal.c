@@ -38,7 +38,7 @@ static void timer_config_interrupt(Timer_Handler_t *pTimerHandler);
  * interrupciones, activar la IRQ específica y luego volver a encender el sistema
  * */
 
-void timer_config(Timer_Handler_t *pTimerHandler){
+void timer_Config(Timer_Handler_t *pTimerHandler){
 	//Guardamos una referencia al periferico que estamos utilizando...
 	ptrTimerUsed = pTimerHandler -> pTIMx;
 
@@ -61,7 +61,7 @@ void timer_config(Timer_Handler_t *pTimerHandler){
 	timer_config_interrupt(pTimerHandler);
 
 	/* x. VOlvemos a activar las interrupciones del sistema*/
-	__enbale_irq();
+	__enable_irq();
 
 	/* El timer inicia apagado */
 	timer_SetState(pTimerHandler, TIMER_OFF);
@@ -88,7 +88,7 @@ void timer_set_prescaler(Timer_Handler_t *pTimerHandler){
 	assert_param(IS_TIMER_PRESC(pTimerHandler -> TIMx_Config.TIMx_Prescaler));
 
 	// Configuramos el valor del prescaler.
-	pTimerHandler -> pTIMx -> PSC = pTimerHandler -> TIMx_Config.TIMx_prescaler -1; //(16000000))
+	pTimerHandler -> pTIMx -> PSC = pTimerHandler -> TIMx_Config.TIMx_Prescaler -1; //(16000000))
 }
 
 /*
@@ -129,6 +129,71 @@ void timer_set_mode(Timer_Handler_t *pTimerHandler){
 		pTimerHandler ->pTIMx->CR1 |= TIM_CR1_DIR;
 	}
 
+}
+
+void timer_config_interrupt(Timer_Handler_t *pTimerHandler){
+
+	//verificamos el posible valor configurado
+	assert_param(IS_TIMER_INTERRUPT(pTimerHandler->TIMx_Config.TIMx_InterruptEnable));
+
+	if(pTimerHandler -> TIMx_Config.TIMx_InterruptEnable == TIMER_INT_ENABLE){
+
+		/*Activamos la interrupción debida al Timerx utilizado*/
+		pTimerHandler ->pTIMx -> DIER |= TIM_DIER_UIE;
+
+		/*Activdamos el cana del sistema NVIC para que le la interrupción*/
+		if(pTimerHandler ->pTIMx == TIM2){
+			NVIC_EnableIRQ(TIM2_IRQn);
+		}
+		else if(pTimerHandler->pTIMx==TIM3){
+			NVIC_EnableIRQ(TIM3_IRQn);
+
+		}
+		else{
+			__NOP();
+		}
+	}
+
+}
+
+void timer_SetState(Timer_Handler_t *pTimerHandler, uint8_t newState){
+
+	//verificamos que el estado ingresado es adecuado
+	assert_param(IS_TIMER_STATE(newState));
+
+	/*Reiniciamos el registro counter*/
+	pTimerHandler ->pTIMx -> CNT=0;
+
+	if(newState == TIMER_ON){
+		/* 5a. Activdamos el Timer (el CNT debe comenzar a contar)*/
+		pTimerHandler -> pTIMx -> CR1 |= TIM_CR1_CEN;
+	}
+
+	else{
+		/*5b. Desactivamos el timer (el CNT debe detenerse)*/
+		pTimerHandler->pTIMx->CR1 &= ~TIM_CR1_CEN;
+	}
+
+}
+
+__attribute__((weak)) void Timer2_Callback(void){
+	__NOP();
+}
+
+/*
+ * Esta es la fucnión a la que apunta el sistema en el vector de interrupciones.
+ * Se debe utilizar usando exactamente el mismo nombre definido en el vecto de interrupciones
+ * Al hacerlo correctamente, el sistema apunta a esta función y cuando la interrupción
+ * el sistema inmediatamente salta a este lugar en la memoria
+ *
+ * */
+
+void TIM2_IRQHandler(void){
+
+	/*Limpiamos la bandera que indica que la intrrupción se ha generado*/
+	TIM2 -> SR &= ~TIM_SR_UIF;
+	/*Llamamos a la función que se debe encargar de hacer algo con esta interrupción*/
+	Timer2_Callback();
 }
 
 

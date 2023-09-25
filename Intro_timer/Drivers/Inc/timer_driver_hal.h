@@ -34,7 +34,7 @@ typedef struct
 {
 	uint8_t	 	TIMx_mode;				//Up or down
 	uint16_t 	TIMx_Prescaler;			//Prescaler....
-	uint32_t 	TIMx_Periodo;			//Valor en ms del periodo del timer
+	uint32_t 	TIMx_Period;			//Valor en ms del periodo del timer
 	uint8_t		TIMx_InterruptEnable;	//Activa o desactiva el modo interrupciones
 } Timer_BasicConfig_t;
 

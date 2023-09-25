@@ -20,12 +20,14 @@
 #include <stdint.h>
 #include "stm32_assert.h"
 #include "gpio_driver_hal.h"
+#include "timer_driver_hal.h"
 
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
 #endif
 
 GPIO_Handler_t userLed={0};
+Timer_Handler_t blinkTimer={0};
 
 int main(void)
 {
@@ -40,17 +42,31 @@ int main(void)
 	gpio_Config(&userLed);
 	gpio_WritePin(&userLed,SET);
 
+	blinkTimer.pTIMx								=TIM2;
+	blinkTimer.TIMx_Config.TIMx_Prescaler			=16000; //Genera incrementos de 1 ms
+	blinkTimer.TIMx_Config.TIMx_Period				=2500;   //DE la mano con el prescaler, se genera los incrementos
+	blinkTimer.TIMx_Config.TIMx_mode				=TIMER_UP_COUNTER;
+	blinkTimer.TIMx_Config.TIMx_InterruptEnable		=TIMER_INT_ENABLE;
+
+	/*Configuramos el Timer*/
+	timer_Config(&blinkTimer);
+
+	//Encendemos el Timer
+	timer_SetState(&blinkTimer, TIMER_ON);
+
     /* Loop forever */
 	while(1){
 
-		gpio_TooglePin(&userLed);
-		for(uint32_t j=0;j<2000000;j++){
-			__NOP();
+
 
 		}
 
 	}
+
+void Timer2_Callback(void){
+	gpio_TooglePin(&userLed);
 }
+
 
 void assert_failed(uint8_t*file,uint32_t line){
 	while(1){
