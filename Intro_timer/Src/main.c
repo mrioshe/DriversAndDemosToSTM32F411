@@ -44,7 +44,7 @@ int main(void)
 
 	blinkTimer.pTIMx								=TIM11;
 	blinkTimer.TIMx_Config.TIMx_Prescaler			=16000; //Genera incrementos de 1 ms
-	blinkTimer.TIMx_Config.TIMx_Period				=1000;   //DE la mano con el prescaler, se genera los incrementos
+	blinkTimer.TIMx_Config.TIMx_Period				=2000;   //DE la mano con el prescaler, se genera los incrementos
 	blinkTimer.TIMx_Config.TIMx_mode				=TIMER_UP_COUNTER;
 	blinkTimer.TIMx_Config.TIMx_InterruptEnable		=TIMER_INT_ENABLE;
 
