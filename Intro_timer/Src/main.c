@@ -54,6 +54,8 @@ int main(void)
 	//Encendemos el Timer
 	timer_SetState(&blinkTimer, TIMER_ON);
 
+	/*control version*/
+
     /* Loop forever */
 	while(1){
 
