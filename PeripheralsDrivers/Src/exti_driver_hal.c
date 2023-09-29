@@ -929,84 +929,84 @@ static void exti_config_interrupt(EXTI_Config_t *extiConfig){
 		switch(extiConfig->pGPIOHandler->pinConfig.GPIO_PinNumber){
 
 		case 0: {
-			EXTI -> IMR |= ~EXTI_IMR_MR0;
+			EXTI -> IMR |= EXTI_IMR_MR0;
 			break;
 
 		}
 
 		case 1: {
-			EXTI -> IMR |= ~EXTI_IMR_MR1;
+			EXTI -> IMR |= EXTI_IMR_MR1;
 			break;
 
 		}
 
 		case 2: {
-			EXTI -> IMR |= ~EXTI_IMR_MR2;
+			EXTI -> IMR |= EXTI_IMR_MR2;
 			break;
 
 		}
 		case 3: {
-			EXTI -> IMR |= ~EXTI_IMR_MR3;
+			EXTI -> IMR |= EXTI_IMR_MR3;
 			break;
 
 		}
 		case 4: {
-			EXTI -> IMR |= ~EXTI_IMR_MR4;
+			EXTI -> IMR |= EXTI_IMR_MR4;
 			break;
 
 		}
 		case 5: {
-			EXTI -> IMR |= ~EXTI_IMR_MR5;
+			EXTI -> IMR |= EXTI_IMR_MR5;
 			break;
 
 		}
 		case 6: {
-			EXTI -> IMR |= ~EXTI_IMR_MR6;
+			EXTI -> IMR |= EXTI_IMR_MR6;
 			break;
 
 		}
 		case 7: {
-			EXTI -> IMR |= ~EXTI_IMR_MR7;
+			EXTI -> IMR |= EXTI_IMR_MR7;
 			break;
 
 		}
 		case 8: {
-			EXTI -> IMR |= ~EXTI_IMR_MR8;
+			EXTI -> IMR |= EXTI_IMR_MR8;
 			break;
 
 		}
 		case 9: {
-			EXTI -> IMR |= ~EXTI_IMR_MR9;
+			EXTI -> IMR |= EXTI_IMR_MR9;
 			break;
 
 		}
 		case 10: {
-			EXTI -> IMR |= ~EXTI_IMR_MR10;
+			EXTI -> IMR |= EXTI_IMR_MR10;
 			break;
 
 		}
 		case 11: {
-			EXTI -> IMR |= ~EXTI_IMR_MR11;
+			EXTI -> IMR |= EXTI_IMR_MR11;
 			break;
 
 		}
 		case 12: {
-			EXTI -> IMR |= ~EXTI_IMR_MR12;
+			EXTI -> IMR |= EXTI_IMR_MR12;
 			break;
 
 		}
 		case 13: {
-			EXTI -> IMR |= ~EXTI_IMR_MR13;
+			EXTI -> IMR |= EXTI_IMR_MR13;
 			break;
 
 		}
 		case 14: {
-			EXTI -> IMR |= ~EXTI_IMR_MR14;
+			EXTI -> IMR |= EXTI_IMR_MR14;
 			break;
 
 		}
 		case 15: {
-			EXTI -> IMR |= ~EXTI_IMR_MR15;
+			EXTI -> IMR |= EXTI_IMR_MR15;
 			break;
 
 		}
@@ -1182,7 +1182,7 @@ void EXTI0_IRQHandler(void){
 		EXTI->PR |= EXTI_PR_PR0;
 
 		// llamamos al callback
-		callback_ExtInt0();
+		callback_extInt0();
 	}
 }
 
@@ -1193,7 +1193,7 @@ void EXTI1_IRQHandler(void){
 		EXTI->PR |= EXTI_PR_PR1;
 
 		// llamamos al callback
-		callback_ExtInt1();
+		callback_extInt1();
 	}
 }
 
@@ -1204,7 +1204,7 @@ void EXTI2_IRQHandler(void){
 		EXTI->PR |= EXTI_PR_PR2;
 
 		// llamamos al callback
-		callback_ExtInt2();
+		callback_extInt2();
 	}
 }
 
@@ -1215,7 +1215,7 @@ void EXTI3_IRQHandler(void){
 		EXTI->PR |= EXTI_PR_PR3;
 
 		// llamamos al callback
-		callback_ExtInt3();
+		callback_extInt3();
 	}
 }
 
@@ -1226,7 +1226,7 @@ void EXTI4_IRQHandler(void){
 		EXTI->PR |= EXTI_PR_PR4;
 
 		// llamamos al callback
-		callback_ExtInt4();
+		callback_extInt4();
 	}
 }
 
@@ -1249,20 +1249,20 @@ void EXTI9_5_IRQHandler(void){
 			EXTI->PR |= EXTI_PR_PR5;
 
 			// llamamos al callback
-			callback_ExtInt5();
+			callback_extInt5();
 
 		} else if(EXTI->PR & EXTI_PR_PR6){
 			EXTI->PR |= EXTI_PR_PR6;
-			callback_ExtInt6();
+			callback_extInt6();
 		} else if(EXTI->PR & EXTI_PR_PR7){
 			EXTI->PR |= EXTI_PR_PR7;
-			callback_ExtInt7();
+			callback_extInt7();
 		} else if(EXTI->PR & EXTI_PR_PR8){
 			EXTI->PR |= EXTI_PR_PR8;
-			callback_ExtInt8();
+			callback_extInt8();
 		} else if(EXTI->PR & EXTI_PR_PR9){
 			EXTI->PR |= EXTI_PR_PR9;
-			callback_ExtInt9();
+			callback_extInt9();
 		}
 
 }
@@ -1283,19 +1283,23 @@ void EXTI15_10_IRQHandler(void){
 		// llamamos al callback
 		callback_extInt10();
 
-	} else if(EXTI->PR & EXTI_PR_PR6){
-		EXTI->PR |= EXTI_PR_PR6;
-		callback_ExtInt6();
-	} else if(EXTI->PR & EXTI_PR_PR7){
-		EXTI->PR |= EXTI_PR_PR7;
-		callback_ExtInt7();
-	} else if(EXTI->PR & EXTI_PR_PR8){
-		EXTI->PR |= EXTI_PR_PR8;
-		callback_ExtInt8();
-	} else if(EXTI->PR & EXTI_PR_PR9){
-		EXTI->PR |= EXTI_PR_PR9;
-		callback_ExtInt9();
+	} else if(EXTI->PR & EXTI_PR_PR11){
+		EXTI->PR |= EXTI_PR_PR11;
+		callback_extInt11();
+	} else if(EXTI->PR & EXTI_PR_PR12){
+		EXTI->PR |= EXTI_PR_PR12;
+		callback_extInt12();
+	} else if(EXTI->PR & EXTI_PR_PR13){
+		EXTI->PR |= EXTI_PR_PR13;
+		callback_extInt13();
+	} else if(EXTI->PR & EXTI_PR_PR14){
+		EXTI->PR |= EXTI_PR_PR14;
+		callback_extInt14();
+	} else if(EXTI->PR & EXTI_PR_PR15){
+		EXTI->PR |= EXTI_PR_PR15;
+		callback_extInt15();
 	}
+
 
 }
 

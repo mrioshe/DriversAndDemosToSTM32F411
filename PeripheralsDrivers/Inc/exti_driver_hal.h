@@ -25,21 +25,21 @@ typedef struct
 
 
 void exti_Config(EXTI_Config_t *extiConfig);
-void callback_ExtInt0(void);
-void callback_ExtInt1(void);
-void callback_ExtInt2(void);
-void callback_ExtInt3(void);
-void callback_ExtInt4(void);
-void callback_ExtInt5(void);
-void callback_ExtInt6(void);
-void callback_ExtInt7(void);
-void callback_ExtInt8(void);
-void callback_ExtInt9(void);
-void callback_ExtInt10(void);
-void callback_ExtInt11(void);
-void callback_ExtInt12(void);
-void callback_ExtInt13(void);
-void callback_ExtInt14(void);
-void callback_ExtInt15(void);
+void callback_extInt0(void);
+void callback_extInt1(void);
+void callback_extInt2(void);
+void callback_extInt3(void);
+void callback_extInt4(void);
+void callback_extInt5(void);
+void callback_extInt6(void);
+void callback_extInt7(void);
+void callback_extInt8(void);
+void callback_extInt9(void);
+void callback_extInt10(void);
+void callback_extInt11(void);
+void callback_extInt12(void);
+void callback_extInt13(void);
+void callback_extInt14(void);
+void callback_extInt15(void);
 
 #endif /* EXTI_DRIVER_HAL_H_ */
