@@ -674,36 +674,244 @@ static void exti_select_edge(EXTI_Config_t *extiConfig){
 
 	if(extiConfig->edgeType == EXTERNAL_INTERRUPT_FALLING_EDGE){
 
+		/* Falling Trigger selection register*/
+
 		switch (extiConfig->pGPIOHandler->pinConfig.GPIO_PinNumber) {
 			case 0:{
 
-				EXTI->FTSR &= ~(0x1 << EXTI_FTSR_TR0_Pos);
+				EXTI->FTSR |= EXTI_FTSR_TR0;
+				break;
 
 			}
 
 			case 1:{
 
-						EXTI->FTSR &= ~(0x1 << EXTI_FTSR_TR1_Pos);
+				EXTI->FTSR |= EXTI_FTSR_TR1;
+				break;
 
 					}
 
 			case 2:{
 
-						EXTI->FTSR &= ~(0x1 << EXTI_FTSR_TR2_Pos);
+				EXTI->FTSR |= EXTI_FTSR_TR2;
+				break;
 
 					}
 
+			case 3:{
 
+				EXTI->FTSR |= EXTI_FTSR_TR3;
+				break;
+
+					}
+
+			case 4:{
+
+				EXTI->FTSR |= EXTI_FTSR_TR4;
+				break;
+
+					}
+
+			case 5:{
+
+				EXTI->FTSR |= EXTI_FTSR_TR5;
+				break;
+
+					}
+
+			case 6:{
+
+				EXTI->FTSR |= EXTI_FTSR_TR6;
+				break;
+
+					}
+
+			case 7:{
+
+				EXTI->FTSR |= EXTI_FTSR_TR7;
+				break;
+
+					}
+
+			case 8:{
+
+				EXTI->FTSR |= EXTI_FTSR_TR8;
+				break;
+
+					}
+
+			case 9:{
+
+				EXTI->FTSR |= EXTI_FTSR_TR9;
+				break;
+
+					}
+
+			case 10:{
+
+				EXTI->FTSR |= EXTI_FTSR_TR10;
+				break;
+
+					}
+
+			case 11:{
+
+				EXTI->FTSR |= EXTI_FTSR_TR11;
+				break;
+
+					}
+
+			case 12:{
+
+				EXTI->FTSR |= EXTI_FTSR_TR12;
+				break;
+
+					}
+
+			case 13:{
+
+				EXTI->FTSR |= EXTI_FTSR_TR13;
+				break;
+
+					}
+
+			case 14:{
+
+				EXTI->FTSR |= EXTI_FTSR_TR14;
+				break;
+
+					}
+
+			case 15:{
+
+				EXTI->FTSR |= EXTI_FTSR_TR15;
+				break;
+
+					}
 
 		}
 
-		//EXTI_FTSR_TR0  &= ~(0xF << SYSCFG_EXTICR1_EXTI2_Pos);
 
-		/* Falling Trigger selection register*/
-        /*Agregue su código acá*/
+
+
+
 	}
+	/* Rising Trigger selection register*/
 	else{
-		/*Agregue su código acá*/
+
+		switch (extiConfig->pGPIOHandler->pinConfig.GPIO_PinNumber) {
+					case 0:{
+
+						EXTI->RTSR |= EXTI_RTSR_TR0;
+						break;
+
+					}
+
+					case 1:{
+
+						EXTI->RTSR |= EXTI_RTSR_TR1;
+						break;
+
+							}
+
+					case 2:{
+
+						EXTI->RTSR |= EXTI_RTSR_TR2;
+						break;
+
+							}
+
+					case 3:{
+
+						EXTI->RTSR |= EXTI_RTSR_TR3;
+						break;
+
+							}
+
+					case 4:{
+
+						EXTI->RTSR |= EXTI_RTSR_TR4;
+						break;
+
+							}
+
+					case 5:{
+
+						EXTI->RTSR |= EXTI_RTSR_TR5;
+						break;
+
+							}
+
+					case 6:{
+
+						EXTI->RTSR |= EXTI_RTSR_TR6;
+						break;
+
+							}
+
+					case 7:{
+
+						EXTI->RTSR |= EXTI_RTSR_TR7;
+						break;
+
+							}
+
+					case 8:{
+
+						EXTI->RTSR |= EXTI_RTSR_TR8;
+						break;
+
+							}
+
+					case 9:{
+
+						EXTI->RTSR |= EXTI_RTSR_TR9;
+						break;
+
+							}
+
+					case 10:{
+
+						EXTI->RTSR |= EXTI_RTSR_TR10;
+						break;
+
+							}
+
+					case 11:{
+
+						EXTI->RTSR |= EXTI_RTSR_TR11;
+						break;
+
+							}
+
+					case 12:{
+
+						EXTI->RTSR |= EXTI_RTSR_TR12;
+						break;
+
+							}
+
+					case 13:{
+
+						EXTI->RTSR |= EXTI_RTSR_TR13;
+						break;
+
+							}
+
+					case 14:{
+
+						EXTI->RTSR |= EXTI_RTSR_TR14;
+						break;
+
+							}
+
+					case 15:{
+
+						EXTI->RTSR |= EXTI_RTSR_TR15;
+						break;
+
+							}
+				}
 	}
 }
 
@@ -712,9 +920,98 @@ static void exti_select_edge(EXTI_Config_t *extiConfig){
  * ademas matricula cada una de las posibles interrupciones en el NVIC
  * */
 static void exti_config_interrupt(EXTI_Config_t *extiConfig){
+
+
 	/* 6.0 Activamos la interrupción del canal que estamos configurando */
 		// Interrupt Mask register
-		/*Agregue su código acá*/
+
+
+		switch(extiConfig->pGPIOHandler->pinConfig.GPIO_PinNumber){
+
+		case 0: {
+			EXTI -> IMR |= ~EXTI_IMR_MR0;
+			break;
+
+		}
+
+		case 1: {
+			EXTI -> IMR |= ~EXTI_IMR_MR1;
+			break;
+
+		}
+
+		case 2: {
+			EXTI -> IMR |= ~EXTI_IMR_MR2;
+			break;
+
+		}
+		case 3: {
+			EXTI -> IMR |= ~EXTI_IMR_MR3;
+			break;
+
+		}
+		case 4: {
+			EXTI -> IMR |= ~EXTI_IMR_MR4;
+			break;
+
+		}
+		case 5: {
+			EXTI -> IMR |= ~EXTI_IMR_MR5;
+			break;
+
+		}
+		case 6: {
+			EXTI -> IMR |= ~EXTI_IMR_MR6;
+			break;
+
+		}
+		case 7: {
+			EXTI -> IMR |= ~EXTI_IMR_MR7;
+			break;
+
+		}
+		case 8: {
+			EXTI -> IMR |= ~EXTI_IMR_MR8;
+			break;
+
+		}
+		case 9: {
+			EXTI -> IMR |= ~EXTI_IMR_MR9;
+			break;
+
+		}
+		case 10: {
+			EXTI -> IMR |= ~EXTI_IMR_MR10;
+			break;
+
+		}
+		case 11: {
+			EXTI -> IMR |= ~EXTI_IMR_MR11;
+			break;
+
+		}
+		case 12: {
+			EXTI -> IMR |= ~EXTI_IMR_MR12;
+			break;
+
+		}
+		case 13: {
+			EXTI -> IMR |= ~EXTI_IMR_MR13;
+			break;
+
+		}
+		case 14: {
+			EXTI -> IMR |= ~EXTI_IMR_MR14;
+			break;
+
+		}
+		case 15: {
+			EXTI -> IMR |= ~EXTI_IMR_MR15;
+			break;
+
+		}
+
+	}
 
 		/* 6.1 Matriculamos la interrupción en el NVIC para el canal correspondiente,
 		 * donde el canal 0 corresponde al EXTI_0, canal 1 al EXTI_1, etc.
@@ -727,19 +1024,96 @@ static void exti_config_interrupt(EXTI_Config_t *extiConfig){
 			break;
 		}
 
-			case 1: {
-		/*Agregue su código acá*/
-		break;
-	}
-    /* .....
-     * .....
-     * .....
-     * y así hasta el ultimo caso */
+		case 1: {
+			__NVIC_EnableIRQ(EXTI1_IRQn);
 
-	case 15: {
-		/*Agregue su código acá*/
 		break;
-	}
+		}
+
+		case 2: {
+			__NVIC_EnableIRQ(EXTI2_IRQn);
+
+		break;
+		}
+		case 3: {
+			__NVIC_EnableIRQ(EXTI3_IRQn);
+
+		break;
+		}
+
+		case 4: {
+			__NVIC_EnableIRQ(EXTI4_IRQn);
+
+		break;
+		}
+
+		case 5: {
+			__NVIC_EnableIRQ(EXTI9_5_IRQn );
+
+		break;
+		}
+
+		case 6: {
+			__NVIC_EnableIRQ(EXTI9_5_IRQn );
+
+		break;
+		}
+
+		case 7: {
+			__NVIC_EnableIRQ(EXTI9_5_IRQn );
+
+		break;
+		}
+
+		case 8: {
+			__NVIC_EnableIRQ(EXTI9_5_IRQn );
+
+		break;
+		}
+
+		case 9: {
+			__NVIC_EnableIRQ(EXTI9_5_IRQn );
+
+		break;
+		}
+
+		case 10: {
+			__NVIC_EnableIRQ(EXTI15_10_IRQn);
+
+		break;
+		}
+
+		case 11: {
+			__NVIC_EnableIRQ(EXTI15_10_IRQn);
+
+		break;
+		}
+
+		case 12: {
+			__NVIC_EnableIRQ(EXTI15_10_IRQn);
+
+		break;
+		}
+
+		case 13: {
+			__NVIC_EnableIRQ(EXTI15_10_IRQn);
+
+		break;
+		}
+
+		case 14: {
+			__NVIC_EnableIRQ(EXTI15_10_IRQn);
+
+		break;
+		}
+
+		case 15: {
+			__NVIC_EnableIRQ(EXTI15_10_IRQn);
+
+		break;
+		}
+
+
 
 	default: {
 		break;
@@ -752,11 +1126,52 @@ static void exti_config_interrupt(EXTI_Config_t *extiConfig){
 __attribute__ ((weak)) void callback_extInt0(void){
 	__NOP();
 }
+__attribute__ ((weak)) void callback_extInt1(void){
+	__NOP();
+}
+__attribute__ ((weak)) void callback_extInt2(void){
+	__NOP();
+}
+__attribute__ ((weak)) void callback_extInt3(void){
+	__NOP();
+}
+__attribute__ ((weak)) void callback_extInt4(void){
+	__NOP();
+}
+__attribute__ ((weak)) void callback_extInt5(void){
+	__NOP();
+}
+__attribute__ ((weak)) void callback_extInt6(void){
+	__NOP();
+}
+__attribute__ ((weak)) void callback_extInt7(void){
+	__NOP();
+}
+__attribute__ ((weak)) void callback_extInt8(void){
+	__NOP();
+}
+__attribute__ ((weak)) void callback_extInt9(void){
+	__NOP();
+}
+__attribute__ ((weak)) void callback_extInt10(void){
+	__NOP();
+}
+__attribute__ ((weak)) void callback_extInt11(void){
+	__NOP();
+}
+__attribute__ ((weak)) void callback_extInt12(void){
+	__NOP();
+}
+__attribute__ ((weak)) void callback_extInt13(void){
+	__NOP();
+}
+__attribute__ ((weak)) void callback_extInt14(void){
+	__NOP();
+}
+__attribute__ ((weak)) void callback_extInt15(void){
+	__NOP();
+}
 
-/*
- * Agregar TODOS los demas callbacks (del 1 al 15) para un total
- * de  16 posibles interrupciones
- */
 
 
 /* ISR de la interrupción canal 0*/
@@ -771,10 +1186,55 @@ void EXTI0_IRQHandler(void){
 	}
 }
 
+void EXTI1_IRQHandler(void){
+	// Evaluamos si la interrupción que se lanzo corresponde al PIN_1 del GPIO_X
+	if(EXTI->PR & EXTI_PR_PR1){
+		// Bajamos la bandera correspondiente
+		EXTI->PR |= EXTI_PR_PR1;
+
+		// llamamos al callback
+		callback_ExtInt1();
+	}
+}
+
+void EXTI2_IRQHandler(void){
+	// Evaluamos si la interrupción que se lanzo corresponde al PIN_2 del GPIO_X
+	if(EXTI->PR & EXTI_PR_PR2){
+		// Bajamos la bandera correspondiente
+		EXTI->PR |= EXTI_PR_PR2;
+
+		// llamamos al callback
+		callback_ExtInt2();
+	}
+}
+
+void EXTI3_IRQHandler(void){
+	// Evaluamos si la interrupción que se lanzo corresponde al PIN_3 del GPIO_X
+	if(EXTI->PR & EXTI_PR_PR3){
+		// Bajamos la bandera correspondiente
+		EXTI->PR |= EXTI_PR_PR3;
+
+		// llamamos al callback
+		callback_ExtInt3();
+	}
+}
+
+void EXTI4_IRQHandler(void){
+	// Evaluamos si la interrupción que se lanzo corresponde al PIN_4 del GPIO_X
+	if(EXTI->PR & EXTI_PR_PR4){
+		// Bajamos la bandera correspondiente
+		EXTI->PR |= EXTI_PR_PR4;
+
+		// llamamos al callback
+		callback_ExtInt4();
+	}
+}
+
 /* Agregue las demas IRQs de las interrupciones EXTI independientes ...
  * Por favor recuerde que debe agregar el bloque if para verificar que
  * en efecto esa es la interrupcion que se está atendiendo.
  */
+
 
 /* ISR de la interrupción canales 9_5
  * Observe que debe agregar totos los posibles casos, los cuales
@@ -783,6 +1243,28 @@ void EXTI0_IRQHandler(void){
  */
 void EXTI9_5_IRQHandler(void){
     /* Agregar todos los casos*/
+
+	if(EXTI->PR & EXTI_PR_PR5){
+			// Bajamos la bandera correspondiente
+			EXTI->PR |= EXTI_PR_PR5;
+
+			// llamamos al callback
+			callback_ExtInt5();
+
+		} else if(EXTI->PR & EXTI_PR_PR6){
+			EXTI->PR |= EXTI_PR_PR6;
+			callback_ExtInt6();
+		} else if(EXTI->PR & EXTI_PR_PR7){
+			EXTI->PR |= EXTI_PR_PR7;
+			callback_ExtInt7();
+		} else if(EXTI->PR & EXTI_PR_PR8){
+			EXTI->PR |= EXTI_PR_PR8;
+			callback_ExtInt8();
+		} else if(EXTI->PR & EXTI_PR_PR9){
+			EXTI->PR |= EXTI_PR_PR9;
+			callback_ExtInt9();
+		}
+
 }
 
 
@@ -801,12 +1283,19 @@ void EXTI15_10_IRQHandler(void){
 		// llamamos al callback
 		callback_extInt10();
 
+	} else if(EXTI->PR & EXTI_PR_PR6){
+		EXTI->PR |= EXTI_PR_PR6;
+		callback_ExtInt6();
+	} else if(EXTI->PR & EXTI_PR_PR7){
+		EXTI->PR |= EXTI_PR_PR7;
+		callback_ExtInt7();
+	} else if(EXTI->PR & EXTI_PR_PR8){
+		EXTI->PR |= EXTI_PR_PR8;
+		callback_ExtInt8();
+	} else if(EXTI->PR & EXTI_PR_PR9){
+		EXTI->PR |= EXTI_PR_PR9;
+		callback_ExtInt9();
 	}
-
-    /* .....
-     * .....
-     * .....
-     * y así hasta el ultimo caso */
 
 }
 

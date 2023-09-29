@@ -117,7 +117,7 @@ void timer_set_prescaler(Timer_Handler_t *pTimerHandler){
 void timer_set_period(Timer_Handler_t *pTimerHandler){
 
 	// Verificamos que el valor que genera el periodo es valido
-	assert_param(IS_TIMER_PERIOD(pTimerHandler -> TIMx_Config.TIMx_Prescaler));
+	assert_param(IS_TIMER_PERIOD(pTimerHandler -> TIMx_Config.TIMx_Period));
 
 	// Acá hace falta algo...
 
@@ -158,7 +158,7 @@ void timer_config_interrupt(Timer_Handler_t *pTimerHandler){
 		/*Activamos la interrupción debida al Timerx utilizado*/
 		pTimerHandler ->pTIMx -> DIER |= TIM_DIER_UIE;
 
-		/*Activdamos el cana del sistema NVIC para que le la interrupción*/
+		/*Activdamos el canal del sistema NVIC para que le la interrupción*/
 		if(pTimerHandler ->pTIMx == TIM2){
 			NVIC_EnableIRQ(TIM2_IRQn);
 		}
