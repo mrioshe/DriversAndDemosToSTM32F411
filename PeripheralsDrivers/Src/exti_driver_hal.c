@@ -673,6 +673,32 @@ static void exti_assign_channel(EXTI_Config_t *extiConfig){
 static void exti_select_edge(EXTI_Config_t *extiConfig){
 
 	if(extiConfig->edgeType == EXTERNAL_INTERRUPT_FALLING_EDGE){
+
+		switch (extiConfig->pGPIOHandler->pinConfig.GPIO_PinNumber) {
+			case 0:{
+
+				EXTI->FTSR &= ~(0x1 << EXTI_FTSR_TR0_Pos);
+
+			}
+
+			case 1:{
+
+						EXTI->FTSR &= ~(0x1 << EXTI_FTSR_TR1_Pos);
+
+					}
+
+			case 2:{
+
+						EXTI->FTSR &= ~(0x1 << EXTI_FTSR_TR2_Pos);
+
+					}
+
+
+
+		}
+
+		//EXTI_FTSR_TR0  &= ~(0xF << SYSCFG_EXTICR1_EXTI2_Pos);
+
 		/* Falling Trigger selection register*/
         /*Agregue su código acá*/
 	}
