@@ -32,10 +32,24 @@ GPIO_Handler_t userLed={0};
 GPIO_Handler_t userbutton={0};
 Timer_Handler_t blinkTimer={0};
 EXTI_Config_t interrupt_button={0};
+GPIO_Handler_t stateled={0};
 
 
-int main(void)
-{
+int main(void){
+
+	/*Configuración de los pines:*/
+
+	//Pin para conectar led de estado
+
+	stateled.pGPIOx							= GPIOC;
+	stateled.pinConfig.GPIO_PinNumber		= PIN_3;
+	stateled.pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
+	stateled.pinConfig.GPIO_PinOutputType	= GPIO_OTYPE_PUSHPULL;
+	stateled.pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
+	stateled.pinConfig.GPIO_PinPuPdControl	= GPIO_PUPDR_NOTHING;
+
+	//
+
 
 	userLed.pGPIOx							= GPIOA;
 	userLed.pinConfig.GPIO_PinNumber		= PIN_6;
@@ -44,8 +58,7 @@ int main(void)
 	userLed.pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
 	userLed.pinConfig.GPIO_PinPuPdControl	= GPIO_PUPDR_NOTHING;
 
-	gpio_Config(&userLed);
-	gpio_WritePin(&userLed,SET);
+
 
 /*blinkTimer.pTIMx								=TIM11;
 	blinkTimer.TIMx_Config.TIMx_Prescaler			=16000; //Genera incrementos de 1 ms
@@ -66,12 +79,28 @@ int main(void)
 	userbutton.pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
 	userbutton.pinConfig.GPIO_PinPuPdControl	= GPIO_PUPDR_NOTHING;
 
-	gpio_Config(&userbutton);
+	//Configuración de las interrupciones externas
 
 	interrupt_button.edgeType		= EXTERNAL_INTERRUPT_FALLING_EDGE;
 	interrupt_button.pGPIOHandler	= &userbutton;
 
+	//Cargamos configuración de los pines
+
+	gpio_Config(&userLed);
+	gpio_Config(&userbutton);
+	gpio_Config(&stateled);
+
+
+
+
+	//Cargamos configuración de interrupciones externas
+
 	exti_Config(&interrupt_button);
+
+	//Encendemos el led de estado
+
+	gpio_WritePin(&userLed,SET);
+	gpio_WritePin(&stateled,SET);
 
 
 
