@@ -28,10 +28,10 @@
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
 #endif
 
-GPIO_Handler_t userLed={0};
-GPIO_Handler_t userbutton={0};
+
+GPIO_Handler_t sw={0};
 Timer_Handler_t blinkTimer={0};
-EXTI_Config_t interrupt_button={0};
+EXTI_Config_t interrupt_sw={0};
 GPIO_Handler_t stateled={0};
 
 
@@ -42,7 +42,7 @@ int main(void){
 	//Pin para conectar led de estado
 
 	stateled.pGPIOx							= GPIOC;
-	stateled.pinConfig.GPIO_PinNumber		= PIN_3;
+	stateled.pinConfig.GPIO_PinNumber		= PIN_1;
 	stateled.pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
 	stateled.pinConfig.GPIO_PinOutputType	= GPIO_OTYPE_PUSHPULL;
 	stateled.pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
@@ -51,12 +51,7 @@ int main(void){
 	//
 
 
-	userLed.pGPIOx							= GPIOA;
-	userLed.pinConfig.GPIO_PinNumber		= PIN_6;
-	userLed.pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
-	userLed.pinConfig.GPIO_PinOutputType	= GPIO_OTYPE_PUSHPULL;
-	userLed.pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
-	userLed.pinConfig.GPIO_PinPuPdControl	= GPIO_PUPDR_NOTHING;
+
 
 
 
@@ -72,22 +67,22 @@ int main(void){
 	//Encendemos el Timer
 	//timer_SetState(&blinkTimer, TIMER_ON);
 
-	userbutton.pGPIOx							= GPIOC;
-	userbutton.pinConfig.GPIO_PinNumber			= PIN_9;
-	userbutton.pinConfig.GPIO_PinMode			= GPIO_MODE_IN;
-	userbutton.pinConfig.GPIO_PinOutputType		= GPIO_OTYPE_PUSHPULL;
-	userbutton.pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
-	userbutton.pinConfig.GPIO_PinPuPdControl	= GPIO_PUPDR_NOTHING;
+	sw.pGPIOx							= GPIOC;
+	sw.pinConfig.GPIO_PinNumber			= PIN_0;
+	sw.pinConfig.GPIO_PinMode			= GPIO_MODE_IN;
+	sw.pinConfig.GPIO_PinOutputType		= GPIO_OTYPE_PUSHPULL;
+	sw.pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
+	sw.pinConfig.GPIO_PinPuPdControl	= GPIO_PUPDR_NOTHING;
 
 	//Configuración de las interrupciones externas
 
-	interrupt_button.edgeType		= EXTERNAL_INTERRUPT_FALLING_EDGE;
-	interrupt_button.pGPIOHandler	= &userbutton;
+	interrupt_sw.edgeType		= EXTERNAL_INTERRUPT_FALLING_EDGE;
+	interrupt_sw.pGPIOHandler	= &sw;
 
 	//Cargamos configuración de los pines
 
-	gpio_Config(&userLed);
-	gpio_Config(&userbutton);
+
+	gpio_Config(&sw);
 	gpio_Config(&stateled);
 
 
@@ -95,11 +90,11 @@ int main(void){
 
 	//Cargamos configuración de interrupciones externas
 
-	exti_Config(&interrupt_button);
+	exti_Config(&interrupt_sw);
 
 	//Encendemos el led de estado
 
-	gpio_WritePin(&userLed,SET);
+
 	gpio_WritePin(&stateled,SET);
 
 
@@ -115,8 +110,8 @@ int main(void){
 
 	}
 
-void callback_extInt9(void){
-	gpio_TooglePin(&userLed);
+void callback_extInt0(void){
+	gpio_TooglePin(&stateled);
 }
 
 
