@@ -32,8 +32,11 @@
 GPIO_Handler_t sw={0};
 Timer_Handler_t blinkTimer={0};
 EXTI_Config_t interrupt_sw={0};
+EXTI_Config_t interrupt_clk={0};
 GPIO_Handler_t stateled={0};
 GPIO_Handler_t direction={0};
+GPIO_Handler_t dt={0};
+GPIO_Handler_t clk={0};
 
 
 int main(void){
@@ -68,6 +71,7 @@ int main(void){
 	blinkTimer.TIMx_Config.TIMx_mode				=TIMER_UP_COUNTER;
 	blinkTimer.TIMx_Config.TIMx_InterruptEnable		=TIMER_INT_ENABLE;
 
+	//Pin de entrada del switche del encoder
 
 	sw.pGPIOx							= GPIOC;
 	sw.pinConfig.GPIO_PinNumber			= PIN_0;
@@ -76,15 +80,39 @@ int main(void){
 	sw.pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
 	sw.pinConfig.GPIO_PinPuPdControl	= GPIO_PUPDR_NOTHING;
 
+	//Pin de entrada del data del encoder
+
+	dt.pGPIOx							= GPIOB;
+	dt.pinConfig.GPIO_PinNumber			= PIN_5;
+	dt.pinConfig.GPIO_PinMode			= GPIO_MODE_IN;
+	dt.pinConfig.GPIO_PinOutputType		= GPIO_OTYPE_PUSHPULL;
+	dt.pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
+	dt.pinConfig.GPIO_PinPuPdControl	= GPIO_PUPDR_NOTHING;
+
+	//Pin de entrada del clock del reloj del encoder
+
+	clk.pGPIOx							= GPIOC;
+	clk.pinConfig.GPIO_PinNumber		= PIN_9;
+	clk.pinConfig.GPIO_PinMode			= GPIO_MODE_IN;
+	clk.pinConfig.GPIO_PinOutputType	= GPIO_OTYPE_PUSHPULL;
+	clk.pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
+	clk.pinConfig.GPIO_PinPuPdControl	= GPIO_PUPDR_NOTHING;
+
+
 	//Configuración de las interrupciones externas
 
 	interrupt_sw.edgeType		= EXTERNAL_INTERRUPT_FALLING_EDGE;
 	interrupt_sw.pGPIOHandler	= &sw;
 
+	interrupt_clk.edgeType		= EXTERNAL_INTERRUPT_FALLING_EDGE;
+	interrupt_clk.pGPIOHandler	= &clk;
+
 	//Cargamos configuración de los pines
 
 
 	gpio_Config(&sw);
+	gpio_Config(&dt);
+	gpio_Config(&clk);
 	gpio_Config(&direction);
 	gpio_Config(&stateled);
 
@@ -96,6 +124,7 @@ int main(void){
 	//Cargamos configuración de interrupciones externas
 
 	exti_Config(&interrupt_sw);
+	exti_Config(&interrupt_clk);
 
 	/*Seteo de estados iniciales*/
 
@@ -124,8 +153,13 @@ void callback_extInt0(void){
 	gpio_TooglePin(&direction);
 }
 
+
 void Timer5_Callback(void){
 	gpio_TooglePin(&stateled);
+}
+
+void callback_extInt9(void){
+
 }
 
 
