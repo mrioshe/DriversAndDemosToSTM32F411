@@ -37,7 +37,9 @@ GPIO_Handler_t stateled={0};
 GPIO_Handler_t direction={0};
 GPIO_Handler_t dt={0};
 GPIO_Handler_t clk={0};
-
+GPIO_Handler_t ledprueba1={0};
+GPIO_Handler_t ledprueba2={0};
+EXTI_Config_t interrupt_prueba={0};
 
 int main(void){
 
@@ -51,6 +53,20 @@ int main(void){
 	stateled.pinConfig.GPIO_PinOutputType	= GPIO_OTYPE_PUSHPULL;
 	stateled.pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
 	stateled.pinConfig.GPIO_PinPuPdControl	= GPIO_PUPDR_NOTHING;
+
+	ledprueba1.pGPIOx							= GPIOA;
+	ledprueba1.pinConfig.GPIO_PinNumber		= PIN_1;
+	ledprueba1.pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
+	ledprueba1.pinConfig.GPIO_PinOutputType	= GPIO_OTYPE_PUSHPULL;
+	ledprueba1.pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
+	ledprueba1.pinConfig.GPIO_PinPuPdControl	= GPIO_PUPDR_NOTHING;
+
+	ledprueba2.pGPIOx							= GPIOD;
+	ledprueba2.pinConfig.GPIO_PinNumber		= PIN_2;
+	ledprueba2.pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
+	ledprueba2.pinConfig.GPIO_PinOutputType	= GPIO_OTYPE_PUSHPULL;
+	ledprueba2.pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
+	ledprueba2.pinConfig.GPIO_PinPuPdControl	= GPIO_PUPDR_NOTHING;
 
 	//Pin para conectar led que indica el sentido de rotación
 
@@ -89,6 +105,7 @@ int main(void){
 	dt.pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
 	dt.pinConfig.GPIO_PinPuPdControl	= GPIO_PUPDR_NOTHING;
 
+
 	//Pin de entrada del clock del reloj del encoder
 
 	clk.pGPIOx							= GPIOC;
@@ -107,6 +124,7 @@ int main(void){
 	interrupt_clk.edgeType		= EXTERNAL_INTERRUPT_FALLING_EDGE;
 	interrupt_clk.pGPIOHandler	= &clk;
 
+
 	//Cargamos configuración de los pines
 
 
@@ -115,6 +133,8 @@ int main(void){
 	gpio_Config(&clk);
 	gpio_Config(&direction);
 	gpio_Config(&stateled);
+	gpio_Config(&ledprueba1);
+	gpio_Config(&ledprueba2);
 
 	/*Cargamos configuracion el Timer*/
 
@@ -126,6 +146,7 @@ int main(void){
 	exti_Config(&interrupt_sw);
 	exti_Config(&interrupt_clk);
 
+
 	/*Seteo de estados iniciales*/
 
 	//Encendemos el led de estado
@@ -133,6 +154,8 @@ int main(void){
 
 	gpio_WritePin(&stateled,SET);
 	gpio_WritePin(&direction,SET);
+	gpio_WritePin(&ledprueba1,SET);
+	gpio_WritePin(&ledprueba2,SET);
 
 	//Encendemos el Timer
 
@@ -160,6 +183,7 @@ void Timer5_Callback(void){
 
 void callback_extInt9(void){
 
+	gpio_TooglePin(&ledprueba2);
 }
 
 
