@@ -24,10 +24,6 @@
 #include "exti_driver_hal.h"
 
 
-#if !defined(__SOFT_FP__) && defined(__ARM_FP)
-  #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
-#endif
-
 
 GPIO_Handler_t sw={0};
 GPIO_Handler_t stateled={0};
@@ -40,8 +36,12 @@ GPIO_Handler_t vcc2_7seg={0};
 Timer_Handler_t blinkTimer={0};
 EXTI_Config_t interrupt_sw={0};
 EXTI_Config_t interrupt_clk={0};
+uint8_t flag_timer={0};
+uint8_t counter={0};
 
 
+
+void segment_configuration(uint8_t number);
 
 int main(void){
 
@@ -129,31 +129,31 @@ int main(void){
 
 	//segmento D
 
-	leds_7segment[3].pGPIOx							= GPIOA;
-	leds_7segment[3].pinConfig.GPIO_PinNumber		= PIN_7;
-	leds_7segment[3].pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
-	leds_7segment[3].pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
-
-	//segmento E
-
 	leds_7segment[4].pGPIOx							= GPIOA;
-	leds_7segment[4].pinConfig.GPIO_PinNumber		= PIN_6;
+	leds_7segment[4].pinConfig.GPIO_PinNumber		= PIN_7;
 	leds_7segment[4].pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
 	leds_7segment[4].pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
 
+	//segmento E
+
+	leds_7segment[6].pGPIOx							= GPIOA;
+	leds_7segment[6].pinConfig.GPIO_PinNumber		= PIN_6;
+	leds_7segment[6].pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
+	leds_7segment[6].pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
+
 	//segmento F
 
-	leds_7segment[5].pGPIOx							= GPIOA;
-	leds_7segment[5].pinConfig.GPIO_PinNumber		= PIN_4;
+	leds_7segment[5].pGPIOx							= GPIOD;
+	leds_7segment[5].pinConfig.GPIO_PinNumber		= PIN_2;
 	leds_7segment[5].pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
 	leds_7segment[5].pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
 
 	//segmento G
 
-	leds_7segment[6].pGPIOx							= GPIOA;
-	leds_7segment[6].pinConfig.GPIO_PinNumber		= PIN_9;
-	leds_7segment[6].pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
-	leds_7segment[6].pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
+	leds_7segment[3].pGPIOx							= GPIOA;
+	leds_7segment[3].pinConfig.GPIO_PinNumber		= PIN_9;
+	leds_7segment[3].pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
+	leds_7segment[3].pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
 
 
 
@@ -215,18 +215,39 @@ int main(void){
 	gpio_WritePin(&stateled,SET);
 	gpio_WritePin(&direction,SET);
 	gpio_WritePin(&vcc1_7seg,SET);
-	gpio_WritePin(&vcc2_7seg,SET);
+	gpio_WritePin(&vcc2_7seg,RESET);
 
 
 	//Encendemos el Timer
 
 	timer_SetState(&blinkTimer, TIMER_ON);
-	segment_configuration(8);
+
+	for(uint8_t i=0;i<7;i++){
+		gpio_WritePin(&leds_7segment[i],SET);
+		}
+
+
 
 
     /* Loop forever */
 	while(1){
 
+
+
+		if(flag_timer){
+			flag_timer=0;
+			if(counter==10){
+				counter=0;
+
+			} else {
+
+				__NOP();
+			}
+
+			segment_configuration(counter);
+
+
+		}
 
 
 		}
@@ -240,6 +261,10 @@ void callback_extInt0(void){
 
 void Timer5_Callback(void){
 	gpio_TooglePin(&stateled);
+	flag_timer=1;
+	counter++;
+	gpio_TooglePin(&vcc1_7seg);
+	gpio_TooglePin(&vcc2_7seg);
 }
 
 /*void callback_extInt9(void){
@@ -254,104 +279,104 @@ void segment_configuration(uint8_t number){
 
 		case 0:
 
-			gpio_WritePin(&leds_7segment[0],SET);
-			gpio_WritePin(&leds_7segment[1],SET);
-			gpio_WritePin(&leds_7segment[2],SET);
-			gpio_WritePin(&leds_7segment[3],SET);
-			gpio_WritePin(&leds_7segment[4],SET);
-			gpio_WritePin(&leds_7segment[5],SET);
-			gpio_WritePin(&leds_7segment[6],RESET);
+			gpio_WritePin(&leds_7segment[0],!SET);
+			gpio_WritePin(&leds_7segment[1],!SET);
+			gpio_WritePin(&leds_7segment[2],!SET);
+			gpio_WritePin(&leds_7segment[3],!SET);
+			gpio_WritePin(&leds_7segment[4],!SET);
+			gpio_WritePin(&leds_7segment[5],!SET);
+			gpio_WritePin(&leds_7segment[6],!RESET);
 			break;
 
 		case 1:
-			gpio_WritePin(&leds_7segment[0],RESET);
-			gpio_WritePin(&leds_7segment[1],SET);
-			gpio_WritePin(&leds_7segment[2],SET);
-			gpio_WritePin(&leds_7segment[3],RESET);
-			gpio_WritePin(&leds_7segment[4],RESET);
-			gpio_WritePin(&leds_7segment[5],RESET);
-			gpio_WritePin(&leds_7segment[6],RESET);
+			gpio_WritePin(&leds_7segment[0],!RESET);
+			gpio_WritePin(&leds_7segment[1],!SET);
+			gpio_WritePin(&leds_7segment[2],!SET);
+			gpio_WritePin(&leds_7segment[3],!RESET);
+			gpio_WritePin(&leds_7segment[4],!RESET);
+			gpio_WritePin(&leds_7segment[5],!RESET);
+			gpio_WritePin(&leds_7segment[6],!RESET);
 			break;
 
 		case 2:
-			gpio_WritePin(&leds_7segment[0],SET);
-			gpio_WritePin(&leds_7segment[1],SET);
-			gpio_WritePin(&leds_7segment[2],RESET);
-			gpio_WritePin(&leds_7segment[3],SET);
-			gpio_WritePin(&leds_7segment[4],SET);
-			gpio_WritePin(&leds_7segment[5],RESET);
-			gpio_WritePin(&leds_7segment[6],SET);
+			gpio_WritePin(&leds_7segment[0],!SET);
+			gpio_WritePin(&leds_7segment[1],!SET);
+			gpio_WritePin(&leds_7segment[2],!RESET);
+			gpio_WritePin(&leds_7segment[3],!SET);
+			gpio_WritePin(&leds_7segment[4],!SET);
+			gpio_WritePin(&leds_7segment[5],!RESET);
+			gpio_WritePin(&leds_7segment[6],!SET);
 			break;
 
 		case 3:
-			gpio_WritePin(&leds_7segment[0],SET);
-			gpio_WritePin(&leds_7segment[1],SET);
-			gpio_WritePin(&leds_7segment[2],SET);
-			gpio_WritePin(&leds_7segment[3],SET);
-			gpio_WritePin(&leds_7segment[4],RESET);
-			gpio_WritePin(&leds_7segment[5],RESET);
-			gpio_WritePin(&leds_7segment[6],SET);
+			gpio_WritePin(&leds_7segment[0],!SET);
+			gpio_WritePin(&leds_7segment[1],!SET);
+			gpio_WritePin(&leds_7segment[2],!SET);
+			gpio_WritePin(&leds_7segment[3],!SET);
+			gpio_WritePin(&leds_7segment[4],!RESET);
+			gpio_WritePin(&leds_7segment[5],!RESET);
+			gpio_WritePin(&leds_7segment[6],!SET);
 			break;
 
 		case 4:
-			gpio_WritePin(&leds_7segment[0],RESET);
-			gpio_WritePin(&leds_7segment[1],SET);
-			gpio_WritePin(&leds_7segment[2],SET);
-			gpio_WritePin(&leds_7segment[3],RESET);
-			gpio_WritePin(&leds_7segment[4],RESET);
-			gpio_WritePin(&leds_7segment[5],SET);
-			gpio_WritePin(&leds_7segment[6],SET);
+			gpio_WritePin(&leds_7segment[0],!RESET);
+			gpio_WritePin(&leds_7segment[1],!SET);
+			gpio_WritePin(&leds_7segment[2],!SET);
+			gpio_WritePin(&leds_7segment[3],!RESET);
+			gpio_WritePin(&leds_7segment[4],!RESET);
+			gpio_WritePin(&leds_7segment[5],!SET);
+			gpio_WritePin(&leds_7segment[6],!SET);
 			break;
 
 		case 5:
-			gpio_WritePin(&leds_7segment[0],SET);
-			gpio_WritePin(&leds_7segment[1],RESET);
-			gpio_WritePin(&leds_7segment[2],SET);
-			gpio_WritePin(&leds_7segment[3],SET);
-			gpio_WritePin(&leds_7segment[4],RESET);
-			gpio_WritePin(&leds_7segment[5],SET);
-			gpio_WritePin(&leds_7segment[6],SET);
+			gpio_WritePin(&leds_7segment[0],!SET);
+			gpio_WritePin(&leds_7segment[1],!RESET);
+			gpio_WritePin(&leds_7segment[2],!SET);
+			gpio_WritePin(&leds_7segment[3],!SET);
+			gpio_WritePin(&leds_7segment[4],!RESET);
+			gpio_WritePin(&leds_7segment[5],!SET);
+			gpio_WritePin(&leds_7segment[6],!SET);
 			break;
 
 		case 6:
-			gpio_WritePin(&leds_7segment[0],SET);
-			gpio_WritePin(&leds_7segment[1],RESET);
-			gpio_WritePin(&leds_7segment[2],SET);
-			gpio_WritePin(&leds_7segment[3],SET);
-			gpio_WritePin(&leds_7segment[4],SET);
-			gpio_WritePin(&leds_7segment[5],SET);
-			gpio_WritePin(&leds_7segment[6],SET);
+			gpio_WritePin(&leds_7segment[0],!SET);
+			gpio_WritePin(&leds_7segment[1],!RESET);
+			gpio_WritePin(&leds_7segment[2],!SET);
+			gpio_WritePin(&leds_7segment[3],!SET);
+			gpio_WritePin(&leds_7segment[4],!SET);
+			gpio_WritePin(&leds_7segment[5],!SET);
+			gpio_WritePin(&leds_7segment[6],!SET);
 			break;
 
 		case 7:
-			gpio_WritePin(&leds_7segment[0],SET);
-			gpio_WritePin(&leds_7segment[1],SET);
-			gpio_WritePin(&leds_7segment[2],SET);
-			gpio_WritePin(&leds_7segment[3],RESET);
-			gpio_WritePin(&leds_7segment[4],RESET);
-			gpio_WritePin(&leds_7segment[5],RESET);
-			gpio_WritePin(&leds_7segment[6],RESET);
+			gpio_WritePin(&leds_7segment[0],!SET);
+			gpio_WritePin(&leds_7segment[1],!SET);
+			gpio_WritePin(&leds_7segment[2],!SET);
+			gpio_WritePin(&leds_7segment[3],!RESET);
+			gpio_WritePin(&leds_7segment[4],!RESET);
+			gpio_WritePin(&leds_7segment[5],!RESET);
+			gpio_WritePin(&leds_7segment[6],!RESET);
 			break;
 
 		case 8:
-			gpio_WritePin(&leds_7segment[0],SET);
-			gpio_WritePin(&leds_7segment[1],SET);
-			gpio_WritePin(&leds_7segment[2],SET);
-			gpio_WritePin(&leds_7segment[3],SET);
-			gpio_WritePin(&leds_7segment[4],SET);
-			gpio_WritePin(&leds_7segment[5],SET);
-			gpio_WritePin(&leds_7segment[6],SET);
+			gpio_WritePin(&leds_7segment[0],!SET);
+			gpio_WritePin(&leds_7segment[1],!SET);
+			gpio_WritePin(&leds_7segment[2],!SET);
+			gpio_WritePin(&leds_7segment[3],!SET);
+			gpio_WritePin(&leds_7segment[4],!SET);
+			gpio_WritePin(&leds_7segment[5],!SET);
+			gpio_WritePin(&leds_7segment[6],!SET);
 			break;
 
 
 		case 9:
-			gpio_WritePin(&leds_7segment[0],SET);
-			gpio_WritePin(&leds_7segment[1],SET);
-			gpio_WritePin(&leds_7segment[2],SET);
-			gpio_WritePin(&leds_7segment[3],SET);
-			gpio_WritePin(&leds_7segment[4],RESET);
-			gpio_WritePin(&leds_7segment[5],SET);
-			gpio_WritePin(&leds_7segment[6],SET);
+			gpio_WritePin(&leds_7segment[0],!SET);
+			gpio_WritePin(&leds_7segment[1],!SET);
+			gpio_WritePin(&leds_7segment[2],!SET);
+			gpio_WritePin(&leds_7segment[3],!SET);
+			gpio_WritePin(&leds_7segment[4],!RESET);
+			gpio_WritePin(&leds_7segment[5],!SET);
+			gpio_WritePin(&leds_7segment[6],!SET);
 			break;
 
 	}
