@@ -30,16 +30,18 @@
 
 
 GPIO_Handler_t sw={0};
-Timer_Handler_t blinkTimer={0};
-EXTI_Config_t interrupt_sw={0};
-EXTI_Config_t interrupt_clk={0};
 GPIO_Handler_t stateled={0};
 GPIO_Handler_t direction={0};
 GPIO_Handler_t dt={0};
 GPIO_Handler_t clk={0};
-GPIO_Handler_t ledprueba1={0};
-GPIO_Handler_t ledprueba2={0};
-EXTI_Config_t interrupt_prueba={0};
+GPIO_Handler_t leds_7segment[7]={0};
+GPIO_Handler_t vcc1_7seg={0};
+GPIO_Handler_t vcc2_7seg={0};
+Timer_Handler_t blinkTimer={0};
+EXTI_Config_t interrupt_sw={0};
+EXTI_Config_t interrupt_clk={0};
+
+
 
 int main(void){
 
@@ -54,19 +56,6 @@ int main(void){
 	stateled.pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
 	stateled.pinConfig.GPIO_PinPuPdControl	= GPIO_PUPDR_NOTHING;
 
-	ledprueba1.pGPIOx							= GPIOA;
-	ledprueba1.pinConfig.GPIO_PinNumber		= PIN_1;
-	ledprueba1.pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
-	ledprueba1.pinConfig.GPIO_PinOutputType	= GPIO_OTYPE_PUSHPULL;
-	ledprueba1.pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
-	ledprueba1.pinConfig.GPIO_PinPuPdControl	= GPIO_PUPDR_NOTHING;
-
-	ledprueba2.pGPIOx							= GPIOD;
-	ledprueba2.pinConfig.GPIO_PinNumber		= PIN_2;
-	ledprueba2.pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
-	ledprueba2.pinConfig.GPIO_PinOutputType	= GPIO_OTYPE_PUSHPULL;
-	ledprueba2.pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
-	ledprueba2.pinConfig.GPIO_PinPuPdControl	= GPIO_PUPDR_NOTHING;
 
 	//Pin para conectar led que indica el sentido de rotación
 
@@ -115,6 +104,74 @@ int main(void){
 	clk.pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
 	clk.pinConfig.GPIO_PinPuPdControl	= GPIO_PUPDR_NOTHING;
 
+	//PINES DEL 7 SEGMENTOS:
+
+	//segmento A
+
+	leds_7segment[0].pGPIOx							= GPIOA;
+	leds_7segment[0].pinConfig.GPIO_PinNumber		= PIN_1;
+	leds_7segment[0].pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
+	leds_7segment[0].pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
+
+	//segmento B
+
+	leds_7segment[1].pGPIOx							= GPIOA;
+	leds_7segment[1].pinConfig.GPIO_PinNumber		= PIN_4;
+	leds_7segment[1].pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
+	leds_7segment[1].pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
+
+	//segmento C
+
+	leds_7segment[2].pGPIOx							= GPIOA;
+	leds_7segment[2].pinConfig.GPIO_PinNumber		= PIN_8;
+	leds_7segment[2].pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
+	leds_7segment[2].pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
+
+	//segmento D
+
+	leds_7segment[3].pGPIOx							= GPIOA;
+	leds_7segment[3].pinConfig.GPIO_PinNumber		= PIN_7;
+	leds_7segment[3].pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
+	leds_7segment[3].pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
+
+	//segmento E
+
+	leds_7segment[4].pGPIOx							= GPIOA;
+	leds_7segment[4].pinConfig.GPIO_PinNumber		= PIN_6;
+	leds_7segment[4].pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
+	leds_7segment[4].pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
+
+	//segmento F
+
+	leds_7segment[5].pGPIOx							= GPIOA;
+	leds_7segment[5].pinConfig.GPIO_PinNumber		= PIN_4;
+	leds_7segment[5].pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
+	leds_7segment[5].pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
+
+	//segmento G
+
+	leds_7segment[6].pGPIOx							= GPIOA;
+	leds_7segment[6].pinConfig.GPIO_PinNumber		= PIN_9;
+	leds_7segment[6].pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
+	leds_7segment[6].pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
+
+
+
+	// pin que alimenta el primer led
+
+	vcc1_7seg.pGPIOx							= GPIOC;
+	vcc1_7seg.pinConfig.GPIO_PinNumber			= PIN_12;
+	vcc1_7seg.pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
+	vcc1_7seg.pinConfig.GPIO_PinOutputSpeed		= GPIO_OSPEEDR_MEDIUM;
+
+
+	// pin que alimenta el segundo led
+
+	vcc2_7seg.pGPIOx							= GPIOC;
+	vcc2_7seg.pinConfig.GPIO_PinNumber			= PIN_8;
+	vcc2_7seg.pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
+	vcc2_7seg.pinConfig.GPIO_PinOutputSpeed		= GPIO_OSPEEDR_MEDIUM;
+
 
 	//Configuración de las interrupciones externas
 
@@ -127,14 +184,17 @@ int main(void){
 
 	//Cargamos configuración de los pines
 
+	for(uint8_t i=0;i<=6;i++){
+		gpio_Config(&leds_7segment[i]);
+	}
 
 	gpio_Config(&sw);
 	gpio_Config(&dt);
 	gpio_Config(&clk);
 	gpio_Config(&direction);
-	gpio_Config(&stateled);
-	gpio_Config(&ledprueba1);
-	gpio_Config(&ledprueba2);
+	gpio_Config(&vcc1_7seg);
+	gpio_Config(&vcc1_7seg);
+
 
 	/*Cargamos configuracion el Timer*/
 
@@ -154,13 +214,14 @@ int main(void){
 
 	gpio_WritePin(&stateled,SET);
 	gpio_WritePin(&direction,SET);
-	gpio_WritePin(&ledprueba1,SET);
-	gpio_WritePin(&ledprueba2,SET);
+	gpio_WritePin(&vcc1_7seg,SET);
+	gpio_WritePin(&vcc2_7seg,SET);
+
 
 	//Encendemos el Timer
 
 	timer_SetState(&blinkTimer, TIMER_ON);
-
+	segment_configuration(8);
 
 
     /* Loop forever */
@@ -181,9 +242,119 @@ void Timer5_Callback(void){
 	gpio_TooglePin(&stateled);
 }
 
-void callback_extInt9(void){
+/*void callback_extInt9(void){
 
-	gpio_TooglePin(&ledprueba2);
+
+}*/
+
+
+void segment_configuration(uint8_t number){
+
+	switch(number){
+
+		case 0:
+
+			gpio_WritePin(&leds_7segment[0],SET);
+			gpio_WritePin(&leds_7segment[1],SET);
+			gpio_WritePin(&leds_7segment[2],SET);
+			gpio_WritePin(&leds_7segment[3],SET);
+			gpio_WritePin(&leds_7segment[4],SET);
+			gpio_WritePin(&leds_7segment[5],SET);
+			gpio_WritePin(&leds_7segment[6],RESET);
+			break;
+
+		case 1:
+			gpio_WritePin(&leds_7segment[0],RESET);
+			gpio_WritePin(&leds_7segment[1],SET);
+			gpio_WritePin(&leds_7segment[2],SET);
+			gpio_WritePin(&leds_7segment[3],RESET);
+			gpio_WritePin(&leds_7segment[4],RESET);
+			gpio_WritePin(&leds_7segment[5],RESET);
+			gpio_WritePin(&leds_7segment[6],RESET);
+			break;
+
+		case 2:
+			gpio_WritePin(&leds_7segment[0],SET);
+			gpio_WritePin(&leds_7segment[1],SET);
+			gpio_WritePin(&leds_7segment[2],RESET);
+			gpio_WritePin(&leds_7segment[3],SET);
+			gpio_WritePin(&leds_7segment[4],SET);
+			gpio_WritePin(&leds_7segment[5],RESET);
+			gpio_WritePin(&leds_7segment[6],SET);
+			break;
+
+		case 3:
+			gpio_WritePin(&leds_7segment[0],SET);
+			gpio_WritePin(&leds_7segment[1],SET);
+			gpio_WritePin(&leds_7segment[2],SET);
+			gpio_WritePin(&leds_7segment[3],SET);
+			gpio_WritePin(&leds_7segment[4],RESET);
+			gpio_WritePin(&leds_7segment[5],RESET);
+			gpio_WritePin(&leds_7segment[6],SET);
+			break;
+
+		case 4:
+			gpio_WritePin(&leds_7segment[0],RESET);
+			gpio_WritePin(&leds_7segment[1],SET);
+			gpio_WritePin(&leds_7segment[2],SET);
+			gpio_WritePin(&leds_7segment[3],RESET);
+			gpio_WritePin(&leds_7segment[4],RESET);
+			gpio_WritePin(&leds_7segment[5],SET);
+			gpio_WritePin(&leds_7segment[6],SET);
+			break;
+
+		case 5:
+			gpio_WritePin(&leds_7segment[0],SET);
+			gpio_WritePin(&leds_7segment[1],RESET);
+			gpio_WritePin(&leds_7segment[2],SET);
+			gpio_WritePin(&leds_7segment[3],SET);
+			gpio_WritePin(&leds_7segment[4],RESET);
+			gpio_WritePin(&leds_7segment[5],SET);
+			gpio_WritePin(&leds_7segment[6],SET);
+			break;
+
+		case 6:
+			gpio_WritePin(&leds_7segment[0],SET);
+			gpio_WritePin(&leds_7segment[1],RESET);
+			gpio_WritePin(&leds_7segment[2],SET);
+			gpio_WritePin(&leds_7segment[3],SET);
+			gpio_WritePin(&leds_7segment[4],SET);
+			gpio_WritePin(&leds_7segment[5],SET);
+			gpio_WritePin(&leds_7segment[6],SET);
+			break;
+
+		case 7:
+			gpio_WritePin(&leds_7segment[0],SET);
+			gpio_WritePin(&leds_7segment[1],SET);
+			gpio_WritePin(&leds_7segment[2],SET);
+			gpio_WritePin(&leds_7segment[3],RESET);
+			gpio_WritePin(&leds_7segment[4],RESET);
+			gpio_WritePin(&leds_7segment[5],RESET);
+			gpio_WritePin(&leds_7segment[6],RESET);
+			break;
+
+		case 8:
+			gpio_WritePin(&leds_7segment[0],SET);
+			gpio_WritePin(&leds_7segment[1],SET);
+			gpio_WritePin(&leds_7segment[2],SET);
+			gpio_WritePin(&leds_7segment[3],SET);
+			gpio_WritePin(&leds_7segment[4],SET);
+			gpio_WritePin(&leds_7segment[5],SET);
+			gpio_WritePin(&leds_7segment[6],SET);
+			break;
+
+
+		case 9:
+			gpio_WritePin(&leds_7segment[0],SET);
+			gpio_WritePin(&leds_7segment[1],SET);
+			gpio_WritePin(&leds_7segment[2],SET);
+			gpio_WritePin(&leds_7segment[3],SET);
+			gpio_WritePin(&leds_7segment[4],RESET);
+			gpio_WritePin(&leds_7segment[5],SET);
+			gpio_WritePin(&leds_7segment[6],SET);
+			break;
+
+	}
 }
 
 
