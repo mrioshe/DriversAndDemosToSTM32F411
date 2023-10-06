@@ -66,16 +66,6 @@ int main(void){
 	direction.pinConfig.GPIO_PinOutputSpeed		= GPIO_OSPEEDR_MEDIUM;
 	direction.pinConfig.GPIO_PinPuPdControl		= GPIO_PUPDR_NOTHING;
 
-	// Configuramos el timer de 32 bits para el blinky
-
-
-
-    blinkTimer.pTIMx								=TIM5;
-	blinkTimer.TIMx_Config.TIMx_Prescaler			=16000; //Genera incrementos de 1 ms
-	blinkTimer.TIMx_Config.TIMx_Period				=250;   //DE la mano con el prescaler, se toma el periodo en ms
-	blinkTimer.TIMx_Config.TIMx_mode				=TIMER_UP_COUNTER;
-	blinkTimer.TIMx_Config.TIMx_InterruptEnable		=TIMER_INT_ENABLE;
-
 	//Pin de entrada del switche del encoder
 
 	sw.pGPIOx							= GPIOC;
@@ -87,8 +77,8 @@ int main(void){
 
 	//Pin de entrada del data del encoder
 
-	dt.pGPIOx							= GPIOB;
-	dt.pinConfig.GPIO_PinNumber			= PIN_5;
+	dt.pGPIOx							= GPIOC;
+	dt.pinConfig.GPIO_PinNumber			= PIN_4;
 	dt.pinConfig.GPIO_PinMode			= GPIO_MODE_IN;
 	dt.pinConfig.GPIO_PinOutputType		= GPIO_OTYPE_PUSHPULL;
 	dt.pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
@@ -127,14 +117,14 @@ int main(void){
 	leds_7segment[2].pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
 	leds_7segment[2].pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
 
-	//segmento D
+	//segmento E
 
 	leds_7segment[4].pGPIOx							= GPIOA;
 	leds_7segment[4].pinConfig.GPIO_PinNumber		= PIN_7;
 	leds_7segment[4].pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
 	leds_7segment[4].pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
 
-	//segmento E
+	//segmento G
 
 	leds_7segment[6].pGPIOx							= GPIOA;
 	leds_7segment[6].pinConfig.GPIO_PinNumber		= PIN_6;
@@ -148,7 +138,7 @@ int main(void){
 	leds_7segment[5].pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
 	leds_7segment[5].pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
 
-	//segmento G
+	//segmento D
 
 	leds_7segment[3].pGPIOx							= GPIOA;
 	leds_7segment[3].pinConfig.GPIO_PinNumber		= PIN_9;
@@ -171,6 +161,15 @@ int main(void){
 	vcc2_7seg.pinConfig.GPIO_PinNumber			= PIN_8;
 	vcc2_7seg.pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
 	vcc2_7seg.pinConfig.GPIO_PinOutputSpeed		= GPIO_OSPEEDR_MEDIUM;
+
+
+	// Configuramos el timer de 32 bits para el blinky
+
+    blinkTimer.pTIMx								=TIM5;
+	blinkTimer.TIMx_Config.TIMx_Prescaler			=16000; //Genera incrementos de 1 ms
+	blinkTimer.TIMx_Config.TIMx_Period				=250;   //DE la mano con el prescaler, se toma el periodo en ms
+	blinkTimer.TIMx_Config.TIMx_mode				=TIMER_UP_COUNTER;
+	blinkTimer.TIMx_Config.TIMx_InterruptEnable		=TIMER_INT_ENABLE;
 
 
 	//Configuración de las interrupciones externas
