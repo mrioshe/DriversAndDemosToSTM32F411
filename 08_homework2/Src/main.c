@@ -36,12 +36,19 @@ GPIO_Handler_t vcc2_7seg={0};
 Timer_Handler_t blinkTimer={0};
 EXTI_Config_t interrupt_sw={0};
 EXTI_Config_t interrupt_clk={0};
-uint8_t flag_timer={0};
+uint8_t flag_clk={0};
 uint8_t counter={0};
+uint8_t digit_selector=0;
+uint8_t number_desc_aux[2]={0};
+uint8_t direction_aux={0};
+Timer_Handler_t frecTimer={0};
+
 
 
 
 void segment_configuration(uint8_t number);
+uint8_t dec_number(uint8_t number_aux);
+uint8_t unit_number(uint8_t number_aux);
 
 int main(void){
 
@@ -66,7 +73,7 @@ int main(void){
 	direction.pinConfig.GPIO_PinOutputSpeed		= GPIO_OSPEEDR_MEDIUM;
 	direction.pinConfig.GPIO_PinPuPdControl		= GPIO_PUPDR_NOTHING;
 
-	//Pin de entrada del switche del encoder
+	//Pin de entrada del botón del encoder
 
 	sw.pGPIOx							= GPIOC;
 	sw.pinConfig.GPIO_PinNumber			= PIN_0;
@@ -77,8 +84,8 @@ int main(void){
 
 	//Pin de entrada del data del encoder
 
-	dt.pGPIOx							= GPIOC;
-	dt.pinConfig.GPIO_PinNumber			= PIN_4;
+	dt.pGPIOx							= GPIOA;
+	dt.pinConfig.GPIO_PinNumber			= PIN_10;
 	dt.pinConfig.GPIO_PinMode			= GPIO_MODE_IN;
 	dt.pinConfig.GPIO_PinOutputType		= GPIO_OTYPE_PUSHPULL;
 	dt.pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
@@ -148,7 +155,6 @@ int main(void){
 
 
 
-
 	// pin que alimenta el primer led
 
 	vcc1_7seg.pGPIOx							= GPIOC;
@@ -172,6 +178,14 @@ int main(void){
 	blinkTimer.TIMx_Config.TIMx_Period				=250;   //DE la mano con el prescaler, se toma el periodo en ms
 	blinkTimer.TIMx_Config.TIMx_mode				=TIMER_UP_COUNTER;
 	blinkTimer.TIMx_Config.TIMx_InterruptEnable		=TIMER_INT_ENABLE;
+
+	// Configuramos el timer de 8 bits para obtener la frecuencia de switcheo de los dos canales del 7segmentos
+
+    frecTimer.pTIMx									=TIM10;
+    frecTimer.TIMx_Config.TIMx_Prescaler			=16000; //Genera incrementos de 1 ms
+    frecTimer.TIMx_Config.TIMx_Period				=5;   //DE la mano con el prescaler, se toma el periodo en ms
+    frecTimer.TIMx_Config.TIMx_mode					=TIMER_UP_COUNTER;
+    frecTimer.TIMx_Config.TIMx_InterruptEnable		=TIMER_INT_ENABLE;
 
 
 	//Configuración de las interrupciones externas
@@ -202,6 +216,7 @@ int main(void){
 	/*Cargamos configuracion el Timer*/
 
 	timer_Config(&blinkTimer);
+	timer_Config(&frecTimer);
 
 
 	//Cargamos configuración de interrupciones externas
@@ -221,34 +236,40 @@ int main(void){
 	gpio_WritePin(&vcc2_7seg, SET);
 
 
-
-
-	segment_configuration(0);
-
-
-
-
-
-	//Encendemos el Timer
+	//Encendemos los Timers
 
 	timer_SetState(&blinkTimer, TIMER_ON);
+	timer_SetState(&frecTimer, TIMER_ON);
 
-
-
+	segment_configuration(0);
+	counter=0;
 
     /* Loop forever */
 	while(1){
 
 
 
+		// Encendemos uno de dos canales de voltaje de los canales del 7 segmentos:
+		if (digit_selector){
+			segment_configuration(unit_number(counter));
+
+		}else{
+			segment_configuration(dec_number(counter));
+		}
+
+
+
+		 }
 
 
 	}
 
-}
+
 
 void callback_extInt0(void){
 	gpio_TooglePin(&direction);
+	direction_aux=~direction_aux;
+
 }
 
 
@@ -257,11 +278,56 @@ void Timer5_Callback(void){
 
 }
 
-/*void callback_extInt9(void){
+void Timer10_Callback(void){
 
+	gpio_TooglePin(&vcc1_7seg);
+	gpio_TooglePin(&vcc2_7seg);
+	digit_selector=~digit_selector;
 
-}*/
+}
 
+void callback_extInt9(void){
+
+	// Si el encoder rota en algun sentido:
+
+		/*
+		Primer caso: se rota hacia la derecha (CW) y está modo directo
+		Segundo caso: se rota hacia la derecha (CW) y está modo inverso
+		Tercer caso: se rota hacia la izquierda (CCW) y está en modo directo
+		Cuarto caso: se rota hacia la izquierda (CCW) y está en modo inverso
+
+		 */
+
+		if(gpio_ReadPin(&dt) && !direction_aux){
+
+			if(counter==99){
+				counter=99;
+			} else {
+				counter++;
+			}
+
+		} else if(!gpio_ReadPin(&dt) && !direction_aux){
+
+			if(counter==0){
+				counter=0;
+			} else {
+				counter--;
+			}
+
+		}
+}
+
+uint8_t unit_number(uint8_t number_aux){
+
+	uint8_t unit = number_aux%10;
+	return unit;
+}
+
+uint8_t dec_number(uint8_t number_aux){
+
+	uint8_t dec= number_aux/10;
+	return dec;
+}
 
 void segment_configuration(uint8_t number){
 
