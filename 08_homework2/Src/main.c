@@ -314,6 +314,22 @@ void callback_extInt9(void){
 				counter--;
 			}
 
+		} else if(!gpio_ReadPin(&dt) && direction_aux){
+
+			if(counter==99){
+				counter=99;
+			} else {
+				counter++;
+			}
+
+		} else if(gpio_ReadPin(&dt) && direction_aux){
+
+			if(counter==0){
+				counter=0;
+			} else {
+				counter--;
+			}
+
 		}
 }
 
