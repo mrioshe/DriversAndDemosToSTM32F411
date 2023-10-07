@@ -94,63 +94,65 @@ int main(void){
 	clk.pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
 	clk.pinConfig.GPIO_PinPuPdControl	= GPIO_PUPDR_NOTHING;
 
-	//PINES DEL 7 SEGMENTOS:
+	/*PINES DEL 7 SEGMENTOS:*/
 
 	//segmento A
 
-	leds_7segment[0].pGPIOx							= GPIOA;
-	leds_7segment[0].pinConfig.GPIO_PinNumber		= PIN_1;
+	leds_7segment[0].pGPIOx							= GPIOD;
+	leds_7segment[0].pinConfig.GPIO_PinNumber		= PIN_2;
 	leds_7segment[0].pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
 	leds_7segment[0].pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
 
 	//segmento B
 
 	leds_7segment[1].pGPIOx							= GPIOA;
-	leds_7segment[1].pinConfig.GPIO_PinNumber		= PIN_4;
+	leds_7segment[1].pinConfig.GPIO_PinNumber		= PIN_1;
 	leds_7segment[1].pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
 	leds_7segment[1].pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
 
 	//segmento C
 
-	leds_7segment[2].pGPIOx							= GPIOA;
-	leds_7segment[2].pinConfig.GPIO_PinNumber		= PIN_8;
+	leds_7segment[2].pGPIOx							= GPIOB;
+	leds_7segment[2].pinConfig.GPIO_PinNumber		= PIN_9;
 	leds_7segment[2].pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
 	leds_7segment[2].pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
 
+	//segmento D
+
+	leds_7segment[3].pGPIOx							= GPIOB;
+	leds_7segment[3].pinConfig.GPIO_PinNumber		= PIN_6;
+	leds_7segment[3].pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
+	leds_7segment[3].pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
+
 	//segmento E
 
-	leds_7segment[4].pGPIOx							= GPIOA;
-	leds_7segment[4].pinConfig.GPIO_PinNumber		= PIN_7;
+	leds_7segment[4].pGPIOx							= GPIOB;
+	leds_7segment[4].pinConfig.GPIO_PinNumber		= PIN_8;
 	leds_7segment[4].pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
 	leds_7segment[4].pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
+
+
+	//segmento F
+
+	leds_7segment[5].pGPIOx							= GPIOA;
+	leds_7segment[5].pinConfig.GPIO_PinNumber		= PIN_4;
+	leds_7segment[5].pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
+	leds_7segment[5].pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
 
 	//segmento G
 
 	leds_7segment[6].pGPIOx							= GPIOA;
-	leds_7segment[6].pinConfig.GPIO_PinNumber		= PIN_6;
+	leds_7segment[6].pinConfig.GPIO_PinNumber		= PIN_9;
 	leds_7segment[6].pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
 	leds_7segment[6].pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
 
-	//segmento F
-
-	leds_7segment[5].pGPIOx							= GPIOD;
-	leds_7segment[5].pinConfig.GPIO_PinNumber		= PIN_2;
-	leds_7segment[5].pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
-	leds_7segment[5].pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
-
-	//segmento D
-
-	leds_7segment[3].pGPIOx							= GPIOA;
-	leds_7segment[3].pinConfig.GPIO_PinNumber		= PIN_9;
-	leds_7segment[3].pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
-	leds_7segment[3].pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
 
 
 
 	// pin que alimenta el primer led
 
 	vcc1_7seg.pGPIOx							= GPIOC;
-	vcc1_7seg.pinConfig.GPIO_PinNumber			= PIN_12;
+	vcc1_7seg.pinConfig.GPIO_PinNumber			= PIN_6;
 	vcc1_7seg.pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
 	vcc1_7seg.pinConfig.GPIO_PinOutputSpeed		= GPIO_OSPEEDR_MEDIUM;
 
@@ -158,7 +160,7 @@ int main(void){
 	// pin que alimenta el segundo led
 
 	vcc2_7seg.pGPIOx							= GPIOC;
-	vcc2_7seg.pinConfig.GPIO_PinNumber			= PIN_8;
+	vcc2_7seg.pinConfig.GPIO_PinNumber			= PIN_11;
 	vcc2_7seg.pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
 	vcc2_7seg.pinConfig.GPIO_PinOutputSpeed		= GPIO_OSPEEDR_MEDIUM;
 
@@ -191,8 +193,10 @@ int main(void){
 	gpio_Config(&dt);
 	gpio_Config(&clk);
 	gpio_Config(&direction);
+	gpio_Config(&stateled);
 	gpio_Config(&vcc1_7seg);
-	gpio_Config(&vcc1_7seg);
+	gpio_Config(&vcc2_7seg);
+
 
 
 	/*Cargamos configuracion el Timer*/
@@ -213,17 +217,21 @@ int main(void){
 
 	gpio_WritePin(&stateled,SET);
 	gpio_WritePin(&direction,SET);
-	gpio_WritePin(&vcc1_7seg,SET);
-	gpio_WritePin(&vcc2_7seg,RESET);
+	gpio_WritePin(&vcc1_7seg, SET);
+	gpio_WritePin(&vcc2_7seg, SET);
+
+
+
+
+	segment_configuration(0);
+
+
+
 
 
 	//Encendemos el Timer
 
 	timer_SetState(&blinkTimer, TIMER_ON);
-
-	for(uint8_t i=0;i<7;i++){
-		gpio_WritePin(&leds_7segment[i],SET);
-		}
 
 
 
@@ -233,25 +241,11 @@ int main(void){
 
 
 
-		if(flag_timer){
-			flag_timer=0;
-			if(counter==10){
-				counter=0;
 
-			} else {
-
-				__NOP();
-			}
-
-			segment_configuration(counter);
-
-
-		}
-
-
-		}
 
 	}
+
+}
 
 void callback_extInt0(void){
 	gpio_TooglePin(&direction);
@@ -260,10 +254,7 @@ void callback_extInt0(void){
 
 void Timer5_Callback(void){
 	gpio_TooglePin(&stateled);
-	flag_timer=1;
-	counter++;
-	gpio_TooglePin(&vcc1_7seg);
-	gpio_TooglePin(&vcc2_7seg);
+
 }
 
 /*void callback_extInt9(void){
