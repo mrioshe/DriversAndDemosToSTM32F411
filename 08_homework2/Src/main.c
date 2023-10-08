@@ -183,7 +183,7 @@ int main(void){
 
     frecTimer.pTIMx									=TIM10;
     frecTimer.TIMx_Config.TIMx_Prescaler			=16000; //Genera incrementos de 1 ms
-    frecTimer.TIMx_Config.TIMx_Period				=5;   //DE la mano con el prescaler, se toma el periodo en ms
+    frecTimer.TIMx_Config.TIMx_Period				=10;   //DE la mano con el prescaler, se toma el periodo en ms
     frecTimer.TIMx_Config.TIMx_mode					=TIMER_UP_COUNTER;
     frecTimer.TIMx_Config.TIMx_InterruptEnable		=TIMER_INT_ENABLE;
 
@@ -257,21 +257,71 @@ int main(void){
 			segment_configuration(dec_number(counter));
 		}
 
-
-
-		 }
-
-
 	}
 
 
+}
+
+/*INTERRUPCIONES EXTERNAS*/
+
+
+void callback_extInt9(void){
+
+	/*
+				Primer caso: se rota hacia la derecha (CW) y está modo directo
+				Segundo caso: se rota hacia la derecha (CW) y está modo inverso
+				Tercer caso: se rota hacia la izquierda (CCW) y está en modo directo
+				Cuarto caso: se rota hacia la izquierda (CCW) y está en modo inverso
+
+				 */
+
+				if(gpio_ReadPin(&dt) && !direction_aux){
+
+					if(counter==99){
+						counter=99;
+					} else {
+						counter++;
+					}
+
+				} else if(!gpio_ReadPin(&dt) && !direction_aux){
+
+					if(counter==0){
+						counter=0;
+					} else {
+						counter--;
+					}
+
+				} else if(!gpio_ReadPin(&dt) && direction_aux){
+
+					if(counter==99){
+						counter=99;
+					} else {
+						counter++;
+					}
+
+				} else if(gpio_ReadPin(&dt) && direction_aux){
+
+					if(counter==0){
+						counter=0;
+					} else {
+						counter--;
+					}
+
+				}
+
+
+
+}
 
 void callback_extInt0(void){
 	gpio_TooglePin(&direction);
+	//Variable auxiliar debido a que no se puede leer un pin de salida:
 	direction_aux=~direction_aux;
 
 }
 
+
+/*INTERRUPCIONES DE LOS TIMERS*/
 
 void Timer5_Callback(void){
 	gpio_TooglePin(&stateled);
@@ -282,56 +332,12 @@ void Timer10_Callback(void){
 
 	gpio_TooglePin(&vcc1_7seg);
 	gpio_TooglePin(&vcc2_7seg);
+	//Variable auxiliar debido a que no se puede leer un pin de salida:
 	digit_selector=~digit_selector;
 
 }
 
-void callback_extInt9(void){
 
-	// Si el encoder rota en algun sentido:
-
-		/*
-		Primer caso: se rota hacia la derecha (CW) y está modo directo
-		Segundo caso: se rota hacia la derecha (CW) y está modo inverso
-		Tercer caso: se rota hacia la izquierda (CCW) y está en modo directo
-		Cuarto caso: se rota hacia la izquierda (CCW) y está en modo inverso
-
-		 */
-
-		if(gpio_ReadPin(&dt) && !direction_aux){
-
-			if(counter==99){
-				counter=99;
-			} else {
-				counter++;
-			}
-
-		} else if(!gpio_ReadPin(&dt) && !direction_aux){
-
-			if(counter==0){
-				counter=0;
-			} else {
-				counter--;
-			}
-
-		} else if(!gpio_ReadPin(&dt) && direction_aux){
-
-			if(counter==99){
-				counter=99;
-			} else {
-				counter++;
-			}
-
-		} else if(gpio_ReadPin(&dt) && direction_aux){
-
-			if(counter==0){
-				counter=0;
-			} else {
-				counter--;
-			}
-
-		}
-}
 
 uint8_t unit_number(uint8_t number_aux){
 
@@ -345,6 +351,8 @@ uint8_t dec_number(uint8_t number_aux){
 	return dec;
 }
 
+
+/*FUNCIÓN QUE GENERA LOS NÚMEROS*/
 void segment_configuration(uint8_t number){
 
 	switch(number){
