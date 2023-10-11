@@ -222,27 +222,42 @@ static void usart_config_baudrate(USART_Handler_t *ptrUsartHandler){
 		case USART_BAUDRATE_9600:
 		{
 		// El valor a cargar es 104.1875 -> Mantiza = 104,fraction = 0.1875
-		// Mantiza = 104 = 0x68, fraction = 16 * 0.1875 = 3
+		// Mantiza = 104 = 0x68, fraction = 16 * 0.1875 = 0x3
 		// Valor a cargar 0x0683
 		// Configurando el Baudrate generator para una velocidad de 9600bps
 		ptrUsartHandler->ptrUSARTx->BRR = 0x0683;
+			break;
 		}
 		case USART_BAUDRATE_19200:
 		{
 		// El valor a cargar es 52.0625 -> Mantiza = 52,fraction = 0.0625
-		// Mantiza = 52 = 0x34, fraction = 16 * 0.1875 = 1
+		// Mantiza = 52 = 0x34, fraction = 16 * 0.1875 = 0x1
+		// Valor a cargar 0x0341
 		// Escriba acá su código y los comentarios que faltan
+		// Configurando el Baudrate generator para una velocidad de 19200 bps
+
+		ptrUsartHandler->ptrUSARTx->BRR = 0x0341;
 			break;
+
 		}
 		case USART_BAUDRATE_115200:
 		{
-        // Escriba acá su código y los comentarios que faltan
+			// Escriba acá su código y los comentarios que faltan
+			// El valor a cargar es 8.6875-> Mantiza = 8,fraction = 0.6875
+			// Mantiza = 8 = 0x8, fraction = 16 * 0.6875= 0xB
+			// Valor a cargar 0x0811
+			// Configurando el Baudrate generator para una velocidad de 115200 bps
+			ptrUsartHandler->ptrUSARTx->BRR = 0x008B;
 			break;
 		}
 		case USART_BAUDRATE_230400:
 		{
-			// Configurando el Baudrate generator para una velocidad de 230400bps
 			// Escriba acá su código y los comentarios que faltan
+			// El valor a cargar es 4.3185-> Mantiza = 4,fraction = 0.3185
+			// Mantiza = 4 = 0x4, fraction = 16 * 0.3125= 0x5
+			// Valor a cargar 0x0045
+			// Configurando el Baudrate generator para una velocidad de 230400 bps
+			ptrUsartHandler->ptrUSARTx->BRR = 0x0045;
 			break;
 		}
 
@@ -262,24 +277,31 @@ static void usart_config_mode(USART_Handler_t *ptrUsartHandler){
 	{
 		// Activamos la parte del sistema encargada de enviar
 		// Escriba acá su código
+		ptrUsartHandler->ptrUSARTx->CR1 |= USART_CR1_TE;
 		break;
 	}
 	case USART_MODE_RX:
 	{
 		// Activamos la parte del sistema encargada de recibir
 		// Escriba acá su código
+		ptrUsartHandler->ptrUSARTx->CR1 |= USART_CR1_RE;
 		break;
 	}
 	case USART_MODE_RXTX:
 	{
 		// Activamos ambas partes, tanto transmision como recepcion
 		// Escriba acá su código
+		ptrUsartHandler->ptrUSARTx->CR1 |= USART_CR1_TE;
+		ptrUsartHandler->ptrUSARTx->CR1 |= USART_CR1_RE;
+
 		break;
 	}
 	case USART_MODE_DISABLE:
 	{
 		// Desactivamos ambos canales
 		// Escriba acá su código
+		ptrUsartHandler->ptrUSARTx->CR1 &= ~USART_CR1_TE;
+		ptrUsartHandler->ptrUSARTx->CR1 &= ~USART_CR1_RE;
 		ptrUsartHandler->ptrUSARTx->CR1 &= ~USART_CR1_UE;
 		break;
 	}
@@ -296,6 +318,8 @@ static void usart_config_interrupt(USART_Handler_t *ptrUsartHandler){
 			/* Debemos activar la interrupción RX en la configuración del USART */
 			// Escriba acá su código
 
+			ptrUsartHandler->ptrUSARTx->CR1 |= USART_CR1_PEIE;
+
 			/* Debemos matricular la interrupción en el NVIC */
 			/* Lo debemos hacer para cada uno de las posibles opciones que tengamos (USART1, USART2, USART6) */
 			if(ptrUsartHandler->ptrUSARTx == USART1){
@@ -305,10 +329,14 @@ static void usart_config_interrupt(USART_Handler_t *ptrUsartHandler){
 
 			else if(ptrUsartHandler->ptrUSARTx == USART2){
                 // Escriba acá su código
+				__NVIC_EnableIRQ(USART2_IRQn);
+				__NVIC_SetPriority(USART1_IRQn, 2);
 				}
 
 			else if(ptrUsartHandler->ptrUSARTx == USART6){
                 // Escriba acá su código
+				__NVIC_EnableIRQ(USART6_IRQn);
+				__NVIC_SetPriority(USART1_IRQn, 2);
 			}
 		}
 		else{
@@ -334,7 +362,7 @@ int usart_WriteChar(USART_Handler_t *ptrUsartHandler, int dataToSend ){
 		__NOP();
 	}
 
-	// Escriba acá su código
+	ptrUsartHandler->ptrUSARTx->DR  = dataTosend;
 
 	return dataToSend;
 }
