@@ -97,7 +97,10 @@ typedef struct
 void usart_Config(USART_Handler_t *ptrUsartHandler);
 int  usart_WriteChar(USART_Handler_t *ptrUsartHandler, int dataToSend );
 void usart_writeMsg(USART_Handler_t *ptrUsartHandler, char *msgToSend );
-uint8_t usart_getRxData(void);
+uint8_t usart_getRxData1(void);
+uint8_t usart_getRxData2(void);
+uint8_t usart_getRxData6(void);
+
 void usart1_RxCallback(void);
 void usart2_RxCallback(void);
 void usart6_RxCallback(void);

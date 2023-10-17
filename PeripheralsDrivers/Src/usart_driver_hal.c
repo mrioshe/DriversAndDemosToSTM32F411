@@ -9,7 +9,9 @@
 #include "usart_driver_hal.h"
 #include <stdint.h>
 
-uint8_t auxRxData = 0;
+uint8_t auxRxData1 = 0;
+uint8_t auxRxData2 = 0;
+uint8_t auxRxData6 = 0;
 
 /* === Headers for private functions === */
 static void usart_enable_clock_peripheral(USART_Handler_t *ptrUsartHandler);
@@ -298,7 +300,7 @@ static void usart_config_interrupt(USART_Handler_t *ptrUsartHandler) {
 		// Como está activada, debemos configurar la interrupción por recepción
 		/* Debemos activar la interrupción RX en la configuración del USART */
 		// Escriba acá su código
-		ptrUsartHandler->ptrUSARTx->CR1 |= USART_CR1_PEIE;
+		ptrUsartHandler->ptrUSARTx->CR1 |= USART_CR1_RXNEIE;
 
 		/* Debemos matricular la interrupción en el NVIC */
 		/* Lo debemos hacer para cada uno de las posibles opciones que tengamos (USART1, USART2, USART6) */
@@ -359,16 +361,34 @@ void usart_writeMsg(USART_Handler_t *ptrUsartHandler, char *msgToSend) {
 
 }
 
-uint8_t usart_getRxData(void) {
-	return auxRxData;
+uint8_t usart_getRxData1(void) {
+	return auxRxData1;
+}
+
+uint8_t usart_getRxData2(void) {
+	return auxRxData2;
+}
+
+uint8_t usart_getRxData6(void) {
+	return auxRxData6;
 }
 
 /* Handler de la interrupción del USART
  * Acá deben estar todas las interrupciones asociadas: TX, RX, PE...
  */
+
+
+
+
+
 void USART2_IRQHandler(void) {
-	// Evaluamos si la interrupción que se dio es por RX
-	// Escriba acá su código
+
+	if(USART2->SR & USART_SR_RXNE ){
+		auxRxData1=USART2->DR;
+		usart2_RxCallback();
+
+	} //else if(USART2->SR & USART_CR1_TXE){
+
 }
 
 /* Handler de la interrupción del USART
@@ -377,6 +397,12 @@ void USART2_IRQHandler(void) {
 void USART6_IRQHandler(void) {
 	// Evaluamos si la interrupción que se dio es por RX
 	// Escriba acá su código
+
+	if(USART6->SR & USART_SR_RXNE ){
+		auxRxData6=USART6->DR;
+		usart6_RxCallback();
+
+	}
 }
 
 /* Handler de la interrupción del USART
@@ -385,6 +411,12 @@ void USART6_IRQHandler(void) {
 void USART1_IRQHandler(void) {
 	// Evaluamos si la interrupción que se dio es por RX
 	// Escriba acá su código
+
+	if(USART1->SR & USART_SR_RXNE ){
+		auxRxData1=USART1->DR;
+		usart1_RxCallback();
+
+	}
 }
 
 __attribute__((weak)) void usart1_RxCallback(void) {
