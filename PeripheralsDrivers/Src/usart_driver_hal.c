@@ -92,7 +92,7 @@ static void usart_enable_clock_peripheral(USART_Handler_t *ptrUsartHandler) {
 	/* 1.2 Configuramos el USART2 */
 	// Escriba acá su código
 	else if (ptrUsartHandler->ptrUSARTx == USART2) {
-		RCC->APB2ENR |= RCC_APB1ENR_USART2EN;
+		RCC->APB1ENR |= RCC_APB1ENR_USART2EN;
 
 	}
 
@@ -283,8 +283,6 @@ static void usart_config_mode(USART_Handler_t *ptrUsartHandler) {
 	case USART_MODE_DISABLE: {
 		// Desactivamos ambos canales
 		// Escriba acá su código
-		ptrUsartHandler->ptrUSARTx->CR1 &= ~USART_CR1_TE;
-		ptrUsartHandler->ptrUSARTx->CR1 &= ~USART_CR1_RE;
 		ptrUsartHandler->ptrUSARTx->CR1 &= ~USART_CR1_UE;
 		break;
 	}
@@ -386,7 +384,7 @@ uint8_t usart_getRxData6(void) {
 void USART2_IRQHandler(void) {
 
 	if(USART2->SR & USART_SR_RXNE ){
-		auxRxData1=USART2->DR;
+		auxRxData2=USART2->DR;
 		usart2_RxCallback();
 
 	} //else if(USART2->SR & USART_CR1_TXE){

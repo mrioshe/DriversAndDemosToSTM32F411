@@ -75,12 +75,20 @@ void adc_ConfigSingleChannel(ADC_Config_t *adcConfig){
 /*Enable Clock signal for ADC peripheral*/
 
 static void adc_enable_clock_peripheral(void){
+	RCC->APB2ENR |= RCC_APB2ENR_ADC1EN;
 
 }
 
 /*Configures the resolution for the conversion*/
 
 static void adc_set_resolution(ADC_Config_t *adcConfig){
+	switch(adcConfig->resolution){
+
+	case RESOLUTION_12_BIT:
+		ADC_CR1_RES;
+		break;
+
+	}
 
 }
 

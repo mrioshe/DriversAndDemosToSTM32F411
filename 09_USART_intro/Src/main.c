@@ -97,7 +97,7 @@ void initSys(void) {
 	commSerial.USART_Config.enableIntRX = USART_RX_INTERRUP_DISABLE;
 	usart_Config(&commSerial);
 
-	usart_WriteChar(&commSerial,0);
+	//usart_WriteChar(&commSerial,0);
 
 }
 
