@@ -2,7 +2,7 @@
  * usart_driver_hal.c
  *
  *  Created on: Oct 5, 2023
- *      Author: ingfisica
+ *      Author: mrioshe
  */
 
 #include "stm32f4xx.h"
@@ -302,6 +302,7 @@ static void usart_config_interrupt(USART_Handler_t *ptrUsartHandler) {
 		// Escriba acá su código
 		ptrUsartHandler->ptrUSARTx->CR1 |= USART_CR1_RXNEIE;
 
+
 		/* Debemos matricular la interrupción en el NVIC */
 		/* Lo debemos hacer para cada uno de las posibles opciones que tengamos (USART1, USART2, USART6) */
 		if (ptrUsartHandler->ptrUSARTx == USART1) {
@@ -321,6 +322,7 @@ static void usart_config_interrupt(USART_Handler_t *ptrUsartHandler) {
 			__NVIC_SetPriority(USART1_IRQn, 2);
 		}
 	} else {
+
 
 	}
 }

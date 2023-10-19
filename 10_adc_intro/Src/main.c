@@ -17,10 +17,13 @@
  */
 
 #include <stdint.h>
+#include <stm32f4xx.h>
+#include <stm32_assert.h>
 #include "usart_driver_hal.h"
 #include "gpio_driver_hal.h"
 #include "timer_driver_hal.h"
 #include "exti_driver_hal.h"
+#include "adc_driver_hal.h"
 
 GPIO_Handler_t userLed = { 0 };
 Timer_Handler_t blinkTimer = { 0 };
@@ -28,8 +31,12 @@ Timer_Handler_t blinkTimer = { 0 };
 USART_Handler_t commSerial= { 0 };
 GPIO_Handler_t pinTx = {0};
 GPIO_Handler_t pinRx = {0};
+uint8_t receivedChar=0;
 uint8_t sendMsg=0;
 char bufferData[64]={0};
+
+//Elementos para la conversion ADC
+ADC_Config_t potenciometro ={0};
 
 void initSys(void);
 
@@ -42,7 +49,30 @@ while (1) {
 
 		}
 
+	if(receivedChar){
+		if(receivedChar=='p'){
+			usart_writeMsg(&commSerial, "Testing, testing!!\n\r");
+		}
+
+		if(receivedChar=='s'){
+			usart_writeMsg(&commSerial,"make simple ADC\n\r");
+		}
+
+		if(receivedChar=='C'){
+			usart_writeMsg(&commSerial,"make continuous ADC\n\r");
+			adc_StartContinuousConv();
+		}
+
+		if(receivedChar == 'S'){
+			usart_writeMsg(&commSerial,"stop continuous ADC\n\r");
+			adc_StopContinuousConv();
+		}
+
+		receivedChar=0;
+
 	}
+
+}
 
 }
 
@@ -88,16 +118,25 @@ void initSys(void) {
 	pinRx.pinConfig.GPIO_PinAltFunMode = AF7;
 	gpio_Config(&pinRx);
 
-	commSerial.ptrUSARTx 				= USART2;
-	commSerial.USART_Config.baudrate 	= USART_BAUDRATE_115200;
-	commSerial.USART_Config.datasize 	= USART_DATASIZE_8BIT;
-	commSerial.USART_Config.mode 		= USART_MODE_RXTX;
-	commSerial.USART_Config.parity		= USART_PARITY_NONE;
-	commSerial.USART_Config.stopbits 	= USART_STOPBIT_1;
+	commSerial.ptrUSARTx = USART2;
+	commSerial.USART_Config.baudrate = USART_BAUDRATE_115200;
+	commSerial.USART_Config.datasize = USART_DATASIZE_8BIT;
+	commSerial.USART_Config.mode = USART_MODE_RXTX;
+	commSerial.USART_Config.parity = USART_PARITY_NONE;
+	commSerial.USART_Config.stopbits = USART_STOPBIT_1;
 	commSerial.USART_Config.enableIntRX = USART_RX_INTERRUP_DISABLE;
 	usart_Config(&commSerial);
 
 	usart_WriteChar(&commSerial,0);
+
+	/*Configurando la conversion ADC*/
+
+	potenciometro.channel			= CHANNEL_0;
+	potenciometro.resolution		= RESOLUTION_12_BIT;
+	potenciometro.dataAlignment 	= ALIGNMENT_RIGHT;
+	potenciometro.samplingPeriod	= SAMPLING_PERIOD_84_CYCLES;
+	potenciometro.interrupState		= ADC_INT_ENABLE;
+	adc_ConfigSingleChannel(&potenciometro);
 
 }
 
@@ -106,9 +145,13 @@ void initSys(void) {
 		sendMsg=1;
 	}
 
+	void usart2_RxCallback(void) {
+		receivedChar = usart_getRxData2();
+	}
 
-
-
+	void adc_completeCallback(void) {
+		potenciometro.adcData = adc_GetValue();
+	}
 
 
 void assert_failed(uint8_t*file,uint32_t line){
