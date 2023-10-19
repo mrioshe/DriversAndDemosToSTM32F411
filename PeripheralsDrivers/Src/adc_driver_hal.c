@@ -82,11 +82,28 @@ static void adc_enable_clock_peripheral(void){
 /*Configures the resolution for the conversion*/
 
 static void adc_set_resolution(ADC_Config_t *adcConfig){
+
 	switch(adcConfig->resolution){
 
 	case RESOLUTION_12_BIT:
-		ADC_CR1_RES;
+		ADC1->CR1 &= ~ADC_CR1_RES;
 		break;
+
+	case RESOLUTION_10_BIT:
+		ADC1->CR1 |= ADC_CR1_RES_0;
+		break;
+
+	case RESOLUTION_8_BIT:
+		ADC1->CR1 |= ADC_CR1_RES_1;
+		break;
+
+	case RESOLUTION_6_BIT:
+		ADC1->CR1 |= ADC_CR1_RES;
+		break;
+
+	default:
+		__NOP();
+
 
 	}
 
@@ -96,11 +113,51 @@ static void adc_set_resolution(ADC_Config_t *adcConfig){
 
 static void adc_set_alignment(ADC_Config_t *adcConfig){
 
+	switch(adcConfig->dataAlignment){
+
+	case ALIGNMENT_RIGHT:
+		ADC1->CR2 &= ~ADC_CR2_ALIGN;
+		break;
+
+	case ALIGNMENT_LEFT:
+		ADC1->CR2 |= ADC_CR2_ALIGN;
+		break;
+
+	default:
+		__NOP();
+
+
+	}
+
+
 }
 
 /*Relacionado con el valor del tiempo de carga del capacitor HOLD*/
 
 static void adc_set_sampling_and_hold(ADC_Config_t *adcConfig){
+
+	switch(adcConfig->channel){
+
+	case CHANNEL_0:
+
+		switch(adcConfig->samplingPeriod){
+
+		case SAMPLING_PERIOD_3_CYCLES:
+
+			ADC1->SMPR2 &= ~ADC_SMPR2_SMP0;
+
+		case SAMPLING_PERIOD_15_CYCLES:
+
+			ADC1->SMPR2 |= ADC_SMPR2_SMP0_1;
+
+		}
+
+	default:
+		__NOP();
+
+
+	}
+
 
 }
 
