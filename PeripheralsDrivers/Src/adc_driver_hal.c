@@ -148,12 +148,36 @@ static void adc_set_sampling_and_hold(ADC_Config_t *adcConfig){
 
 		case SAMPLING_PERIOD_15_CYCLES:
 
+			ADC1->SMPR2 |= ADC_SMPR2_SMP0_0;
+
+		case SAMPLING_PERIOD_28_CYCLES:
+
 			ADC1->SMPR2 |= ADC_SMPR2_SMP0_1;
+
+		case SAMPLING_PERIOD_56_CYCLES:
+
+			ADC1->SMPR2 |= ADC_SMPR2_SMP0>>1;
+
+		case SAMPLING_PERIOD_84_CYCLES:
+
+			ADC1->SMPR2 |= ADC_SMPR2_SMP0_2;
+
+		case SAMPLING_PERIOD_112_CYCLES:
+
+			ADC1->SMPR2 |= ADC_SMPR2_SMP0_2;
+
+		default:
+			__NOP();
+			break;
+
 
 		}
 
+
+
 	default:
 		__NOP();
+		break;
 
 
 	}
