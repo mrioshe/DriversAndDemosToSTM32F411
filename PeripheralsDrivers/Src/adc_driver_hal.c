@@ -1193,26 +1193,33 @@ void adc_StartSingleConv(void){
 		__NOP();
 	}
 
-	uint16_t ;
+	uint16_t convertedValue= ADC1->DR;
 
-	return dataToSend;
+	return convertedValue;
 
 }
 
 /*Funcion que comienza la conversion ADC continua*/
 void adc_StartContinuousConv(void){
 
+	ADC1->CR2 |= ADC_CR2_CONT;
+
 }
 
 /*Funcion que para la conversion ADC continua*/
 void adc_StopContinuousConv(void){
 
+	 ADC1->CR2 &= ~ADC_CR2_CONT;
 }
 
 /*Funcion que me retorna el ultimo dato adquirido por la ADC*/
 
 uint16_t adc_GetValue(void){
-	return adcRawData;
+	return adc_StatSingleConv();
+}
+
+void adc_ConfigAnalogPin(uint8_t adcChannel){
+
 }
 
 /*Esta es la ISR de la interrupciON POR CONVERSION ADC*/
