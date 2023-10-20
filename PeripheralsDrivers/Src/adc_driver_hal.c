@@ -4,7 +4,7 @@
  *  Created on: Oct 19, 2023
  *      Author: mauricio
  */
-
+#include <stdint.h>
 #include "adc_driver_hal.h"
 #include "gpio_driver_hal.h"
 #include "stm32f4xx.h"
@@ -1188,6 +1188,14 @@ void adc_ScanMode(uint8_t state){
 /*Funcion que comienza la conversion ADC simple*/
 
 void adc_StartSingleConv(void){
+
+	while (!(ADC1->SR & ADC_SR_EOC)) {
+		__NOP();
+	}
+
+	uint16_t ;
+
+	return dataToSend;
 
 }
 
