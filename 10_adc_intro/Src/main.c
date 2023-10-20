@@ -25,6 +25,8 @@
 #include "exti_driver_hal.h"
 #include "adc_driver_hal.h"
 
+ADC_SMPR2_SMP0>>1;
+
 GPIO_Handler_t userLed = { 0 };
 Timer_Handler_t blinkTimer = { 0 };
 
