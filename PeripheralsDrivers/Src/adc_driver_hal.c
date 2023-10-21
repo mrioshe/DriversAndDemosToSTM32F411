@@ -1229,6 +1229,7 @@ void adc_StartSingleConv(void){
 void adc_StartContinuousConv(void){
 
 	ADC1->CR2 |= ADC_CR2_CONT;
+	ADC1->CR2 |= ADC_CR2_SWSTART;
 
 }
 
@@ -1236,16 +1237,16 @@ void adc_StartContinuousConv(void){
 void adc_StopContinuousConv(void){
 
 	 ADC1->CR2 &= ~ADC_CR2_CONT;
+	 ADC1->CR2 &= ~ADC_CR2_SWSTART;
 }
 
 /*Funcion que me retorna el ultimo dato adquirido por la ADC*/
 
 uint16_t adc_GetValue(void){
 
-	while (!(ADC1->SR & ADC_SR_EOC)) {
-		__NOP();
-	}
-
+	//while (!(ADC1->SR & ADC_SR_EOC)){
+		//__NOP();
+	//}
 	adcRawData= ADC1->DR;
 	return adcRawData;
 }
