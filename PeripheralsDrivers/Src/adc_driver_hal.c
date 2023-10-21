@@ -6,9 +6,9 @@
  */
 #include <stdint.h>
 #include "adc_driver_hal.h"
-#include "gpio_driver_hal.h"
 #include "stm32f4xx.h"
 #include "stm32_assert.h"
+#include "gpio_driver_hal.h"
 
 /*Headers for private functions ===*/
 
@@ -194,6 +194,8 @@ static void adc_set_sampling_and_hold(ADC_Config_t *adcConfig){
 
 			}
 
+			break;
+
 		case CHANNEL_1:
 
 			ADC1->SMPR2 &= ~ADC_SMPR2_SMP1;
@@ -249,6 +251,8 @@ static void adc_set_sampling_and_hold(ADC_Config_t *adcConfig){
 				break;
 
 			}
+
+			break;
 
 		case CHANNEL_2:
 
@@ -306,6 +310,8 @@ static void adc_set_sampling_and_hold(ADC_Config_t *adcConfig){
 
 			}
 
+			break;
+
 		case CHANNEL_3:
 
 			ADC1->SMPR2 &= ~ADC_SMPR2_SMP3;
@@ -361,6 +367,8 @@ static void adc_set_sampling_and_hold(ADC_Config_t *adcConfig){
 				break;
 
 			}
+
+			break;
 
 		case CHANNEL_4:
 
@@ -418,6 +426,8 @@ static void adc_set_sampling_and_hold(ADC_Config_t *adcConfig){
 
 			}
 
+			break;
+
 		case CHANNEL_5:
 
 			ADC1->SMPR2 &= ~ADC_SMPR2_SMP5;
@@ -473,6 +483,8 @@ static void adc_set_sampling_and_hold(ADC_Config_t *adcConfig){
 				break;
 
 			}
+
+			break;
 
 		case CHANNEL_6:
 
@@ -530,6 +542,8 @@ static void adc_set_sampling_and_hold(ADC_Config_t *adcConfig){
 
 			}
 
+			break;
+
 		case CHANNEL_7:
 
 			ADC1->SMPR2 &= ~ADC_SMPR2_SMP7;
@@ -585,6 +599,8 @@ static void adc_set_sampling_and_hold(ADC_Config_t *adcConfig){
 				break;
 
 			}
+
+			break;
 
 		case CHANNEL_8:
 
@@ -642,6 +658,8 @@ static void adc_set_sampling_and_hold(ADC_Config_t *adcConfig){
 
 			}
 
+			break;
+
 		case CHANNEL_9:
 
 			ADC1->SMPR2 &= ~ADC_SMPR2_SMP9;
@@ -697,6 +715,8 @@ static void adc_set_sampling_and_hold(ADC_Config_t *adcConfig){
 				break;
 
 			}
+
+			break;
 
 		case CHANNEL_10:
 
@@ -754,6 +774,8 @@ static void adc_set_sampling_and_hold(ADC_Config_t *adcConfig){
 
 			}
 
+			break;
+
 		case CHANNEL_11:
 
 			ADC1->SMPR1 &= ~ADC_SMPR1_SMP11;
@@ -809,6 +831,8 @@ static void adc_set_sampling_and_hold(ADC_Config_t *adcConfig){
 				break;
 
 			}
+
+			break;
 
 		case CHANNEL_12:
 
@@ -866,6 +890,8 @@ static void adc_set_sampling_and_hold(ADC_Config_t *adcConfig){
 
 			}
 
+			break;
+
 		case CHANNEL_13:
 
 			ADC1->SMPR1 &= ~ADC_SMPR1_SMP13;
@@ -921,6 +947,8 @@ static void adc_set_sampling_and_hold(ADC_Config_t *adcConfig){
 				break;
 
 			}
+
+			break;
 
 		case CHANNEL_14:
 
@@ -978,6 +1006,8 @@ static void adc_set_sampling_and_hold(ADC_Config_t *adcConfig){
 
 			}
 
+			break;
+
 
 		case CHANNEL_15:
 
@@ -1034,6 +1064,8 @@ static void adc_set_sampling_and_hold(ADC_Config_t *adcConfig){
 				break;
 
 			}
+
+			break;
 
 	default:
 		__NOP();
@@ -1164,7 +1196,6 @@ void adc_peripheralOnOFF(uint8_t state){
 	}
 	else if(state==ADC_ON){
 		ADC1->CR2 |= ADC_CR2_ADON;
-		ADC1->CR2 |= ADC_CR2_SWSTART;
 	}
 
 }
@@ -1189,13 +1220,8 @@ void adc_ScanMode(uint8_t state){
 
 void adc_StartSingleConv(void){
 
-	while (!(ADC1->SR & ADC_SR_EOC)) {
-		__NOP();
-	}
-
-	uint16_t convertedValue= ADC1->DR;
-
-	return convertedValue;
+	ADC1->CR2 &= ~ADC_CR2_CONT;
+	ADC1->CR2 |= ADC_CR2_SWSTART;
 
 }
 
@@ -1215,18 +1241,213 @@ void adc_StopContinuousConv(void){
 /*Funcion que me retorna el ultimo dato adquirido por la ADC*/
 
 uint16_t adc_GetValue(void){
-	return adc_StatSingleConv();
+
+	while (!(ADC1->SR & ADC_SR_EOC)) {
+		__NOP();
+	}
+
+	adcRawData= ADC1->DR;
+	return adcRawData;
 }
 
 void adc_ConfigAnalogPin(uint8_t adcChannel){
+
+	switch (adcChannel){
+
+	case CHANNEL_0:
+
+		handlerADCPin.pGPIOx = GPIOA;
+		handlerADCPin.pinConfig.GPIO_PinNumber = PIN_0;
+		handlerADCPin.pinConfig.GPIO_PinMode = GPIO_MODE_ANALOG;
+		handlerADCPin.pinConfig.GPIO_PinOutputType = GPIO_OTYPE_PUSHPULL;
+		handlerADCPin.pinConfig.GPIO_PinOutputSpeed = GPIO_OSPEEDR_FAST;
+		handlerADCPin.pinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+		gpio_Config(&handlerADCPin);
+		break;
+
+	case CHANNEL_1:
+
+		handlerADCPin.pGPIOx = GPIOA;
+		handlerADCPin.pinConfig.GPIO_PinNumber = PIN_1;
+		handlerADCPin.pinConfig.GPIO_PinMode = GPIO_MODE_ANALOG;
+		handlerADCPin.pinConfig.GPIO_PinOutputType = GPIO_OTYPE_PUSHPULL;
+		handlerADCPin.pinConfig.GPIO_PinOutputSpeed = GPIO_OSPEEDR_FAST;
+		handlerADCPin.pinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+		gpio_Config(&handlerADCPin);
+		break;
+
+	case CHANNEL_2:
+
+		handlerADCPin.pGPIOx = GPIOA;
+		handlerADCPin.pinConfig.GPIO_PinNumber = PIN_2;
+		handlerADCPin.pinConfig.GPIO_PinMode = GPIO_MODE_ANALOG;
+		handlerADCPin.pinConfig.GPIO_PinOutputType = GPIO_OTYPE_PUSHPULL;
+		handlerADCPin.pinConfig.GPIO_PinOutputSpeed = GPIO_OSPEEDR_FAST;
+		handlerADCPin.pinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+		gpio_Config(&handlerADCPin);
+		break;
+
+	case CHANNEL_3:
+
+		handlerADCPin.pGPIOx = GPIOA;
+		handlerADCPin.pinConfig.GPIO_PinNumber = PIN_3;
+		handlerADCPin.pinConfig.GPIO_PinMode = GPIO_MODE_ANALOG;
+		handlerADCPin.pinConfig.GPIO_PinOutputType = GPIO_OTYPE_PUSHPULL;
+		handlerADCPin.pinConfig.GPIO_PinOutputSpeed = GPIO_OSPEEDR_FAST;
+		handlerADCPin.pinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+		gpio_Config(&handlerADCPin);
+		break;
+
+	case CHANNEL_4:
+
+		handlerADCPin.pGPIOx = GPIOA;
+		handlerADCPin.pinConfig.GPIO_PinNumber = PIN_4;
+		handlerADCPin.pinConfig.GPIO_PinMode = GPIO_MODE_ANALOG;
+		handlerADCPin.pinConfig.GPIO_PinOutputType = GPIO_OTYPE_PUSHPULL;
+		handlerADCPin.pinConfig.GPIO_PinOutputSpeed = GPIO_OSPEEDR_FAST;
+		handlerADCPin.pinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+		gpio_Config(&handlerADCPin);
+		break;
+
+	case CHANNEL_5:
+
+		handlerADCPin.pGPIOx = GPIOA;
+		handlerADCPin.pinConfig.GPIO_PinNumber = PIN_5;
+		handlerADCPin.pinConfig.GPIO_PinMode = GPIO_MODE_ANALOG;
+		handlerADCPin.pinConfig.GPIO_PinOutputType = GPIO_OTYPE_PUSHPULL;
+		handlerADCPin.pinConfig.GPIO_PinOutputSpeed = GPIO_OSPEEDR_FAST;
+		handlerADCPin.pinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+		gpio_Config(&handlerADCPin);
+		break;
+
+	case CHANNEL_6:
+
+		handlerADCPin.pGPIOx = GPIOA;
+		handlerADCPin.pinConfig.GPIO_PinNumber = PIN_6;
+		handlerADCPin.pinConfig.GPIO_PinMode = GPIO_MODE_ANALOG;
+		handlerADCPin.pinConfig.GPIO_PinOutputType = GPIO_OTYPE_PUSHPULL;
+		handlerADCPin.pinConfig.GPIO_PinOutputSpeed = GPIO_OSPEEDR_FAST;
+		handlerADCPin.pinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+		gpio_Config(&handlerADCPin);
+		break;
+
+	case CHANNEL_7:
+
+		handlerADCPin.pGPIOx = GPIOA;
+		handlerADCPin.pinConfig.GPIO_PinNumber = PIN_7;
+		handlerADCPin.pinConfig.GPIO_PinMode = GPIO_MODE_ANALOG;
+		handlerADCPin.pinConfig.GPIO_PinOutputType = GPIO_OTYPE_PUSHPULL;
+		handlerADCPin.pinConfig.GPIO_PinOutputSpeed = GPIO_OSPEEDR_FAST;
+		handlerADCPin.pinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+		gpio_Config(&handlerADCPin);
+		break;
+
+	case CHANNEL_8:
+
+		handlerADCPin.pGPIOx = GPIOB;
+		handlerADCPin.pinConfig.GPIO_PinNumber = PIN_0;
+		handlerADCPin.pinConfig.GPIO_PinMode = GPIO_MODE_ANALOG;
+		handlerADCPin.pinConfig.GPIO_PinOutputType = GPIO_OTYPE_PUSHPULL;
+		handlerADCPin.pinConfig.GPIO_PinOutputSpeed = GPIO_OSPEEDR_FAST;
+		handlerADCPin.pinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+		gpio_Config(&handlerADCPin);
+		break;
+
+	case CHANNEL_9:
+
+		handlerADCPin.pGPIOx = GPIOB;
+		handlerADCPin.pinConfig.GPIO_PinNumber = PIN_1;
+		handlerADCPin.pinConfig.GPIO_PinMode = GPIO_MODE_ANALOG;
+		handlerADCPin.pinConfig.GPIO_PinOutputType = GPIO_OTYPE_PUSHPULL;
+		handlerADCPin.pinConfig.GPIO_PinOutputSpeed = GPIO_OSPEEDR_FAST;
+		handlerADCPin.pinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+		gpio_Config(&handlerADCPin);
+		break;
+
+	case CHANNEL_10:
+
+		handlerADCPin.pGPIOx = GPIOC;
+		handlerADCPin.pinConfig.GPIO_PinNumber = PIN_0;
+		handlerADCPin.pinConfig.GPIO_PinMode = GPIO_MODE_ANALOG;
+		handlerADCPin.pinConfig.GPIO_PinOutputType = GPIO_OTYPE_PUSHPULL;
+		handlerADCPin.pinConfig.GPIO_PinOutputSpeed = GPIO_OSPEEDR_FAST;
+		handlerADCPin.pinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+		gpio_Config(&handlerADCPin);
+		break;
+
+	case CHANNEL_11:
+
+		handlerADCPin.pGPIOx = GPIOC;
+		handlerADCPin.pinConfig.GPIO_PinNumber = PIN_1;
+		handlerADCPin.pinConfig.GPIO_PinMode = GPIO_MODE_ANALOG;
+		handlerADCPin.pinConfig.GPIO_PinOutputType = GPIO_OTYPE_PUSHPULL;
+		handlerADCPin.pinConfig.GPIO_PinOutputSpeed = GPIO_OSPEEDR_FAST;
+		handlerADCPin.pinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+		gpio_Config(&handlerADCPin);
+		break;
+
+	case CHANNEL_12:
+
+		handlerADCPin.pGPIOx = GPIOC;
+		handlerADCPin.pinConfig.GPIO_PinNumber = PIN_2;
+		handlerADCPin.pinConfig.GPIO_PinMode = GPIO_MODE_ANALOG;
+		handlerADCPin.pinConfig.GPIO_PinOutputType = GPIO_OTYPE_PUSHPULL;
+		handlerADCPin.pinConfig.GPIO_PinOutputSpeed = GPIO_OSPEEDR_FAST;
+		handlerADCPin.pinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+		gpio_Config(&handlerADCPin);
+		break;
+
+	case CHANNEL_13:
+
+		handlerADCPin.pGPIOx = GPIOC;
+		handlerADCPin.pinConfig.GPIO_PinNumber = PIN_3;
+		handlerADCPin.pinConfig.GPIO_PinMode = GPIO_MODE_ANALOG;
+		handlerADCPin.pinConfig.GPIO_PinOutputType = GPIO_OTYPE_PUSHPULL;
+		handlerADCPin.pinConfig.GPIO_PinOutputSpeed = GPIO_OSPEEDR_FAST;
+		handlerADCPin.pinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+		gpio_Config(&handlerADCPin);
+		break;
+
+	case CHANNEL_14:
+
+		handlerADCPin.pGPIOx = GPIOC;
+		handlerADCPin.pinConfig.GPIO_PinNumber = PIN_4;
+		handlerADCPin.pinConfig.GPIO_PinMode = GPIO_MODE_ANALOG;
+		handlerADCPin.pinConfig.GPIO_PinOutputType = GPIO_OTYPE_PUSHPULL;
+		handlerADCPin.pinConfig.GPIO_PinOutputSpeed = GPIO_OSPEEDR_FAST;
+		handlerADCPin.pinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+		gpio_Config(&handlerADCPin);
+		break;
+
+	case CHANNEL_15:
+
+		handlerADCPin.pGPIOx = GPIOC;
+		handlerADCPin.pinConfig.GPIO_PinNumber = PIN_5;
+		handlerADCPin.pinConfig.GPIO_PinMode = GPIO_MODE_ANALOG;
+		handlerADCPin.pinConfig.GPIO_PinOutputType = GPIO_OTYPE_PUSHPULL;
+		handlerADCPin.pinConfig.GPIO_PinOutputSpeed = GPIO_OSPEEDR_FAST;
+		handlerADCPin.pinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+		gpio_Config(&handlerADCPin);
+		break;
+
+	default:
+		__NOP();
+
+	}
 
 }
 
 /*Esta es la ISR de la interrupciON POR CONVERSION ADC*/
 
-void ADC_IRQHandler(void){}
+void ADC_IRQHandler(void){
 
-__attribute__((weak)) void adc_COmpleteCallback(void){
+	adcRawData= ADC1->DR;
+	adc_CompleteCallback();
+
+
+}
+
+__attribute__((weak)) void adc_CompleteCallback(void){
 	__NOP();
 }
 

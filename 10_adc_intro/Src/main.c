@@ -44,11 +44,14 @@ void initSys(void);
 int main() {
 	initSys();
 while (1) {
-	if (sendMsg== 1){
+
+	 	if (sendMsg== 1){
 			sendMsg=0;
 			usart_writeMsg(&commSerial,"Hola Mundo !!\n\r");
 
 		}
+
+
 
 	if(receivedChar){
 		if(receivedChar=='p'){
@@ -57,6 +60,8 @@ while (1) {
 
 		if(receivedChar=='s'){
 			usart_writeMsg(&commSerial,"make simple ADC\n\r");
+			adc_StartSingleConv();
+
 		}
 
 		if(receivedChar=='C'){
@@ -125,7 +130,7 @@ void initSys(void) {
 	commSerial.USART_Config.mode = USART_MODE_RXTX;
 	commSerial.USART_Config.parity = USART_PARITY_NONE;
 	commSerial.USART_Config.stopbits = USART_STOPBIT_1;
-	commSerial.USART_Config.enableIntRX = USART_RX_INTERRUP_DISABLE;
+	commSerial.USART_Config.enableIntRX = USART_RX_INTERRUP_ENABLE;
 	usart_Config(&commSerial);
 
 	usart_WriteChar(&commSerial,0);
@@ -150,7 +155,7 @@ void initSys(void) {
 		receivedChar = usart_getRxData2();
 	}
 
-	void adc_completeCallback(void) {
+	void adc_CompleteCallback(void) {
 		potenciometro.adcData = adc_GetValue();
 	}
 

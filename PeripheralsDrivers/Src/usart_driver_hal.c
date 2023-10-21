@@ -167,40 +167,40 @@ static void usart_config_datasize(USART_Handler_t *ptrUsartHandler) {
  */
 static void usart_config_stopbits(USART_Handler_t *ptrUsartHandler) {
 	switch (ptrUsartHandler->USART_Config.stopbits) {
-	case USART_STOPBIT_1: {
+	case USART_STOPBIT_1:
 		// Debemoscargar el valor 0b00 en los dos bits de STOP
 		// Escriba acá su código
 
 		ptrUsartHandler->ptrUSARTx->CR2 &= ~USART_CR2_STOP;
 		break;
-	}
-	case USART_STOPBIT_0_5: {
+
+	case USART_STOPBIT_0_5:
 		// Debemoscargar el valor 0b01 en los dos bits de STOP
 		// Escriba acá su código
 
 		ptrUsartHandler->ptrUSARTx->CR2 |= USART_CR2_STOP_0;
 
 		break;
-	}
-	case USART_STOPBIT_2: {
+
+	case USART_STOPBIT_2:
 		// Debemoscargar el valor 0b10 en los dos bits de STOP
 		// Escriba acá su código
 
 		ptrUsartHandler->ptrUSARTx->CR2 |= USART_CR2_STOP_1;
 
 		break;
-	}
-	case USART_STOPBIT_1_5: {
+
+	case USART_STOPBIT_1_5:
 		// Debemoscargar el valor 0b11 en los dos bits de STOP
 		ptrUsartHandler->ptrUSARTx->CR2 |= USART_CR2_STOP;
 		break;
-	}
-	default: {
+
+	default:
 		// En el casopor defecto seleccionamos 1 bit de parada
 		// Escriba acá su código
 		ptrUsartHandler->ptrUSARTx->CR2 &= ~USART_CR2_STOP;
 		break;
-	}
+
 	}
 }
 
@@ -210,15 +210,15 @@ static void usart_config_stopbits(USART_Handler_t *ptrUsartHandler) {
 static void usart_config_baudrate(USART_Handler_t *ptrUsartHandler) {
 	// Caso para configurar cuando se trabaja con el Cristal Interno
 	switch (ptrUsartHandler->USART_Config.baudrate) {
-	case USART_BAUDRATE_9600: {
+	case USART_BAUDRATE_9600:
 		// El valor a cargar es 104.1875 -> Mantiza = 104,fraction = 0.1875
 		// Mantiza = 104 = 0x68, fraction = 16 * 0.1875 = 0x3
 		// Valor a cargar 0x0683
 		// Configurando el Baudrate generator para una velocidad de 9600bps
 		ptrUsartHandler->ptrUSARTx->BRR = 0x0683;
 		break;
-	}
-	case USART_BAUDRATE_19200: {
+
+	case USART_BAUDRATE_19200:
 		// El valor a cargar es 52.0625 -> Mantiza = 52,fraction = 0.0625
 		// Mantiza = 52 = 0x34, fraction = 16 * 0.1875 = 0x1
 		// Valor a cargar 0x0341
@@ -228,8 +228,8 @@ static void usart_config_baudrate(USART_Handler_t *ptrUsartHandler) {
 		ptrUsartHandler->ptrUSARTx->BRR = 0x0341;
 		break;
 
-	}
-	case USART_BAUDRATE_115200: {
+
+	case USART_BAUDRATE_115200:
 		// Escriba acá su código y los comentarios que faltan
 		// El valor a cargar es 8.6875-> Mantiza = 8,fraction = 0.6875
 		// Mantiza = 8 = 0x8, fraction = 16 * 0.6875= 0xB
@@ -237,8 +237,8 @@ static void usart_config_baudrate(USART_Handler_t *ptrUsartHandler) {
 		// Configurando el Baudrate generator para una velocidad de 115200 bps
 		ptrUsartHandler->ptrUSARTx->BRR = 0x008B;
 		break;
-	}
-	case USART_BAUDRATE_230400: {
+
+	case USART_BAUDRATE_230400:
 		// Escriba acá su código y los comentarios que faltan
 		// El valor a cargar es 4.3185-> Mantiza = 4,fraction = 0.3185
 		// Mantiza = 4 = 0x4, fraction = 16 * 0.3125= 0x5
@@ -246,7 +246,17 @@ static void usart_config_baudrate(USART_Handler_t *ptrUsartHandler) {
 		// Configurando el Baudrate generator para una velocidad de 230400 bps
 		ptrUsartHandler->ptrUSARTx->BRR = 0x0045;
 		break;
-	}
+
+	case USART_BAUDRATE_921600:
+
+		// El valor a cargar es 1.0625-> Mantiza = 1,fraction = 0.0625
+		// Mantiza = 1 = 0x1, fraction = 16 * 0.3125= 1
+		// Valor a cargar 0x0011
+		// Configurando el Baudrate generator para una velocidad de 921600 bps
+		ptrUsartHandler->ptrUSARTx->BRR = 0x0011;
+		break;
+
+
 
 	default:
 		// Configurando el Baudrate generator para una velocidad de 115200bps
@@ -260,32 +270,32 @@ static void usart_config_baudrate(USART_Handler_t *ptrUsartHandler) {
  */
 static void usart_config_mode(USART_Handler_t *ptrUsartHandler) {
 	switch (ptrUsartHandler->USART_Config.mode) {
-	case USART_MODE_TX: {
+	case USART_MODE_TX:
 		// Activamos la parte del sistema encargada de enviar
 		// Escriba acá su código
 		ptrUsartHandler->ptrUSARTx->CR1 |= USART_CR1_TE;
 		break;
-	}
-	case USART_MODE_RX: {
+
+	case USART_MODE_RX:
 		// Activamos la parte del sistema encargada de recibir
 		// Escriba acá su código
 		ptrUsartHandler->ptrUSARTx->CR1 |= USART_CR1_RE;
 		break;
-	}
-	case USART_MODE_RXTX: {
+
+	case USART_MODE_RXTX:
 		// Activamos ambas partes, tanto transmision como recepcion
 		// Escriba acá su código
 		ptrUsartHandler->ptrUSARTx->CR1 |= USART_CR1_TE;
 		ptrUsartHandler->ptrUSARTx->CR1 |= USART_CR1_RE;
 
 		break;
-	}
-	case USART_MODE_DISABLE: {
+
+	case USART_MODE_DISABLE:
 		// Desactivamos ambos canales
 		// Escriba acá su código
 		ptrUsartHandler->ptrUSARTx->CR1 &= ~USART_CR1_UE;
 		break;
-	}
+
 	}
 }
 
@@ -311,13 +321,13 @@ static void usart_config_interrupt(USART_Handler_t *ptrUsartHandler) {
 		else if (ptrUsartHandler->ptrUSARTx == USART2) {
 			// Escriba acá su código
 			__NVIC_EnableIRQ(USART2_IRQn);
-			__NVIC_SetPriority(USART1_IRQn, 2);
+			__NVIC_SetPriority(USART2_IRQn, 2);
 		}
 
 		else if (ptrUsartHandler->ptrUSARTx == USART6) {
 			// Escriba acá su código
 			__NVIC_EnableIRQ(USART6_IRQn);
-			__NVIC_SetPriority(USART1_IRQn, 2);
+			__NVIC_SetPriority(USART6_IRQn, 2);
 		}
 	} else {
 
