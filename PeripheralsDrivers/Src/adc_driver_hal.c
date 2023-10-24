@@ -21,7 +21,7 @@ static void adc_config_interrupt(ADC_Config_t *adcConfig);
 
 /*Variables y elementos que necesita internamente el driver para funcionar adecuadamente*/
 
-GPIO_Handler_t handlerADCPin={0};
+GPIO_Handler_t 	handlerADCPin={0};
 uint16_t		adcRawData=0;
 
 void adc_ConfigSingleChannel(ADC_Config_t *adcConfig){
@@ -1228,8 +1228,10 @@ void adc_StartSingleConv(void){
 /*Funcion que comienza la conversion ADC continua*/
 void adc_StartContinuousConv(void){
 
-	ADC1->CR2 |= ADC_CR2_CONT;
 	ADC1->CR2 |= ADC_CR2_SWSTART;
+	ADC1->CR2 |= ADC_CR2_CONT;
+
+	// ADC1->CR2 &= ~ADC_CR2_SWSTART;
 
 }
 

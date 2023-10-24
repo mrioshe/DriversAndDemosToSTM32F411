@@ -146,18 +146,18 @@ void initSys(void) {
 
 }
 
-	void Timer2_Callback(void) {
-		gpio_TooglePin(&userLed);
-		sendMsg=1;
-	}
+void Timer2_Callback(void) {
+	gpio_TooglePin(&userLed);
+	sendMsg = 1;
+}
 
-	void usart2_RxCallback(void) {
-		receivedChar = usart_getRxData2();
-	}
+void usart2_RxCallback(void) {
+	receivedChar = usart_getRxData2();
+}
 
-	void adc_CompleteCallback(void) {
-		potenciometro.adcData = adc_GetValue();
-	}
+void adc_CompleteCallback(void) {
+	potenciometro.adcData = adc_GetValue();
+}
 
 
 void assert_failed(uint8_t*file,uint32_t line){
