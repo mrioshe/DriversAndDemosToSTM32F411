@@ -7,7 +7,8 @@ PC1  -> LED_state
 PA5  -> LED_micro_ON
 PA6  -> SIGNAL_1 (ADC1_6)
 PA7  -> SIGNAL_2 (ADC1_7)
-PA9  -> G_7segment
+PA8  -> G_7segment
+PA9  -> TX(USART1)
 PB6  -> D_7segment
 PB8  -> E_7segment
 PB9  -> C_7segment
@@ -15,7 +16,5 @@ PC9  -> Clk_enconder (EXTI9)
 PC8  -> DP_7segment
 PC6  -> control_units_7segment
 PC5  -> signal_3 (ADC1_15)
-PA12 -> rx (USART6)
-PA11 -> tx
-PA10 -> DT_enconder
- 
+PA10 -> RX (USART1)
+PB5  -> DT_enconder

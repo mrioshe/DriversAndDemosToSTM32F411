@@ -84,8 +84,8 @@ int main(void){
 
 	//Pin de entrada del data del encoder
 
-	dt.pGPIOx							= GPIOA;
-	dt.pinConfig.GPIO_PinNumber			= PIN_10;
+	dt.pGPIOx							= GPIOB;
+	dt.pinConfig.GPIO_PinNumber			= PIN_5;
 	dt.pinConfig.GPIO_PinMode			= GPIO_MODE_IN;
 	dt.pinConfig.GPIO_PinOutputType		= GPIO_OTYPE_PUSHPULL;
 	dt.pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
@@ -149,7 +149,7 @@ int main(void){
 	//segmento G
 
 	leds_7segment[6].pGPIOx							= GPIOA;
-	leds_7segment[6].pinConfig.GPIO_PinNumber		= PIN_9;
+	leds_7segment[6].pinConfig.GPIO_PinNumber		= PIN_8;
 	leds_7segment[6].pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
 	leds_7segment[6].pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
 
@@ -316,7 +316,7 @@ void callback_extInt9(void){
 void callback_extInt0(void){
 	gpio_TooglePin(&direction);
 	//Variable auxiliar debido a que no se puede leer un pin de salida:
-	direction_aux=~direction_aux;
+	direction_aux=!direction_aux;
 
 }
 
@@ -333,7 +333,7 @@ void Timer10_Callback(void){
 	gpio_TooglePin(&vcc1_7seg);
 	gpio_TooglePin(&vcc2_7seg);
 	//Variable auxiliar debido a que no se puede leer un pin de salida:
-	digit_selector=~digit_selector;
+	digit_selector=!digit_selector;
 
 }
 

@@ -127,8 +127,8 @@ void initSys(void) {
 
 	//Pin de entrada del data del encoder
 
-	dt.pGPIOx							= GPIOA;
-	dt.pinConfig.GPIO_PinNumber			= PIN_10;
+	dt.pGPIOx							= GPIOB;
+	dt.pinConfig.GPIO_PinNumber			= PIN_5;
 	dt.pinConfig.GPIO_PinMode			= GPIO_MODE_IN;
 	dt.pinConfig.GPIO_PinOutputType		= GPIO_OTYPE_PUSHPULL;
 	dt.pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
@@ -145,6 +145,17 @@ void initSys(void) {
 	clk.pinConfig.GPIO_PinPuPdControl	= GPIO_PUPDR_NOTHING;
 
 	/*PINES DEL 7 SEGMENTOS:*/
+
+	/*
+	 * leds_7segment[0]		A segment
+	 * leds_7segment[1]		B segment
+	 * leds_7segment[2]		C segment
+	 * leds_7segment[3]		D segment
+	 * leds_7segment[4]		E segment
+	 * leds_7segment[5]		F segment
+	 * leds_7segment[6]		G segment
+	 * leds_7segment[7]		DP
+	 * */
 
 	//segmento A
 
@@ -192,16 +203,17 @@ void initSys(void) {
 	//segmento G
 
 	leds_7segment[6].pGPIOx							= GPIOA;
-	leds_7segment[6].pinConfig.GPIO_PinNumber		= PIN_9;
+	leds_7segment[6].pinConfig.GPIO_PinNumber		= PIN_8;
 	leds_7segment[6].pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
 	leds_7segment[6].pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
 
-	//segmento DP
+	//DP
 
 	leds_7segment[7].pGPIOx							= GPIOC;
 	leds_7segment[7].pinConfig.GPIO_PinNumber		= PIN_8;
 	leds_7segment[7].pinConfig.GPIO_PinMode			= GPIO_MODE_OUT;
 	leds_7segment[7].pinConfig.GPIO_PinOutputSpeed	= GPIO_OSPEEDR_MEDIUM;
+
 
 
 	// pin que alimenta el primer led
@@ -305,21 +317,54 @@ void adc_CompleteCallback(void) {
 	potenciometro.adcData = adc_GetValue();
 }
 
+/*
+ * leds_7segment[0]		A segment
+ * leds_7segment[1]		B segment
+ * leds_7segment[2]		C segment
+ * leds_7segment[3]		D segment
+ * leds_7segment[4]		E segment
+ * leds_7segment[5]		F segment
+ * leds_7segment[6]		G segment
+ * leds_7segment[7]		DP
+ * */
+
 void segment_configuration_decs(ADC_Config_t *adcConfig){
 
-	switch(adcConfig->channel){
+	gpio_WritePin(&leds_7segment[7],!SET);
+
+	switch(adcConfig->resolution){
 
 	case RESOLUTION_12_BIT:
-
+		gpio_WritePin(&leds_7segment[0],!SET);
+		gpio_WritePin(&leds_7segment[3],!SET);
+		gpio_WritePin(&leds_7segment[6],!SET);
 		break;
+
+	case RESOLUTION_10_BIT:
+
+		gpio_WritePin(&leds_7segment[3],!SET);
+		gpio_WritePin(&leds_7segment[6],!SET);
+		break;
+
+	case RESOLUTION_8_BIT:
+		gpio_WritePin(&leds_7segment[3],!SET);
+		break;
+
+	case RESOLUTION_6_BIT:
+		gpio_WritePin(&leds_7segment[4],!SET);
+		break;
+
 	default:
 		__NOP();
+		break;
 
 	}
 }
 
 
 void segment_configuration_units(uint8_t number){
+
+	gpio_WritePin(&leds_7segment[7],!SET);
 
 	switch(number){
 
@@ -423,6 +468,10 @@ void segment_configuration_units(uint8_t number){
 			gpio_WritePin(&leds_7segment[4],!RESET);
 			gpio_WritePin(&leds_7segment[5],!SET);
 			gpio_WritePin(&leds_7segment[6],!SET);
+			break;
+
+		default:
+			__NOP();
 			break;
 
 	}
