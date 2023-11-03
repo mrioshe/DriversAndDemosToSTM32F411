@@ -1,7 +1,7 @@
 PA4  -> F_7segment
 PA1  -> B_7segment
 PD2  -> A_7segment
-PC11 -> control_dec_7segment
+PC11 -> vcc_decs_7seg
 PC0  -> SW_encoder (EXTI0)
 PC1  -> LED_state 
 PA5  -> LED_micro_ON
@@ -14,7 +14,7 @@ PB8  -> E_7segment
 PB9  -> C_7segment
 PC9  -> Clk_enconder (EXTI9)
 PC8  -> DP_7segment
-PC6  -> control_units_7segment
+PC6  -> vcc_units_7seg
 PC5  -> signal_3 (ADC1_15)
 PA10 -> RX (USART1)
 PB5  -> DT_enconder
