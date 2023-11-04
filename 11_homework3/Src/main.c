@@ -46,73 +46,134 @@ EXTI_Config_t interrupt_clk={0};
 
 USART_Handler_t commSerial= { 0 };
 
-ADC_Config_t signal[3]={0};
+ADC_Config_t adc_signal[3]={0};
 
 uint8_t receivedChar=0;
 uint8_t sendMsg=0;
 char bufferData[64]={0};
 
 uint8_t flag_clk={0};
+uint8_t flag_sendMsg={0};
+uint8_t flag_selector={0};
+uint8_t flag_switcheo={0};
+
 uint8_t counter={0};
 uint8_t digit_selector=0;
 uint8_t number_desc_aux[2]={0};
-uint8_t direction_aux={0};
-uint8_t flag_selector={0};
-uint8_t selector_aux={0};
+uint8_t selector={0};
 
-
-enum{
-	SIGNAL_CONFIG=0,
-	RESOLUTION_CONFIG
-};
 
 //funciones:
 
 void initSys(void);
-void segment_configuration_units(uint8_t number);
-void segment_configuration_decs(ADC_Config_t *adcConfig);
-void config(void);
+void segment_configuration_units(uint8_t number,uint8_t digit_active);
+void segment_configuration_decs(ADC_Config_t *adcConfig,uint8_t digit_active);
+
 
 
 int main() {
 	initSys();
 while (1) {
 
-	 	if (sendMsg== 1){
-			sendMsg=0;
-			usart_writeMsg(&commSerial,"Hola Mundo !!\n\r");
-		}
-
-	if(receivedChar){
-		if(receivedChar=='p'){
-			usart_writeMsg(&commSerial, "Testing, testing!!\n\r");
-		}
-
-		if(receivedChar=='s'){
-			usart_writeMsg(&commSerial,"make simple ADC\n\r");
-			adc_StartSingleConv();
-
-		}
-
-		if(receivedChar=='C'){
-			usart_writeMsg(&commSerial,"make continuous ADC\n\r");
-			adc_StartContinuousConv();
-		}
-
-		if(receivedChar == 'S'){
-			usart_writeMsg(&commSerial,"stop continuous ADC\n\r");
-			adc_StopContinuousConv();
-		}
-
-		receivedChar=0;
-
-	}
-
 	if(flag_selector){
-
 		flag_selector=0;
+		selector=!selector;
+		gpio_WritePin(&led_selector,SET);
+		//variable que selecciona si se esta modificando el canal o la resulcion (0: resolucion, 1:señal)
+	}
+
+	if(flag_clk){
+		flag_clk=0;
+		if (selector && gpio_ReadPin(&dt)){
+			if(counter==3){
+				counter=3;
+			} else {
+				counter++;
+			}
+
+		} else if(selector && !gpio_ReadPin(&dt)){
+			if(counter==1){
+				counter=1;
+			} else {
+				counter--;
+			}
+		} else if ( !selector && gpio_ReadPin(&dt)){
+			if(adc_signal[counter].resolution==RESOLUTION_12_BIT){
+				adc_signal[counter].resolution=RESOLUTION_12_BIT;
+			} else {
+				adc_signal[counter].resolution--;
+			}
+		}else if (!selector && !gpio_ReadPin(&dt)){
+
+			if(adc_signal[counter].resolution==RESOLUTION_6_BIT){
+				adc_signal[counter].resolution=RESOLUTION_6_BIT;
+			} else {
+				adc_signal[counter].resolution++;
+			}
+		}
+	}
+
+	if(flag_switcheo){
+		flag_switcheo=0;
+		digit_selector=!digit_selector;
+		if(selector && digit_selector){
+			gpio_WritePin(&vcc_units_7seg,SET);
+			gpio_WritePin(&vcc_decs_7seg,RESET);
+			segment_configuration_units(counter,1);
+
+		}else if(selector && !digit_selector){
+			gpio_WritePin(&vcc_units_7seg,RESET);
+			gpio_WritePin(&vcc_decs_7seg,SET);
+			segment_configuration_decs(&adc_signal[counter],0);
+
+		} else if(!selector && digit_selector){
+			gpio_WritePin(&vcc_units_7seg,SET);
+			gpio_WritePin(&vcc_decs_7seg,RESET);
+			segment_configuration_units(counter,0);
+
+		} else if (!selector & !digit_selector){
+			gpio_WritePin(&vcc_units_7seg,RESET);
+			gpio_WritePin(&vcc_decs_7seg,SET);
+			segment_configuration_decs(&adc_signal[counter],1);
+		}
+	}
+
+	if(flag_sendMsg){
+		flag_sendMsg=0;
+		sendMsg = 1;
 
 	}
+
+
+	//	 	if (sendMsg== 1){
+	//			sendMsg=0;
+	//			usart_writeMsg(&commSerial,"Hola Mundo !!\n\r");
+	//		}
+	//
+	//	if(receivedChar){
+	//		if(receivedChar=='p'){
+	//			usart_writeMsg(&commSerial, "Testing, testing!!\n\r");
+	//		}
+	//
+	//		if(receivedChar=='s'){
+	//			usart_writeMsg(&commSerial,"make simple ADC\n\r");
+	//			adc_StartSingleConv();
+	//
+	//		}
+	//
+	//		if(receivedChar=='C'){
+	//			usart_writeMsg(&commSerial,"make continuous ADC\n\r");
+	//			adc_StartContinuousConv();
+	//		}
+	//
+	//		if(receivedChar == 'S'){
+	//			usart_writeMsg(&commSerial,"stop continuous ADC\n\r");
+	//			adc_StopContinuousConv();
+	//		}
+	//
+	//		receivedChar=0;
+	//
+	//	}
 
 }
 
@@ -313,7 +374,7 @@ void initSys(void) {
 
     frec_7segment.pTIMx								=TIM10;
     frec_7segment.TIMx_Config.TIMx_Prescaler		=16000; //Genera incrementos de 1 ms
-    frec_7segment.TIMx_Config.TIMx_Period			=10;   //DE la mano con el prescaler, se toma el periodo en ms
+    frec_7segment.TIMx_Config.TIMx_Period			=30;   //DE la mano con el prescaler, se toma el periodo en ms
     frec_7segment.TIMx_Config.TIMx_mode				=TIMER_UP_COUNTER;
     frec_7segment.TIMx_Config.TIMx_InterruptEnable	=TIMER_INT_ENABLE;
 
@@ -321,7 +382,7 @@ void initSys(void) {
 
 	frec_message.pTIMx 								= TIM2;
 	frec_message.TIMx_Config.TIMx_Prescaler 		= 16000;
-	frec_message.TIMx_Config.TIMx_Period 			= 500;
+	frec_message.TIMx_Config.TIMx_Period 			= 1000;
 	frec_message.TIMx_Config.TIMx_mode 				= TIMER_UP_COUNTER;
 	frec_message.TIMx_Config.TIMx_InterruptEnable 	= TIMER_INT_ENABLE;
 
@@ -358,42 +419,46 @@ void initSys(void) {
 	/*CONFIGURACION ADC*/
 
 	//Señal 1
-	signal[0].channel				= CHANNEL_6;
-	signal[0].resolution			= RESOLUTION_12_BIT;
-	signal[0].dataAlignment 		=ALIGNMENT_RIGHT;
-	signal[0].samplingPeriod		= SAMPLING_PERIOD_84_CYCLES;
-	signal[0].interrupState			= ADC_INT_ENABLE;
+	adc_signal[0].channel				= CHANNEL_6;
+	adc_signal[0].resolution			= RESOLUTION_12_BIT;
+	adc_signal[0].dataAlignment 		=ALIGNMENT_RIGHT;
+	adc_signal[0].samplingPeriod		= SAMPLING_PERIOD_84_CYCLES;
+	adc_signal[0].interrupState			= ADC_INT_ENABLE;
 
-	signal[1].channel				= CHANNEL_7;
-	signal[1].resolution			= RESOLUTION_12_BIT;
-	signal[1].dataAlignment 		=ALIGNMENT_RIGHT;
-	signal[1].samplingPeriod		= SAMPLING_PERIOD_84_CYCLES;
-	signal[1].interrupState			= ADC_INT_ENABLE;
+	adc_signal[1].channel				= CHANNEL_7;
+	adc_signal[1].resolution			= RESOLUTION_12_BIT;
+	adc_signal[1].dataAlignment 		=ALIGNMENT_RIGHT;
+	adc_signal[1].samplingPeriod		= SAMPLING_PERIOD_84_CYCLES;
+	adc_signal[1].interrupState			= ADC_INT_ENABLE;
 
-	signal[2].channel				= CHANNEL_15;
-	signal[2].resolution			= RESOLUTION_12_BIT;
-	signal[2].dataAlignment 		=ALIGNMENT_RIGHT;
-	signal[2].samplingPeriod		= SAMPLING_PERIOD_84_CYCLES;
-	signal[2].interrupState			= ADC_INT_ENABLE;
+	adc_signal[2].channel				= CHANNEL_15;
+	adc_signal[2].resolution			= RESOLUTION_12_BIT;
+	adc_signal[2].dataAlignment 		=ALIGNMENT_RIGHT;
+	adc_signal[2].samplingPeriod		= SAMPLING_PERIOD_84_CYCLES;
+	adc_signal[2].interrupState			= ADC_INT_ENABLE;
 
 	for(uint8_t i=0;i<=2;i++){
-			adc_ConfigSingleChannel(&signal[i]);
+			adc_ConfigSingleChannel(&adc_signal[i]);
 		}
 
 	/*SETEO DE VALORES INICIALES*/
 
 	gpio_WritePin(&stateled,SET);
-	gpio_WritePin(&direction,SET);
-	gpio_WritePin(&vcc1_7seg, SET);
-	gpio_WritePin(&vcc2_7seg, SET);
+	gpio_WritePin(&led_selector,SET);
+	gpio_WritePin(&vcc_units_7seg, SET);
+	gpio_WritePin(&vcc_decs_7seg, SET);
 
 	timer_SetState(&blinkTimer, TIMER_ON);
 	timer_SetState(&frec_7segment, TIMER_ON);
 	timer_SetState(&frec_message, TIMER_ON);
 
 	usart_WriteChar(&commSerial,0);
-	segment_configuration(0);
-	counter=0;
+
+
+	counter=1;
+	selector=1;
+	segment_configuration_units(counter,selector);
+
 }
 
 /*
@@ -407,170 +472,330 @@ void initSys(void) {
  * leds_7segment[7]		DP
  * */
 
-void segment_configuration_decs(ADC_Config_t *adcConfig){
+void segment_configuration_decs(ADC_Config_t *adcConfig,uint8_t digit_active){
 
-	gpio_WritePin(&leds_7segment[7],!SET);
+	if(digit_active){
 
-	switch(adcConfig->resolution){
+		gpio_WritePin(&leds_7segment[7],!SET);
+		switch(adcConfig->resolution){
 
-	case RESOLUTION_12_BIT:
-		gpio_WritePin(&leds_7segment[0],!SET);
-		gpio_WritePin(&leds_7segment[3],!SET);
-		gpio_WritePin(&leds_7segment[6],!SET);
-		break;
-
-	case RESOLUTION_10_BIT:
-
-		gpio_WritePin(&leds_7segment[3],!SET);
-		gpio_WritePin(&leds_7segment[6],!SET);
-		break;
-
-	case RESOLUTION_8_BIT:
-		gpio_WritePin(&leds_7segment[3],!SET);
-		break;
-
-	case RESOLUTION_6_BIT:
-		gpio_WritePin(&leds_7segment[4],!SET);
-		break;
-
-	default:
-		__NOP();
-		break;
-
-	}
-}
-
-
-void segment_configuration_units(uint8_t number){
-
-	gpio_WritePin(&leds_7segment[7],!SET);
-
-	switch(number){
-
-		case 0:
-
+		case RESOLUTION_12_BIT:
 			gpio_WritePin(&leds_7segment[0],!SET);
-			gpio_WritePin(&leds_7segment[1],!SET);
-			gpio_WritePin(&leds_7segment[2],!SET);
 			gpio_WritePin(&leds_7segment[3],!SET);
+			gpio_WritePin(&leds_7segment[6],!SET);
+			break;
+
+		case RESOLUTION_10_BIT:
+
+			gpio_WritePin(&leds_7segment[3],!SET);
+			gpio_WritePin(&leds_7segment[6],!SET);
+			break;
+
+		case RESOLUTION_8_BIT:
+			gpio_WritePin(&leds_7segment[3],!SET);
+			break;
+
+		case RESOLUTION_6_BIT:
 			gpio_WritePin(&leds_7segment[4],!SET);
-			gpio_WritePin(&leds_7segment[5],!SET);
-			gpio_WritePin(&leds_7segment[6],!RESET);
-			break;
-
-		case 1:
-			gpio_WritePin(&leds_7segment[0],!RESET);
-			gpio_WritePin(&leds_7segment[1],!SET);
-			gpio_WritePin(&leds_7segment[2],!SET);
-			gpio_WritePin(&leds_7segment[3],!RESET);
-			gpio_WritePin(&leds_7segment[4],!RESET);
-			gpio_WritePin(&leds_7segment[5],!RESET);
-			gpio_WritePin(&leds_7segment[6],!RESET);
-			break;
-
-		case 2:
-			gpio_WritePin(&leds_7segment[0],!SET);
-			gpio_WritePin(&leds_7segment[1],!SET);
-			gpio_WritePin(&leds_7segment[2],!RESET);
-			gpio_WritePin(&leds_7segment[3],!SET);
-			gpio_WritePin(&leds_7segment[4],!SET);
-			gpio_WritePin(&leds_7segment[5],!RESET);
-			gpio_WritePin(&leds_7segment[6],!SET);
-			break;
-
-		case 3:
-			gpio_WritePin(&leds_7segment[0],!SET);
-			gpio_WritePin(&leds_7segment[1],!SET);
-			gpio_WritePin(&leds_7segment[2],!SET);
-			gpio_WritePin(&leds_7segment[3],!SET);
-			gpio_WritePin(&leds_7segment[4],!RESET);
-			gpio_WritePin(&leds_7segment[5],!RESET);
-			gpio_WritePin(&leds_7segment[6],!SET);
-			break;
-
-		case 4:
-			gpio_WritePin(&leds_7segment[0],!RESET);
-			gpio_WritePin(&leds_7segment[1],!SET);
-			gpio_WritePin(&leds_7segment[2],!SET);
-			gpio_WritePin(&leds_7segment[3],!RESET);
-			gpio_WritePin(&leds_7segment[4],!RESET);
-			gpio_WritePin(&leds_7segment[5],!SET);
-			gpio_WritePin(&leds_7segment[6],!SET);
-			break;
-
-		case 5:
-			gpio_WritePin(&leds_7segment[0],!SET);
-			gpio_WritePin(&leds_7segment[1],!RESET);
-			gpio_WritePin(&leds_7segment[2],!SET);
-			gpio_WritePin(&leds_7segment[3],!SET);
-			gpio_WritePin(&leds_7segment[4],!RESET);
-			gpio_WritePin(&leds_7segment[5],!SET);
-			gpio_WritePin(&leds_7segment[6],!SET);
-			break;
-
-		case 6:
-			gpio_WritePin(&leds_7segment[0],!SET);
-			gpio_WritePin(&leds_7segment[1],!RESET);
-			gpio_WritePin(&leds_7segment[2],!SET);
-			gpio_WritePin(&leds_7segment[3],!SET);
-			gpio_WritePin(&leds_7segment[4],!SET);
-			gpio_WritePin(&leds_7segment[5],!SET);
-			gpio_WritePin(&leds_7segment[6],!SET);
-			break;
-
-		case 7:
-			gpio_WritePin(&leds_7segment[0],!SET);
-			gpio_WritePin(&leds_7segment[1],!SET);
-			gpio_WritePin(&leds_7segment[2],!SET);
-			gpio_WritePin(&leds_7segment[3],!RESET);
-			gpio_WritePin(&leds_7segment[4],!RESET);
-			gpio_WritePin(&leds_7segment[5],!RESET);
-			gpio_WritePin(&leds_7segment[6],!RESET);
-			break;
-
-		case 8:
-			gpio_WritePin(&leds_7segment[0],!SET);
-			gpio_WritePin(&leds_7segment[1],!SET);
-			gpio_WritePin(&leds_7segment[2],!SET);
-			gpio_WritePin(&leds_7segment[3],!SET);
-			gpio_WritePin(&leds_7segment[4],!SET);
-			gpio_WritePin(&leds_7segment[5],!SET);
-			gpio_WritePin(&leds_7segment[6],!SET);
-			break;
-
-
-		case 9:
-			gpio_WritePin(&leds_7segment[0],!SET);
-			gpio_WritePin(&leds_7segment[1],!SET);
-			gpio_WritePin(&leds_7segment[2],!SET);
-			gpio_WritePin(&leds_7segment[3],!SET);
-			gpio_WritePin(&leds_7segment[4],!RESET);
-			gpio_WritePin(&leds_7segment[5],!SET);
-			gpio_WritePin(&leds_7segment[6],!SET);
 			break;
 
 		default:
 			__NOP();
 			break;
+		}
+
+	} else {
+
+		gpio_WritePin(&leds_7segment[7],!RESET);
+		switch(adcConfig->resolution){
+
+		case RESOLUTION_12_BIT:
+			gpio_WritePin(&leds_7segment[0],!SET);
+			gpio_WritePin(&leds_7segment[3],!SET);
+			gpio_WritePin(&leds_7segment[6],!SET);
+			break;
+
+		case RESOLUTION_10_BIT:
+
+			gpio_WritePin(&leds_7segment[3],!SET);
+			gpio_WritePin(&leds_7segment[6],!SET);
+			break;
+
+		case RESOLUTION_8_BIT:
+			gpio_WritePin(&leds_7segment[3],!SET);
+			break;
+
+		case RESOLUTION_6_BIT:
+			gpio_WritePin(&leds_7segment[4],!SET);
+			break;
+
+		default:
+			__NOP();
+			break;
+		}
+
 	}
+
+
 }
 
-void config(void);
+
+void segment_configuration_units(uint8_t number, uint8_t digit_active){
+
+	if(digit_active){
+
+		gpio_WritePin(&leds_7segment[7],!SET);
+		switch(number){
+
+			case 0:
+
+				gpio_WritePin(&leds_7segment[0],!SET);
+				gpio_WritePin(&leds_7segment[1],!SET);
+				gpio_WritePin(&leds_7segment[2],!SET);
+				gpio_WritePin(&leds_7segment[3],!SET);
+				gpio_WritePin(&leds_7segment[4],!SET);
+				gpio_WritePin(&leds_7segment[5],!SET);
+				gpio_WritePin(&leds_7segment[6],!RESET);
+				break;
+
+			case 1:
+				gpio_WritePin(&leds_7segment[0],!RESET);
+				gpio_WritePin(&leds_7segment[1],!SET);
+				gpio_WritePin(&leds_7segment[2],!SET);
+				gpio_WritePin(&leds_7segment[3],!RESET);
+				gpio_WritePin(&leds_7segment[4],!RESET);
+				gpio_WritePin(&leds_7segment[5],!RESET);
+				gpio_WritePin(&leds_7segment[6],!RESET);
+				break;
+
+			case 2:
+				gpio_WritePin(&leds_7segment[0],!SET);
+				gpio_WritePin(&leds_7segment[1],!SET);
+				gpio_WritePin(&leds_7segment[2],!RESET);
+				gpio_WritePin(&leds_7segment[3],!SET);
+				gpio_WritePin(&leds_7segment[4],!SET);
+				gpio_WritePin(&leds_7segment[5],!RESET);
+				gpio_WritePin(&leds_7segment[6],!SET);
+				break;
+
+			case 3:
+				gpio_WritePin(&leds_7segment[0],!SET);
+				gpio_WritePin(&leds_7segment[1],!SET);
+				gpio_WritePin(&leds_7segment[2],!SET);
+				gpio_WritePin(&leds_7segment[3],!SET);
+				gpio_WritePin(&leds_7segment[4],!RESET);
+				gpio_WritePin(&leds_7segment[5],!RESET);
+				gpio_WritePin(&leds_7segment[6],!SET);
+				break;
+
+			case 4:
+				gpio_WritePin(&leds_7segment[0],!RESET);
+				gpio_WritePin(&leds_7segment[1],!SET);
+				gpio_WritePin(&leds_7segment[2],!SET);
+				gpio_WritePin(&leds_7segment[3],!RESET);
+				gpio_WritePin(&leds_7segment[4],!RESET);
+				gpio_WritePin(&leds_7segment[5],!SET);
+				gpio_WritePin(&leds_7segment[6],!SET);
+				break;
+
+			case 5:
+				gpio_WritePin(&leds_7segment[0],!SET);
+				gpio_WritePin(&leds_7segment[1],!RESET);
+				gpio_WritePin(&leds_7segment[2],!SET);
+				gpio_WritePin(&leds_7segment[3],!SET);
+				gpio_WritePin(&leds_7segment[4],!RESET);
+				gpio_WritePin(&leds_7segment[5],!SET);
+				gpio_WritePin(&leds_7segment[6],!SET);
+				break;
+
+			case 6:
+				gpio_WritePin(&leds_7segment[0],!SET);
+				gpio_WritePin(&leds_7segment[1],!RESET);
+				gpio_WritePin(&leds_7segment[2],!SET);
+				gpio_WritePin(&leds_7segment[3],!SET);
+				gpio_WritePin(&leds_7segment[4],!SET);
+				gpio_WritePin(&leds_7segment[5],!SET);
+				gpio_WritePin(&leds_7segment[6],!SET);
+				break;
+
+			case 7:
+				gpio_WritePin(&leds_7segment[0],!SET);
+				gpio_WritePin(&leds_7segment[1],!SET);
+				gpio_WritePin(&leds_7segment[2],!SET);
+				gpio_WritePin(&leds_7segment[3],!RESET);
+				gpio_WritePin(&leds_7segment[4],!RESET);
+				gpio_WritePin(&leds_7segment[5],!RESET);
+				gpio_WritePin(&leds_7segment[6],!RESET);
+				break;
+
+			case 8:
+				gpio_WritePin(&leds_7segment[0],!SET);
+				gpio_WritePin(&leds_7segment[1],!SET);
+				gpio_WritePin(&leds_7segment[2],!SET);
+				gpio_WritePin(&leds_7segment[3],!SET);
+				gpio_WritePin(&leds_7segment[4],!SET);
+				gpio_WritePin(&leds_7segment[5],!SET);
+				gpio_WritePin(&leds_7segment[6],!SET);
+				break;
+
+
+			case 9:
+				gpio_WritePin(&leds_7segment[0],!SET);
+				gpio_WritePin(&leds_7segment[1],!SET);
+				gpio_WritePin(&leds_7segment[2],!SET);
+				gpio_WritePin(&leds_7segment[3],!SET);
+				gpio_WritePin(&leds_7segment[4],!RESET);
+				gpio_WritePin(&leds_7segment[5],!SET);
+				gpio_WritePin(&leds_7segment[6],!SET);
+				break;
+
+			default:
+				__NOP();
+				break;
+		}
+
+	} else{
+
+		gpio_WritePin(&leds_7segment[7],!RESET);
+		switch(number){
+
+			case 0:
+
+				gpio_WritePin(&leds_7segment[0],!SET);
+				gpio_WritePin(&leds_7segment[1],!SET);
+				gpio_WritePin(&leds_7segment[2],!SET);
+				gpio_WritePin(&leds_7segment[3],!SET);
+				gpio_WritePin(&leds_7segment[4],!SET);
+				gpio_WritePin(&leds_7segment[5],!SET);
+				gpio_WritePin(&leds_7segment[6],!RESET);
+				break;
+
+			case 1:
+				gpio_WritePin(&leds_7segment[0],!RESET);
+				gpio_WritePin(&leds_7segment[1],!SET);
+				gpio_WritePin(&leds_7segment[2],!SET);
+				gpio_WritePin(&leds_7segment[3],!RESET);
+				gpio_WritePin(&leds_7segment[4],!RESET);
+				gpio_WritePin(&leds_7segment[5],!RESET);
+				gpio_WritePin(&leds_7segment[6],!RESET);
+				break;
+
+			case 2:
+				gpio_WritePin(&leds_7segment[0],!SET);
+				gpio_WritePin(&leds_7segment[1],!SET);
+				gpio_WritePin(&leds_7segment[2],!RESET);
+				gpio_WritePin(&leds_7segment[3],!SET);
+				gpio_WritePin(&leds_7segment[4],!SET);
+				gpio_WritePin(&leds_7segment[5],!RESET);
+				gpio_WritePin(&leds_7segment[6],!SET);
+				break;
+
+			case 3:
+				gpio_WritePin(&leds_7segment[0],!SET);
+				gpio_WritePin(&leds_7segment[1],!SET);
+				gpio_WritePin(&leds_7segment[2],!SET);
+				gpio_WritePin(&leds_7segment[3],!SET);
+				gpio_WritePin(&leds_7segment[4],!RESET);
+				gpio_WritePin(&leds_7segment[5],!RESET);
+				gpio_WritePin(&leds_7segment[6],!SET);
+				break;
+
+			case 4:
+				gpio_WritePin(&leds_7segment[0],!RESET);
+				gpio_WritePin(&leds_7segment[1],!SET);
+				gpio_WritePin(&leds_7segment[2],!SET);
+				gpio_WritePin(&leds_7segment[3],!RESET);
+				gpio_WritePin(&leds_7segment[4],!RESET);
+				gpio_WritePin(&leds_7segment[5],!SET);
+				gpio_WritePin(&leds_7segment[6],!SET);
+				break;
+
+			case 5:
+				gpio_WritePin(&leds_7segment[0],!SET);
+				gpio_WritePin(&leds_7segment[1],!RESET);
+				gpio_WritePin(&leds_7segment[2],!SET);
+				gpio_WritePin(&leds_7segment[3],!SET);
+				gpio_WritePin(&leds_7segment[4],!RESET);
+				gpio_WritePin(&leds_7segment[5],!SET);
+				gpio_WritePin(&leds_7segment[6],!SET);
+				break;
+
+			case 6:
+				gpio_WritePin(&leds_7segment[0],!SET);
+				gpio_WritePin(&leds_7segment[1],!RESET);
+				gpio_WritePin(&leds_7segment[2],!SET);
+				gpio_WritePin(&leds_7segment[3],!SET);
+				gpio_WritePin(&leds_7segment[4],!SET);
+				gpio_WritePin(&leds_7segment[5],!SET);
+				gpio_WritePin(&leds_7segment[6],!SET);
+				break;
+
+			case 7:
+				gpio_WritePin(&leds_7segment[0],!SET);
+				gpio_WritePin(&leds_7segment[1],!SET);
+				gpio_WritePin(&leds_7segment[2],!SET);
+				gpio_WritePin(&leds_7segment[3],!RESET);
+				gpio_WritePin(&leds_7segment[4],!RESET);
+				gpio_WritePin(&leds_7segment[5],!RESET);
+				gpio_WritePin(&leds_7segment[6],!RESET);
+				break;
+
+			case 8:
+				gpio_WritePin(&leds_7segment[0],!SET);
+				gpio_WritePin(&leds_7segment[1],!SET);
+				gpio_WritePin(&leds_7segment[2],!SET);
+				gpio_WritePin(&leds_7segment[3],!SET);
+				gpio_WritePin(&leds_7segment[4],!SET);
+				gpio_WritePin(&leds_7segment[5],!SET);
+				gpio_WritePin(&leds_7segment[6],!SET);
+				break;
+
+
+			case 9:
+				gpio_WritePin(&leds_7segment[0],!SET);
+				gpio_WritePin(&leds_7segment[1],!SET);
+				gpio_WritePin(&leds_7segment[2],!SET);
+				gpio_WritePin(&leds_7segment[3],!SET);
+				gpio_WritePin(&leds_7segment[4],!RESET);
+				gpio_WritePin(&leds_7segment[5],!SET);
+				gpio_WritePin(&leds_7segment[6],!SET);
+				break;
+
+			default:
+				__NOP();
+				break;
+		}
+
+	}
+
+
+}
+
+
 
 void callback_extInt0(void){
 	flag_selector=1;
-	gpio_TooglePin(&direction);
-	selector_aux=!selector_aux;
 }
 
+void callback_extInt9(void){
+	flag_clk=1;
+}
 
 void Timer5_Callback(void){
 	gpio_TooglePin(&stateled);
 }
 
 void Timer2_Callback(void) {
-	gpio_TooglePin(&userLed);
-	sendMsg = 1;
+
+	adc_StartSingleConv();
+	gpio_TooglePin(&led_selector);
+
+}
+
+
+void Timer10_Callback(void) {
+	flag_switcheo=1;
+
 }
 
 void usart1_RxCallback(void) {
@@ -578,7 +803,9 @@ void usart1_RxCallback(void) {
 }
 
 void adc_CompleteCallback(void) {
-	potenciometro.adcData = adc_GetValue();
+	adc_signal[counter].adcData = adc_GetValue();
+	flag_sendMsg=1;
+
 }
 
 
