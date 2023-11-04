@@ -69,17 +69,45 @@ void initSys(void);
 void segment_configuration_units(uint8_t number,uint8_t digit_active);
 void segment_configuration_decs(ADC_Config_t *adcConfig,uint8_t digit_active);
 
-
-
 int main() {
 	initSys();
 while (1) {
 
+	if(flag_switcheo){
+		flag_switcheo=0;
+		digit_selector=!digit_selector;
+		if(selector && digit_selector){
+			gpio_WritePin(&vcc_units_7seg,!SET);
+			gpio_WritePin(&vcc_decs_7seg,RESET);
+			segment_configuration_units(counter,1);
+
+		}else if(selector && !digit_selector){
+			gpio_WritePin(&vcc_units_7seg,!RESET);
+			gpio_WritePin(&vcc_decs_7seg,SET);
+			segment_configuration_decs(&adc_signal[counter-1],0);
+
+		} else if(!selector && digit_selector){
+			gpio_WritePin(&vcc_units_7seg,!SET);
+			gpio_WritePin(&vcc_decs_7seg,RESET);
+			segment_configuration_units(counter,0);
+
+		} else if (!selector & !digit_selector){
+			gpio_WritePin(&vcc_units_7seg,!RESET);
+			gpio_WritePin(&vcc_decs_7seg,SET);
+			segment_configuration_decs(&adc_signal[counter-1],1);
+		}
+	}
+
+
 	if(flag_selector){
 		flag_selector=0;
 		selector=!selector;
-		gpio_WritePin(&led_selector,SET);
 		//variable que selecciona si se esta modificando el canal o la resulcion (0: resolucion, 1:señal)
+		if (gpio_ReadPin(&led_selector)){
+			gpio_WritePin(&led_selector,RESET);
+		} else if (!gpio_ReadPin(&led_selector)){
+			gpio_WritePin(&led_selector,SET);
+		}
 	}
 
 	if(flag_clk){
@@ -91,89 +119,31 @@ while (1) {
 				counter++;
 			}
 
+
 		} else if(selector && !gpio_ReadPin(&dt)){
 			if(counter==1){
 				counter=1;
 			} else {
 				counter--;
 			}
+
 		} else if ( !selector && gpio_ReadPin(&dt)){
-			if(adc_signal[counter].resolution==RESOLUTION_12_BIT){
-				adc_signal[counter].resolution=RESOLUTION_12_BIT;
+			if(adc_signal[counter-1].resolution==RESOLUTION_12_BIT){
+				adc_signal[counter-1].resolution=RESOLUTION_12_BIT;
 			} else {
-				adc_signal[counter].resolution--;
+				adc_signal[counter-1].resolution--;
 			}
+
 		}else if (!selector && !gpio_ReadPin(&dt)){
 
-			if(adc_signal[counter].resolution==RESOLUTION_6_BIT){
-				adc_signal[counter].resolution=RESOLUTION_6_BIT;
+			if(adc_signal[counter-1].resolution==RESOLUTION_6_BIT){
+				adc_signal[counter-1].resolution=RESOLUTION_6_BIT;
 			} else {
-				adc_signal[counter].resolution++;
+				adc_signal[counter-1].resolution++;
 			}
 		}
 	}
 
-	if(flag_switcheo){
-		flag_switcheo=0;
-		digit_selector=!digit_selector;
-		if(selector && digit_selector){
-			gpio_WritePin(&vcc_units_7seg,SET);
-			gpio_WritePin(&vcc_decs_7seg,RESET);
-			segment_configuration_units(counter,1);
-
-		}else if(selector && !digit_selector){
-			gpio_WritePin(&vcc_units_7seg,RESET);
-			gpio_WritePin(&vcc_decs_7seg,SET);
-			segment_configuration_decs(&adc_signal[counter],0);
-
-		} else if(!selector && digit_selector){
-			gpio_WritePin(&vcc_units_7seg,SET);
-			gpio_WritePin(&vcc_decs_7seg,RESET);
-			segment_configuration_units(counter,0);
-
-		} else if (!selector & !digit_selector){
-			gpio_WritePin(&vcc_units_7seg,RESET);
-			gpio_WritePin(&vcc_decs_7seg,SET);
-			segment_configuration_decs(&adc_signal[counter],1);
-		}
-	}
-
-	if(flag_sendMsg){
-		flag_sendMsg=0;
-		sendMsg = 1;
-
-	}
-
-
-	//	 	if (sendMsg== 1){
-	//			sendMsg=0;
-	//			usart_writeMsg(&commSerial,"Hola Mundo !!\n\r");
-	//		}
-	//
-	//	if(receivedChar){
-	//		if(receivedChar=='p'){
-	//			usart_writeMsg(&commSerial, "Testing, testing!!\n\r");
-	//		}
-	//
-	//		if(receivedChar=='s'){
-	//			usart_writeMsg(&commSerial,"make simple ADC\n\r");
-	//			adc_StartSingleConv();
-	//
-	//		}
-	//
-	//		if(receivedChar=='C'){
-	//			usart_writeMsg(&commSerial,"make continuous ADC\n\r");
-	//			adc_StartContinuousConv();
-	//		}
-	//
-	//		if(receivedChar == 'S'){
-	//			usart_writeMsg(&commSerial,"stop continuous ADC\n\r");
-	//			adc_StopContinuousConv();
-	//		}
-	//
-	//		receivedChar=0;
-	//
-	//	}
 
 }
 
@@ -333,7 +303,7 @@ void initSys(void) {
 	vcc_decs_7seg.pinConfig.GPIO_PinOutputSpeed		= GPIO_OSPEEDR_MEDIUM;
 
 	gpio_Config(&vcc_units_7seg);
-	gpio_Config(&vcc_units_7seg);
+	gpio_Config(&vcc_decs_7seg);
 
 	/*CONFIGURACION PINES PARA USART*/
 
@@ -364,7 +334,7 @@ void initSys(void) {
 
 	// Configuramos el timer para el blinky
 
-    blinkTimer.pTIMx								=TIM5;
+    blinkTimer.pTIMx								=TIM3;
 	blinkTimer.TIMx_Config.TIMx_Prescaler			=16000; //Genera incrementos de 1 ms
 	blinkTimer.TIMx_Config.TIMx_Period				=250;   //DE la mano con el prescaler, se toma el periodo en ms
 	blinkTimer.TIMx_Config.TIMx_mode				=TIMER_UP_COUNTER;
@@ -372,9 +342,9 @@ void initSys(void) {
 
 	// Configuramos el timer  para obtener la frecuencia de switcheo de los dos canales del 7segmentos
 
-    frec_7segment.pTIMx								=TIM10;
+    frec_7segment.pTIMx								=TIM5;
     frec_7segment.TIMx_Config.TIMx_Prescaler		=16000; //Genera incrementos de 1 ms
-    frec_7segment.TIMx_Config.TIMx_Period			=30;   //DE la mano con el prescaler, se toma el periodo en ms
+    frec_7segment.TIMx_Config.TIMx_Period			=10;   //DE la mano con el prescaler, se toma el periodo en ms
     frec_7segment.TIMx_Config.TIMx_mode				=TIMER_UP_COUNTER;
     frec_7segment.TIMx_Config.TIMx_InterruptEnable	=TIMER_INT_ENABLE;
 
@@ -387,8 +357,8 @@ void initSys(void) {
 	frec_message.TIMx_Config.TIMx_InterruptEnable 	= TIMER_INT_ENABLE;
 
 	timer_Config(&blinkTimer);
-	timer_Config(&blinkTimer);
-	timer_Config(&blinkTimer);
+	timer_Config(&frec_7segment);
+	timer_Config(&frec_message);
 
 	/*CONFIGURACION EXITS*/
 
@@ -421,32 +391,30 @@ void initSys(void) {
 	//Señal 1
 	adc_signal[0].channel				= CHANNEL_6;
 	adc_signal[0].resolution			= RESOLUTION_12_BIT;
-	adc_signal[0].dataAlignment 		=ALIGNMENT_RIGHT;
+	adc_signal[0].dataAlignment 		= ALIGNMENT_RIGHT;
 	adc_signal[0].samplingPeriod		= SAMPLING_PERIOD_84_CYCLES;
 	adc_signal[0].interrupState			= ADC_INT_ENABLE;
 
 	adc_signal[1].channel				= CHANNEL_7;
-	adc_signal[1].resolution			= RESOLUTION_12_BIT;
-	adc_signal[1].dataAlignment 		=ALIGNMENT_RIGHT;
+	adc_signal[1].resolution			= RESOLUTION_8_BIT;
+	adc_signal[1].dataAlignment 		= ALIGNMENT_RIGHT;
 	adc_signal[1].samplingPeriod		= SAMPLING_PERIOD_84_CYCLES;
 	adc_signal[1].interrupState			= ADC_INT_ENABLE;
 
 	adc_signal[2].channel				= CHANNEL_15;
 	adc_signal[2].resolution			= RESOLUTION_12_BIT;
-	adc_signal[2].dataAlignment 		=ALIGNMENT_RIGHT;
+	adc_signal[2].dataAlignment 		= ALIGNMENT_RIGHT;
 	adc_signal[2].samplingPeriod		= SAMPLING_PERIOD_84_CYCLES;
 	adc_signal[2].interrupState			= ADC_INT_ENABLE;
 
-	for(uint8_t i=0;i<=2;i++){
-			adc_ConfigSingleChannel(&adc_signal[i]);
-		}
+	adc_ConfigSingleChannel(&adc_signal[0]);
 
 	/*SETEO DE VALORES INICIALES*/
 
 	gpio_WritePin(&stateled,SET);
 	gpio_WritePin(&led_selector,SET);
-	gpio_WritePin(&vcc_units_7seg, SET);
-	gpio_WritePin(&vcc_decs_7seg, SET);
+	gpio_WritePin(&vcc_units_7seg, RESET);
+	gpio_WritePin(&vcc_decs_7seg, RESET);
 
 	timer_SetState(&blinkTimer, TIMER_ON);
 	timer_SetState(&frec_7segment, TIMER_ON);
@@ -457,7 +425,9 @@ void initSys(void) {
 
 	counter=1;
 	selector=1;
-	segment_configuration_units(counter,selector);
+	segment_configuration_units(counter,1);
+
+
 
 }
 
@@ -477,6 +447,11 @@ void segment_configuration_decs(ADC_Config_t *adcConfig,uint8_t digit_active){
 	if(digit_active){
 
 		gpio_WritePin(&leds_7segment[7],!SET);
+
+		for(uint8_t i=0;i<=6;i++){
+			gpio_WritePin(&leds_7segment[i],!RESET);
+		}
+
 		switch(adcConfig->resolution){
 
 		case RESOLUTION_12_BIT:
@@ -507,9 +482,15 @@ void segment_configuration_decs(ADC_Config_t *adcConfig,uint8_t digit_active){
 	} else {
 
 		gpio_WritePin(&leds_7segment[7],!RESET);
+
+		for(uint8_t i=0;i<=6;i++){
+			gpio_WritePin(&leds_7segment[i],!RESET);
+		}
+
 		switch(adcConfig->resolution){
 
 		case RESOLUTION_12_BIT:
+
 			gpio_WritePin(&leds_7segment[0],!SET);
 			gpio_WritePin(&leds_7segment[3],!SET);
 			gpio_WritePin(&leds_7segment[6],!SET);
@@ -782,19 +763,20 @@ void callback_extInt9(void){
 }
 
 void Timer5_Callback(void){
-	gpio_TooglePin(&stateled);
+	flag_switcheo=1;
+
 }
 
 void Timer2_Callback(void) {
 
+	adc_ConfigSingleChannel(&adc_signal[counter-1]);
 	adc_StartSingleConv();
-	gpio_TooglePin(&led_selector);
 
 }
 
 
-void Timer10_Callback(void) {
-	flag_switcheo=1;
+void Timer3_Callback(void) {
+	gpio_TooglePin(&stateled);
 
 }
 
@@ -803,7 +785,8 @@ void usart1_RxCallback(void) {
 }
 
 void adc_CompleteCallback(void) {
-	adc_signal[counter].adcData = adc_GetValue();
+
+	adc_signal[counter-1].adcData = adc_GetValue();
 	flag_sendMsg=1;
 
 }

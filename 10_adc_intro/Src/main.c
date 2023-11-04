@@ -137,7 +137,7 @@ void initSys(void) {
 
 	/*Configurando la conversion ADC*/
 
-	potenciometro.channel			= CHANNEL_0;
+	potenciometro.channel			= CHANNEL_15;
 	potenciometro.resolution		= RESOLUTION_12_BIT;
 	potenciometro.dataAlignment 	= ALIGNMENT_RIGHT;
 	potenciometro.samplingPeriod	= SAMPLING_PERIOD_84_CYCLES;

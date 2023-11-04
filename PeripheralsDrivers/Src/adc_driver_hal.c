@@ -1133,12 +1133,14 @@ static void adc_set_one_channel_sequence (ADC_Config_t *adcConfig){
 			break;
 
 		case CHANNEL_10:
-			ADC1->SQR3 |= ADC_SQR3_SQ1_4;
+			ADC1->SQR3 |= ADC_SQR3_SQ1_3;
+			ADC1->SQR3 |= ADC_SQR3_SQ1_1;
 			break;
 
 		case CHANNEL_11:
+			ADC1->SQR3 |= ADC_SQR3_SQ1_3;
+			ADC1->SQR3 |= ADC_SQR3_SQ1_1;
 			ADC1->SQR3 |= ADC_SQR3_SQ1_0;
-			ADC1->SQR3 |= ADC_SQR3_SQ1_4;
 			break;
 
 		case CHANNEL_12:
@@ -1154,13 +1156,15 @@ static void adc_set_one_channel_sequence (ADC_Config_t *adcConfig){
 
 		case CHANNEL_14:
 			ADC1->SQR3 |= ADC_SQR3_SQ1_2;
-			ADC1->SQR3 |= ADC_SQR3_SQ1_4;
+			ADC1->SQR3 |= ADC_SQR3_SQ1_1;
+			ADC1->SQR3 |= ADC_SQR3_SQ1_3;
 		break;
 
 		case CHANNEL_15:
 			ADC1->SQR3 |= ADC_SQR3_SQ1_0;
+			ADC1->SQR3 |= ADC_SQR3_SQ1_1;
 			ADC1->SQR3 |= ADC_SQR3_SQ1_2;
-			ADC1->SQR3 |= ADC_SQR3_SQ1_4;
+			ADC1->SQR3 |= ADC_SQR3_SQ1_3;
 		break;
 
 
