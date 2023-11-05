@@ -153,6 +153,7 @@ while (1) {
 			if(adc_signal[counter-1].resolution==RESOLUTION_12_BIT){
 				adc_signal[counter-1].resolution=RESOLUTION_12_BIT;
 			} else {
+				//hay que dismunir el valor, pues el valor 0 representa es 12 bits y 3 es 6 bits
 				adc_signal[counter-1].resolution--;
 			}
 
@@ -176,30 +177,64 @@ while (1) {
 
 
 
-//	if(receivedChar){
-//		if(receivedChar=='p'){
-//			usart_writeMsg(&commSerial, "Testing, testing!!\n\r");
-//		}
-//
-//		if(receivedChar=='s'){
-//			usart_writeMsg(&commSerial,"make simple ADC\n\r");
-//			adc_StartSingleConv();
-//
-//		}
-//
-//		if(receivedChar=='C'){
-//			usart_writeMsg(&commSerial,"make continuous ADC\n\r");
-//			adc_StartContinuousConv();
-//		}
-//
-//		if(receivedChar == 'S'){
-//			usart_writeMsg(&commSerial,"stop continuous ADC\n\r");
-//			adc_StopContinuousConv();
-//		}
-//
-//		receivedChar=0;
-//
-//	}
+	if(receivedChar){
+		if(receivedChar=='p'){
+			usart_writeMsg(&commSerial, "Testing, testing!!\n\r");
+		}
+
+		if(receivedChar=='m'){
+			flag_selector=0;
+			selector=!selector;
+			//variable que selecciona si se esta modificando
+			//el canal o la resulcion (0: resolucion, 1:señal)
+			//apagamos/prendemos el led de estado:
+			if (gpio_ReadPin(&led_selector)){
+				gpio_WritePin(&led_selector,RESET);
+			} else if (!gpio_ReadPin(&led_selector)){
+				gpio_WritePin(&led_selector,SET);
+			}
+
+		}
+
+		if(receivedChar=='a'){
+
+			if(selector){
+				if(counter==3){
+					counter=3;
+				} else {
+					counter++;
+				}
+
+			} else if(!selector){
+				if(adc_signal[counter-1].resolution==RESOLUTION_12_BIT){
+					adc_signal[counter-1].resolution=RESOLUTION_12_BIT;
+				} else {
+					adc_signal[counter-1].resolution--;
+				}
+
+			}
+		}
+
+		if(receivedChar == 'd'){
+			if(selector){
+				if(counter==1){
+						counter=1;
+					} else {
+						counter--;
+					}
+
+			} else if(!selector){
+				if(adc_signal[counter-1].resolution==RESOLUTION_6_BIT){
+					adc_signal[counter-1].resolution=RESOLUTION_6_BIT;
+				} else {
+					adc_signal[counter-1].resolution++;
+				}
+			}
+		}
+
+		receivedChar=0;
+
+	}
 
 
 }
@@ -459,7 +494,7 @@ void initSys(void) {
 	adc_signal[1].interrupState			= ADC_INT_ENABLE;
 
 	adc_signal[2].channel				= CHANNEL_15;
-	adc_signal[2].resolution			= RESOLUTION_12_BIT;
+	adc_signal[2].resolution			= RESOLUTION_6_BIT;
 	adc_signal[2].dataAlignment 		= ALIGNMENT_RIGHT;
 	adc_signal[2].samplingPeriod		= SAMPLING_PERIOD_84_CYCLES;
 	adc_signal[2].interrupState			= ADC_INT_ENABLE;
