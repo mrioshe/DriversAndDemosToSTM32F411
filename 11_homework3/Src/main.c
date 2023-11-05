@@ -26,6 +26,8 @@
 #include "adc_driver_hal.h"
 #include <string.h>
 
+//Declaracion de variables:
+
 GPIO_Handler_t sw={0};
 GPIO_Handler_t stateled={0};
 GPIO_Handler_t led_selector={0};
@@ -50,7 +52,7 @@ ADC_Config_t adc_signal[3]={0};
 
 uint8_t receivedChar=0;
 uint8_t sendMsg=0;
-char bufferData[64]={0};
+char bufferData[128]={0};
 
 uint8_t flag_clk={0};
 uint8_t flag_sendMsg={0};
@@ -61,6 +63,7 @@ uint8_t counter={0};
 uint8_t digit_selector=0;
 uint8_t number_desc_aux[2]={0};
 uint8_t selector={0};
+uint8_t resolution_value={0};
 
 
 //funciones:
@@ -68,17 +71,26 @@ uint8_t selector={0};
 void initSys(void);
 void segment_configuration_units(uint8_t number,uint8_t digit_active);
 void segment_configuration_decs(ADC_Config_t *adcConfig,uint8_t digit_active);
+uint8_t get_resolution_value(ADC_Config_t *adcConfig);
 
 int main() {
+	// Iniciamos el sistema:
 	initSys();
 while (1) {
 
+	// Cada vez que el timer de switcheo lanza una interrupcion:
+
 	if(flag_switcheo){
-		flag_switcheo=0;
-		digit_selector=!digit_selector;
+		flag_switcheo=0; //bajar la bandera
+		digit_selector=!digit_selector; //Cambiar de estado el selector,
+		/*para encender el digito que no estaba activo y apagar el
+		que estaba activo. Se tiene cuatro opciones dependiendo del estado
+		del selector y de que se está modificando si la senal o la resolucion
+		*/
 		if(selector && digit_selector){
 			gpio_WritePin(&vcc_units_7seg,!SET);
 			gpio_WritePin(&vcc_decs_7seg,RESET);
+			//se configura el 7segmentos:
 			segment_configuration_units(counter,1);
 
 		}else if(selector && !digit_selector){
@@ -98,11 +110,13 @@ while (1) {
 		}
 	}
 
-
+	// Cada vez que se tiene interrupcion externa debido al boton del encoder:
 	if(flag_selector){
 		flag_selector=0;
 		selector=!selector;
-		//variable que selecciona si se esta modificando el canal o la resulcion (0: resolucion, 1:señal)
+		//variable que selecciona si se esta modificando
+		//el canal o la resulcion (0: resolucion, 1:señal)
+		//apagamos/prendemos el led de estado:
 		if (gpio_ReadPin(&led_selector)){
 			gpio_WritePin(&led_selector,RESET);
 		} else if (!gpio_ReadPin(&led_selector)){
@@ -110,8 +124,16 @@ while (1) {
 		}
 	}
 
+	// Cada vez que el enconder se mueve:
+
 	if(flag_clk){
 		flag_clk=0;
+		/*se tiene cuatro casos:
+		 * 1. activo para modificar la senal (1,2 o 3) y el se debe aumentar (1->2 o 2->3)
+		 * 2. activo para modificar la senal (1,2 o 3) y el se debe disminuir (2->1 o 3->2)
+		 * 3. activo para modificar la resolucion y el se debe aumentar la resolucion (ex: 10bits->12bits)
+		 * 4. activo para modificar la resolucion y el se debe dismunuir la resolucion (ex: 10bits->8bits)
+		 * */
 		if (selector && gpio_ReadPin(&dt)){
 			if(counter==3){
 				counter=3;
@@ -143,6 +165,41 @@ while (1) {
 			}
 		}
 	}
+
+	if(flag_sendMsg){
+		flag_sendMsg=0;
+		resolution_value=get_resolution_value(&adc_signal[counter-1]);
+		sprintf(bufferData,"El valor de la conversión ADC del sensor %d es %d, con una "
+				"resolución de %d bits. \n\r",counter,adc_signal[counter-1].adcData,resolution_value );
+		usart_writeMsg(&commSerial,bufferData);
+	}
+
+
+
+//	if(receivedChar){
+//		if(receivedChar=='p'){
+//			usart_writeMsg(&commSerial, "Testing, testing!!\n\r");
+//		}
+//
+//		if(receivedChar=='s'){
+//			usart_writeMsg(&commSerial,"make simple ADC\n\r");
+//			adc_StartSingleConv();
+//
+//		}
+//
+//		if(receivedChar=='C'){
+//			usart_writeMsg(&commSerial,"make continuous ADC\n\r");
+//			adc_StartContinuousConv();
+//		}
+//
+//		if(receivedChar == 'S'){
+//			usart_writeMsg(&commSerial,"stop continuous ADC\n\r");
+//			adc_StopContinuousConv();
+//		}
+//
+//		receivedChar=0;
+//
+//	}
 
 
 }
@@ -344,7 +401,7 @@ void initSys(void) {
 
     frec_7segment.pTIMx								=TIM5;
     frec_7segment.TIMx_Config.TIMx_Prescaler		=16000; //Genera incrementos de 1 ms
-    frec_7segment.TIMx_Config.TIMx_Period			=10;   //DE la mano con el prescaler, se toma el periodo en ms
+    frec_7segment.TIMx_Config.TIMx_Period			=12;   //DE la mano con el prescaler, se toma el periodo en ms
     frec_7segment.TIMx_Config.TIMx_mode				=TIMER_UP_COUNTER;
     frec_7segment.TIMx_Config.TIMx_InterruptEnable	=TIMER_INT_ENABLE;
 
@@ -442,11 +499,15 @@ void initSys(void) {
  * leds_7segment[7]		DP
  * */
 
+//Funcion para modificar el digito de las decenas del 7segmentos de 2 numeros
+
 void segment_configuration_decs(ADC_Config_t *adcConfig,uint8_t digit_active){
 
+	//Se tiene dos posibilidades dependiendo si el digito que se cargar esta activo para modificar
+	// si esta activo para modificor el led de DP debe estar activo:
 	if(digit_active){
 
-		gpio_WritePin(&leds_7segment[7],!SET);
+		gpio_WritePin(&leds_7segment[7],!SET); // se activa el DP
 
 		for(uint8_t i=0;i<=6;i++){
 			gpio_WritePin(&leds_7segment[i],!RESET);
@@ -481,7 +542,7 @@ void segment_configuration_decs(ADC_Config_t *adcConfig,uint8_t digit_active){
 
 	} else {
 
-		gpio_WritePin(&leds_7segment[7],!RESET);
+		gpio_WritePin(&leds_7segment[7],!RESET); // se desactiva el DP
 
 		for(uint8_t i=0;i<=6;i++){
 			gpio_WritePin(&leds_7segment[i],!RESET);
@@ -520,8 +581,14 @@ void segment_configuration_decs(ADC_Config_t *adcConfig,uint8_t digit_active){
 
 }
 
+//Funcion para modificar el digito de las unidades del 7segmentos de 2 numeros
 
 void segment_configuration_units(uint8_t number, uint8_t digit_active){
+
+
+	//Se tiene dos posibilidades dependiendo si el digito que se cargar esta activo para modificar
+	// si esta activo para modificor el led de DP debe estar activo:
+	// esta funcion se hizo en general para los 9 numeros pero con el caso para 1,2 y 3 también funcionaria
 
 	if(digit_active){
 
@@ -752,42 +819,75 @@ void segment_configuration_units(uint8_t number, uint8_t digit_active){
 
 }
 
+uint8_t get_resolution_value(ADC_Config_t *adcConfig){
+	int re_value=0;
+	switch(adcConfig->resolution){
+		case RESOLUTION_12_BIT:
+			re_value = 12;
+			break;
+		case RESOLUTION_10_BIT:
+			re_value = 10;
+			break;
+		case RESOLUTION_8_BIT:
+			re_value = 8;
+			break;
+		case RESOLUTION_6_BIT:
+			re_value = 6;
+			break;
+		default:
+			__NOP();
+			break;
+	}
+	return re_value;
+}
 
-
+// interrupcion externa del boton del encoder:
 void callback_extInt0(void){
 	flag_selector=1;
 }
 
+// interrupcion externa del clock del encoder:
 void callback_extInt9(void){
 	flag_clk=1;
 }
 
+//interrupcion del timer de frencuencia del 7 segmentos
 void Timer5_Callback(void){
 	flag_switcheo=1;
 
 }
 
+//interrupcion del timer que configura la frecuencia del mensaje
 void Timer2_Callback(void) {
 
+	//cuando se cumple el tiempo se inicia la conversion adc
 	adc_ConfigSingleChannel(&adc_signal[counter-1]);
 	adc_StartSingleConv();
 
+
 }
 
-
+//interrupcion del timer para activar/desactivar el led blinky
 void Timer3_Callback(void) {
 	gpio_TooglePin(&stateled);
 
 }
 
+//interrupcion por recepcion en el USART1
 void usart1_RxCallback(void) {
 	receivedChar = usart_getRxData1();
 }
 
+//interrupcion por finalizacion de conversion ADC1
 void adc_CompleteCallback(void) {
 
 	adc_signal[counter-1].adcData = adc_GetValue();
 	flag_sendMsg=1;
+	adc_peripheralOnOFF(ADC_OFF);
+	//luego de tener el valor de la conversion adc mandamos el mensaje:
+
+
+
 
 }
 
