@@ -436,7 +436,7 @@ void initSys(void) {
 
     frec_7segment.pTIMx								=TIM5;
     frec_7segment.TIMx_Config.TIMx_Prescaler		=16000; //Genera incrementos de 1 ms
-    frec_7segment.TIMx_Config.TIMx_Period			=12;   //DE la mano con el prescaler, se toma el periodo en ms
+    frec_7segment.TIMx_Config.TIMx_Period			=5;   //DE la mano con el prescaler, se toma el periodo en ms
     frec_7segment.TIMx_Config.TIMx_mode				=TIMER_UP_COUNTER;
     frec_7segment.TIMx_Config.TIMx_InterruptEnable	=TIMER_INT_ENABLE;
 
@@ -481,13 +481,13 @@ void initSys(void) {
 	/*CONFIGURACION ADC*/
 
 	//Señal 1
-	adc_signal[0].channel				= CHANNEL_6;
+	adc_signal[0].channel				= CHANNEL_9;
 	adc_signal[0].resolution			= RESOLUTION_12_BIT;
 	adc_signal[0].dataAlignment 		= ALIGNMENT_RIGHT;
 	adc_signal[0].samplingPeriod		= SAMPLING_PERIOD_84_CYCLES;
 	adc_signal[0].interrupState			= ADC_INT_ENABLE;
 
-	adc_signal[1].channel				= CHANNEL_7;
+	adc_signal[1].channel				= CHANNEL_6;
 	adc_signal[1].resolution			= RESOLUTION_8_BIT;
 	adc_signal[1].dataAlignment 		= ALIGNMENT_RIGHT;
 	adc_signal[1].samplingPeriod		= SAMPLING_PERIOD_84_CYCLES;

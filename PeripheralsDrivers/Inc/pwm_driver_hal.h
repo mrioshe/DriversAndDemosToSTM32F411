@@ -19,7 +19,6 @@ enum{
 	TIMER_TIM9,
 	TIMER_TIM10,
 	TIMER_TIM11,
-	TIMER_TIM2,
 };
 
 enum{
@@ -34,6 +33,8 @@ enum{
 
 typedef struct
 {
+	uint8_t		dutty;
+	uint8_t		timer;
 	uint8_t		channel;
 	uint32_t	prescaler;
 	uint16_t	period;  // este está dado por Time_fosc*PSC*ARR

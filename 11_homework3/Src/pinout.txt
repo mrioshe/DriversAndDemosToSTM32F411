@@ -5,8 +5,8 @@ PC11 -> vcc_decs_7seg
 PC0  -> SW_encoder (EXTI0)
 PC1  -> LED_state 
 PA5  -> LED_micro_ON
-PA6  -> SIGNAL_1 (ADC1_6)
-PA7  -> SIGNAL_2 (ADC1_7)
+PA6  -> SIGNAL_1 (ADC1_9)
+PA7  -> SIGNAL_2 (ADC1_8)
 PA8  -> G_7segment
 PA9  -> TX(USART1)
 PB6  -> D_7segment

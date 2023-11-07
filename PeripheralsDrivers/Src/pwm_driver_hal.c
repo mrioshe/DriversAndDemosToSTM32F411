@@ -15,7 +15,7 @@ void pwm_Config(PWM_Handler_t *pPWMHandler){
 
 	/* 1. Activar la señal de reloj del periférico requerido */
 
-	switch(pPWMHandler->pTIMx){
+	switch(pPWMHandler->config.timer){
 
 	case TIMER_TIM1:
 		RCC -> APB1ENR |= RCC_APB2ENR_TIM1EN;
@@ -99,7 +99,7 @@ void pwm_Config(PWM_Handler_t *pPWMHandler){
 	}
 
 	/* 6. Activamos la salida seleccionada */
-	enableOutput(ptrPwmHandler);
+	enableOutput(pPWMHandler);
 
 	}// fin del switch-case
 }
@@ -161,12 +161,12 @@ void updateFrequency(PWM_Handler_t *ptrPwmHandler, uint16_t newFreq){
 }
 
 /* El valor del dutty debe estar dado en valores de %, entre 0% y 100%*/
-void setDuttyCycle(PWM_Handler_t *ptrPwmHandler){
+void setDuttyCycle(PWM_Handler_t *pPWMHandler){
 
 	// Seleccionamos el canal para configurar su dutty
-	switch(ptrPwmHandler->config.channel){
+	switch(pPWMHandler->config.channel){
 	case PWM_CHANNEL_1:{
-		ptrPwmHandler->ptrTIMx->CCR1 = ptrPwmHandler->config.duttyCicle;
+		pPWMHandler->pTIMx->CCR1 = pPWMHandler->config.dutty;
 
 		break;
 	}
