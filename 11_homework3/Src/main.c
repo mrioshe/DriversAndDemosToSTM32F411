@@ -114,6 +114,13 @@ while (1) {
 	if(flag_selector){
 		flag_selector=0;
 		selector=!selector;
+
+		if(selector){
+			usart_writeMsg(&commSerial, "Modificando la señal (sensor 1,2 o 3) \n\r");
+		}
+		else if(!selector){
+			usart_writeMsg(&commSerial, "Modificando la resolución \n\r");
+		}
 		//variable que selecciona si se esta modificando
 		//el canal o la resulcion (0: resolucion, 1:señal)
 		//apagamos/prendemos el led de estado:
@@ -139,6 +146,7 @@ while (1) {
 				counter=3;
 			} else {
 				counter++;
+				usart_writeMsg(&commSerial, "Aumentando el canal de lectura de sensor \n\r");
 			}
 
 
@@ -147,6 +155,8 @@ while (1) {
 				counter=1;
 			} else {
 				counter--;
+				usart_writeMsg(&commSerial, "Disminuyendo el canal de lectura de sensor \n\r");
+
 			}
 
 		} else if ( !selector && gpio_ReadPin(&dt)){
@@ -155,6 +165,8 @@ while (1) {
 			} else {
 				//hay que dismunir el valor, pues el valor 0 representa es 12 bits y 3 es 6 bits
 				adc_signal[counter-1].resolution--;
+				usart_writeMsg(&commSerial, "Aumentando la resolución \n\r");
+
 			}
 
 		}else if (!selector && !gpio_ReadPin(&dt)){
@@ -163,6 +175,7 @@ while (1) {
 				adc_signal[counter-1].resolution=RESOLUTION_6_BIT;
 			} else {
 				adc_signal[counter-1].resolution++;
+				usart_writeMsg(&commSerial, "Disminuyendo el canal de lectura de sensor\n\r");
 			}
 		}
 	}
@@ -185,6 +198,13 @@ while (1) {
 		if(receivedChar=='m'){
 			flag_selector=0;
 			selector=!selector;
+			if(selector){
+				usart_writeMsg(&commSerial, "Modificando la señal (sensor 1,2 o 3) \n\r");
+			}
+			else if(!selector){
+				usart_writeMsg(&commSerial, "Modificando la resolución \n\r");
+			}
+
 			//variable que selecciona si se esta modificando
 			//el canal o la resulcion (0: resolucion, 1:señal)
 			//apagamos/prendemos el led de estado:
@@ -197,12 +217,12 @@ while (1) {
 		}
 
 		if(receivedChar=='a'){
-
 			if(selector){
 				if(counter==3){
 					counter=3;
 				} else {
 					counter++;
+					usart_writeMsg(&commSerial, "Aumentando el canal de lectura de sensor \n\r");
 				}
 
 			} else if(!selector){
@@ -210,6 +230,7 @@ while (1) {
 					adc_signal[counter-1].resolution=RESOLUTION_12_BIT;
 				} else {
 					adc_signal[counter-1].resolution--;
+					usart_writeMsg(&commSerial, "Aumentando la resolución \n\r");
 				}
 
 			}
@@ -221,6 +242,7 @@ while (1) {
 						counter=1;
 					} else {
 						counter--;
+						usart_writeMsg(&commSerial, "disminuyendo el canal de lectura de sensor\n\r");
 					}
 
 			} else if(!selector){
@@ -228,6 +250,7 @@ while (1) {
 					adc_signal[counter-1].resolution=RESOLUTION_6_BIT;
 				} else {
 					adc_signal[counter-1].resolution++;
+					usart_writeMsg(&commSerial, "Disminuyendo la resolución \n\r");
 				}
 			}
 		}
@@ -444,7 +467,7 @@ void initSys(void) {
 
 	frec_message.pTIMx 								= TIM2;
 	frec_message.TIMx_Config.TIMx_Prescaler 		= 16000;
-	frec_message.TIMx_Config.TIMx_Period 			= 1000;
+	frec_message.TIMx_Config.TIMx_Period 			= 2000;
 	frec_message.TIMx_Config.TIMx_mode 				= TIMER_UP_COUNTER;
 	frec_message.TIMx_Config.TIMx_InterruptEnable 	= TIMER_INT_ENABLE;
 
