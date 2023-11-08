@@ -1,14 +1,14 @@
 /*
- * systic_driver_hal.c
+ * systick_driver_hal.c
  *
- *  Created on: Nov 7, 2023
- *      Author: if401-09
+ *  Created on: Nov 8, 2023
+ *      Author: mauricio
  */
 
 #include <stm32f4xx.h>
-#include "systic_driver_hal.h"
+#include "systick_driver_hal.h"
 
-uint64_t tick = 0;
+uint64_t ticks = 0;
 uint64_t ticks_start =0;
 uint64_t ticks_counting=0;
 
@@ -54,7 +54,7 @@ void config_systick_ms(Systic_Handler_t *Systick_Handler_t){
 
 	// Activamos las interrupciones externas
 
-	_enable_irq();
+	__enable_irq();
 
 }
 
@@ -83,15 +83,13 @@ void delay_ms(uint32_t wait_time_ms){
 
 void systick_handler(Systic_Handler_t *Systick_Handler_t){
 	//verificamos que la interrupcion se lanzo
-	if(Systick_Handler_t->Systick->CTRL & SysTick_CTRLO_CUNTFLAG_Msk){
+	if(Systick_Handler_t->Systick->CTRL & SysTick_CTRL_COUNTFLAG_Msk){
 
 		//Limpiamos la bandera
-		Systick_Handler_t->Systick->CTRL &= ~SysTick_CTRLO_CUNTFLAG_Msk;
+		Systick_Handler_t->Systick->CTRL &= ~SysTick_CTRL_COUNTFLAG_Msk;
 
 		//Incrementos en 1 el contador
 		ticks++;
 
 	}
 }
-
-

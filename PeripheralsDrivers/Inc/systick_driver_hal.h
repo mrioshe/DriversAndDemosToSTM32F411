@@ -1,12 +1,12 @@
 /*
- * adc_driver_hal.h
+ * systick_driver_hal.h
  *
- *  Created on: Oct 19, 2023
+ *  Created on: Nov 8, 2023
  *      Author: mauricio
  */
 
-#ifndef SYSTIC_DRIVER_HAL_H
-#define SYSTIC_DRIVER_HAL_H
+#ifndef SYSTICK_DRIVER_HAL_H_
+#define SYSTICK_DRIVER_HAL_H_
 
 #include <stm32f4xx.h>
 
@@ -33,9 +33,9 @@ typedef struct
 } Systic_Handler_t;
 
 
-void config_systick_ms(uint8_t systemClock);
+void config_systick_ms(Systic_Handler_t *pSystick_Handler_t);
 uint64_t getTicksMs(void);
 void delay_ms(uint32_t wait_time_ms);
 
 
-#endif
+#endif /* SYSTICK_DRIVER_HAL_H_ */
