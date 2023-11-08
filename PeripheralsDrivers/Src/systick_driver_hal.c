@@ -12,29 +12,29 @@ uint64_t ticks = 0;
 uint64_t ticks_start =0;
 uint64_t ticks_counting=0;
 
-void config_systick_ms(Systic_Handler_t *Systick_Handler_t){
+void config_systick_ms(Systic_Handler_t *pSystick_Handler_t){
 	//reiniciamos el valor de la variable que cuenta tiempo
 	ticks=0;
 
-	switch(Systick_Handler_t->Systick_Config_t.systemClock){
+	switch(pSystick_Handler_t->Systick_Config_t.systemClock){
 
 	case HSI_TIMER_16MHz:
-		Systick_Handler_t->Systick->LOAD=SYSTIC_LOAD_VALUE_16MHz_1ms;
+		SysTick->LOAD=SYSTIC_LOAD_VALUE_16MHz_1ms;
 		break;
 	case HSI_TIMER_100MHz:
-		Systick_Handler_t->Systick->LOAD=SYSTIC_LOAD_VALUE_100MHz_1ms;
-
+		SysTick->LOAD=SYSTIC_LOAD_VALUE_100MHz_1ms;
+		break;
 	default:
-		Systick_Handler_t->Systick->LOAD=SYSTIC_LOAD_VALUE_16MHz_1ms;
+		SysTick->LOAD=SYSTIC_LOAD_VALUE_16MHz_1ms;
 		break;
 	}
 
 	// Limpiamos el valor actual del systic
-	Systick_Handler_t->Systick->VAL=0;
+	SysTick->VAL=0;
 
 	//Configuramos el reloj interno como el reloj para el timer
 
-	Systick_Handler_t->Systick->CTRL |= SysTick_CTRL_CLKSOURCE_Msk;
+	SysTick->CTRL |= SysTick_CTRL_CLKSOURCE_Msk;
 
 	//Desactivamos las interrupcion del NVIC
 
@@ -46,11 +46,11 @@ void config_systick_ms(Systic_Handler_t *Systick_Handler_t){
 
 	// Activamos la interrupcion debido al conteo a cero del systick
 
-	Systick_Handler_t->Systick->CTRL |= SysTick_CTRL_TICKINT_Msk;
+	SysTick->CTRL |= SysTick_CTRL_TICKINT_Msk;
 
 	//Activamos el timer
 
-	Systick_Handler_t->Systick->CTRL |= SysTick_CTRL_ENABLE_Msk;
+	SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
 
 	// Activamos las interrupciones externas
 
@@ -81,12 +81,12 @@ void delay_ms(uint32_t wait_time_ms){
 
 }
 
-void systick_handler(Systic_Handler_t *Systick_Handler_t){
+void SysTick_Handler(void){
 	//verificamos que la interrupcion se lanzo
-	if(Systick_Handler_t->Systick->CTRL & SysTick_CTRL_COUNTFLAG_Msk){
+	if(SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk){
 
 		//Limpiamos la bandera
-		Systick_Handler_t->Systick->CTRL &= ~SysTick_CTRL_COUNTFLAG_Msk;
+		SysTick->CTRL &= ~SysTick_CTRL_COUNTFLAG_Msk;
 
 		//Incrementos en 1 el contador
 		ticks++;

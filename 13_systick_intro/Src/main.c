@@ -52,68 +52,48 @@ int main() {
 	initSys();
 while (1) {
 
-	if (sendMsg > 4){
-
-		usart_writeMsg(&commSerial,"Hola mundo\n\r!!");
-
-		//Pruebas al systick
-
-		gpio_TooglePin(&userLed);
-		delay_ms(300);
-		gpio_TooglePin(&userLed);
-		delay_ms(300);
-		gpio_TooglePin(&userLed);
-		delay_ms(300);
-		gpio_TooglePin(&userLed);
-		delay_ms(300);
-
-		gpio_TooglePin(&userLed);
-		delay_ms(250);
-		gpio_TooglePin(&userLed);
-		delay_ms(250);
-		gpio_TooglePin(&userLed);
-		delay_ms(250);
-		gpio_TooglePin(&userLed);
-		delay_ms(250);
-
-		usart_writeMsg(&commSerial,"Contando cada segundo\n\r");
-
-		gpio_TooglePin(&userLed);
-		delay_ms(1000);
-		gpio_TooglePin(&userLed);
-		delay_ms(1000);
-		gpio_TooglePin(&userLed);
-		delay_ms(1000);
-		gpio_TooglePin(&userLed);
-		delay_ms(1000);
-		sendMsg=0;
-
-		}
+//	if (sendMsg > 4){
+//
+//		usart_writeMsg(&commSerial,"Hola mundo\n\r!!");
+//
+//		//Pruebas al systick
+//
+//		gpio_TooglePin(&userLed);
+//		delay_ms(300);
+//		gpio_TooglePin(&userLed);
+//		delay_ms(300);
+//		gpio_TooglePin(&userLed);
+//		delay_ms(300);
+//		gpio_TooglePin(&userLed);
+//		delay_ms(300);
+//
+//		gpio_TooglePin(&userLed);
+//		delay_ms(250);
+//		gpio_TooglePin(&userLed);
+//		delay_ms(250);
+//		gpio_TooglePin(&userLed);
+//		delay_ms(250);
+//		gpio_TooglePin(&userLed);
+//		delay_ms(250);
+//
+//		usart_writeMsg(&commSerial,"Contando cada segundo\n\r");
+//
+//		gpio_TooglePin(&userLed);
+//		delay_ms(1000);
+//		gpio_TooglePin(&userLed);
+//		delay_ms(1000);
+//		gpio_TooglePin(&userLed);
+//		delay_ms(1000);
+//		gpio_TooglePin(&userLed);
+//		delay_ms(1000);
+//		sendMsg=0;
+//
+//		}
 	}
 }
 
 void initSys(void) {
 
-	/* Configuramos el PinA5 */
-	userLed.pGPIOx = GPIOA;
-	userLed.pinConfig.GPIO_PinNumber = PIN_5;
-	userLed.pinConfig.GPIO_PinMode = GPIO_MODE_OUT;
-	userLed.pinConfig.GPIO_PinOutputType = GPIO_OTYPE_PUSHPULL;
-	userLed.pinConfig.GPIO_PinOutputSpeed = GPIO_OSPEEDR_MEDIUM;
-	userLed.pinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
-
-	gpio_Config(&userLed);
-	gpio_WritePin(&userLed,SET);
-
-	/* Configuramos el timer del blink (TIM2) */
-	blinkTimer.pTIMx = TIM2;
-	blinkTimer.TIMx_Config.TIMx_Prescaler = 16000;
-	blinkTimer.TIMx_Config.TIMx_Period = 500;
-	blinkTimer.TIMx_Config.TIMx_mode = TIMER_UP_COUNTER;
-	blinkTimer.TIMx_Config.TIMx_InterruptEnable = TIMER_INT_ENABLE;
-
-	timer_Config(&blinkTimer);
-	timer_SetState(&blinkTimer, SET);
 
 	pinTx.pGPIOx = GPIOA;
 	pinTx.pinConfig.GPIO_PinNumber = PIN_2;
@@ -164,12 +144,21 @@ void initSys(void) {
 
 	userbuttonEXTI.edgeType		= EXTERNAL_INTERRUPT_FALLING_EDGE;
 	userbuttonEXTI.pGPIOHandler	= &userbutton;
-
 	exti_Config(&userbuttonEXTI);
 
 	systick.Systick							= SysTick;
 	systick.Systick_Config_t.systemClock	=HSI_TIMER_16MHz;
 	config_systick_ms(&systick);
+
+	/* Configuramos el timer del blink (TIM2) */
+	blinkTimer.pTIMx = TIM2;
+	blinkTimer.TIMx_Config.TIMx_Prescaler = 16000;
+	blinkTimer.TIMx_Config.TIMx_Period = 500;
+	blinkTimer.TIMx_Config.TIMx_mode = TIMER_UP_COUNTER;
+	blinkTimer.TIMx_Config.TIMx_InterruptEnable = TIMER_INT_ENABLE;
+
+	timer_Config(&blinkTimer);
+	timer_SetState(&blinkTimer, SET);
 
 }
 
