@@ -15,37 +15,7 @@ void pwm_Config(PWM_Handler_t *pPWMHandler){
 
 	/* 1. Activar la señal de reloj del periférico requerido */
 
-	switch(pPWMHandler->config.timer){
-
-	case TIMER_TIM1:
-		RCC -> APB1ENR |= RCC_APB2ENR_TIM1EN;
-		break;
-	case TIMER_TIM2:
-		RCC -> APB1ENR |= RCC_APB1ENR_TIM2EN;
-		break;
-	case TIMER_TIM3:
-		RCC -> APB1ENR |= RCC_APB1ENR_TIM3EN;
-		break;
-	case TIMER_TIM4:
-		RCC -> APB1ENR |= RCC_APB1ENR_TIM4EN;
-		break;
-	case TIMER_TIM5:
-		RCC -> APB1ENR |= RCC_APB1ENR_TIM5EN;
-		break;
-	case TIMER_TIM9:
-		RCC -> APB2ENR |= RCC_APB2ENR_TIM9EN;
-		break;
-	case TIMER_TIM10:
-		RCC -> APB2ENR |= RCC_APB2ENR_TIM10EN;
-		break;
-	case TIMER_TIM11:
-		RCC -> APB2ENR |= RCC_APB2ENR_TIM11EN;
-		break;
-	default:
-		__NOP();
-		break;
-
-	}
+	enable_timerx(pPWMHandler);
 
 	/* 1. Cargamos la frecuencia deseada */
 	setFrequency(pPWMHandler);
@@ -56,8 +26,7 @@ void pwm_Config(PWM_Handler_t *pPWMHandler){
 	/* 2a. Estamos en UP_Mode, el limite se carga en ARR y se comienza en 0 */
 	/* agregue acá su código */
 
-	pPWMHandler->pTIMx->CR1 &= ~(TIM_CR1_DIR);
-	pPWMHandler->pTIMx->ARR = pPWMHandler->config.period-1;
+	setInitConfig(pPWMHandler);
 
 	/* 3. Configuramos los bits CCxS del registro TIMy_CCMR1, de forma que sea modo salida
 	 * (para cada canal hay un conjunto CCxS)
@@ -66,116 +35,14 @@ void pwm_Config(PWM_Handler_t *pPWMHandler){
 	 *
 	 * 5. Y además activamos el preload bit, para que cada vez que exista un update-event
 	 * el valor cargado en el CCRx será recargado en el registro "shadow" del PWM */
-	switch(pPWMHandler->config.channel){
 
+	config_channel_pwm(pPWMHandler);
 
-
-
-	case PWM_CHANNEL_1:{
-		pPWMHandler->pTIMx->CCMR1=0;
-		// Seleccionamos como salida el canal
-		/* agregue acá su código */
-
-		pPWMHandler->pTIMx->CCMR1 &= ~TIM_CCMR1_CC1S_0;
-		pPWMHandler->pTIMx->CCMR1 &= ~TIM_CCMR1_CC1S_1;
-		pPWMHandler->pTIMx->CCMR1 |= TIM_CCMR1_OC1FE;
-
-
-		// Configuramos el canal como PWM
-		/* agregue acá su código */
-
-		pPWMHandler->pTIMx->CCMR1 &= ~TIM_CCMR1_OC1M_0;
-		pPWMHandler->pTIMx->CCMR1 |= TIM_CCMR1_OC1M_1;
-		pPWMHandler->pTIMx->CCMR1 |= TIM_CCMR1_OC1M_2;
-
-		// Activamos la funcionalidad de pre-load
-		/* agregue acá su código */
-
-		pPWMHandler->pTIMx->CCMR1 |= TIM_CCMR1_OC1PE;
-
-		break;
-	}
-
-	case PWM_CHANNEL_2:{
-		pPWMHandler->pTIMx->CCMR1=0;
-		// Seleccionamos como salida el canal
-		/* agregue acá su código */
-
-		pPWMHandler->pTIMx->CCMR1 &= ~TIM_CCMR1_CC2S_0;
-		pPWMHandler->pTIMx->CCMR1 &= ~TIM_CCMR1_CC2S_1;
-		pPWMHandler->pTIMx->CCMR1 |= TIM_CCMR1_OC2FE;
-
-
-		// Configuramos el canal como PWM
-		/* agregue acá su código */
-
-		pPWMHandler->pTIMx->CCMR1 &= ~TIM_CCMR1_OC2M_0;
-		pPWMHandler->pTIMx->CCMR1 |= TIM_CCMR1_OC2M_1;
-		pPWMHandler->pTIMx->CCMR1 |= TIM_CCMR1_OC2M_2;
-
-		// Activamos la funcionalidad de pre-load
-		/* agregue acá su código */
-
-		pPWMHandler->pTIMx->CCMR1 |= TIM_CCMR1_OC2PE;
-		break;
-	}
-
-	case PWM_CHANNEL_3:{
-		pPWMHandler->pTIMx->CCMR2=0;
-		// Seleccionamos como salida el canal
-		/* agregue acá su código */
-
-		pPWMHandler->pTIMx->CCMR2 &= ~TIM_CCMR2_CC3S_0;
-		pPWMHandler->pTIMx->CCMR2 &= ~TIM_CCMR2_CC3S_1;
-		pPWMHandler->pTIMx->CCMR2 |= TIM_CCMR2_OC3FE;
-
-
-		// Configuramos el canal como PWM
-		/* agregue acá su código */
-
-		pPWMHandler->pTIMx->CCMR2 &= ~TIM_CCMR2_OC3M_0;
-		pPWMHandler->pTIMx->CCMR2 |= TIM_CCMR2_OC3M_1;
-		pPWMHandler->pTIMx->CCMR2 |= TIM_CCMR2_OC3M_2;
-
-		// Activamos la funcionalidad de pre-load
-		/* agregue acá su código */
-
-		pPWMHandler->pTIMx->CCMR1 |= TIM_CCMR2_OC3PE;
-		break;
-	}
-
-	case PWM_CHANNEL_4:{
-		pPWMHandler->pTIMx->CCMR2=0;
-			// Seleccionamos como salida el canal
-			/* agregue acá su código */
-
-			pPWMHandler->pTIMx->CCMR2 &= ~TIM_CCMR2_CC4S_0;
-			pPWMHandler->pTIMx->CCMR2 &= ~TIM_CCMR2_CC4S_1;
-			pPWMHandler->pTIMx->CCMR2 |= TIM_CCMR2_OC4FE;
-
-
-			// Configuramos el canal como PWM
-			/* agregue acá su código */
-
-			pPWMHandler->pTIMx->CCMR2 &= ~TIM_CCMR2_OC4M_0;
-			pPWMHandler->pTIMx->CCMR2 |= TIM_CCMR2_OC4M_1;
-			pPWMHandler->pTIMx->CCMR2 |= TIM_CCMR2_OC4M_2;
-
-			// Activamos la funcionalidad de pre-load
-			/* agregue acá su código */
-
-			pPWMHandler->pTIMx->CCMR1 |= TIM_CCMR2_OC4PE;
-			break;
-	}
-	default:{
-		__NOP();
-		break;
-	}
 
 	/* 6. Activamos la salida seleccionada */
 	enableOutput(pPWMHandler);
 
-	}
+
 }
 
 /* Función para activar el Timer y activar todo el módulo PWM */
@@ -315,4 +182,156 @@ void updateDuttyCycle(PWM_Handler_t *pPWMHandler, uint16_t newDutty){
 	/* agregue acá su código */
 	setDuttyCycle(pPWMHandler);
 
+}
+
+void enable_timerx(PWM_Handler_t *pPWMHandler){
+
+	switch(pPWMHandler->config.timer){
+
+		case TIMER_TIM1:
+			RCC -> APB1ENR |= RCC_APB2ENR_TIM1EN;
+			break;
+		case TIMER_TIM2:
+			RCC -> APB1ENR |= RCC_APB1ENR_TIM2EN;
+			break;
+		case TIMER_TIM3:
+			RCC -> APB1ENR |= RCC_APB1ENR_TIM3EN;
+			break;
+		case TIMER_TIM4:
+			RCC -> APB1ENR |= RCC_APB1ENR_TIM4EN;
+			break;
+		case TIMER_TIM5:
+			RCC -> APB1ENR |= RCC_APB1ENR_TIM5EN;
+			break;
+		case TIMER_TIM9:
+			RCC -> APB2ENR |= RCC_APB2ENR_TIM9EN;
+			break;
+		case TIMER_TIM10:
+			RCC -> APB2ENR |= RCC_APB2ENR_TIM10EN;
+			break;
+		case TIMER_TIM11:
+			RCC -> APB2ENR |= RCC_APB2ENR_TIM11EN;
+			break;
+		default:
+			__NOP();
+			break;
+
+		}
+}
+
+void config_channel_pwm (PWM_Handler_t *pPWMHandler){
+
+
+
+switch(pPWMHandler->config.channel){
+
+	case PWM_CHANNEL_1:{
+		pPWMHandler->pTIMx->CCMR1=0;
+		// Seleccionamos como salida el canal
+		/* agregue acá su código */
+
+		pPWMHandler->pTIMx->CCMR1 &= ~TIM_CCMR1_CC1S_0;
+		pPWMHandler->pTIMx->CCMR1 &= ~TIM_CCMR1_CC1S_1;
+		pPWMHandler->pTIMx->CCMR1 |= TIM_CCMR1_OC1FE;
+
+
+		// Configuramos el canal como PWM
+		/* agregue acá su código */
+
+		pPWMHandler->pTIMx->CCMR1 &= ~TIM_CCMR1_OC1M_0;
+		pPWMHandler->pTIMx->CCMR1 |= TIM_CCMR1_OC1M_1;
+		pPWMHandler->pTIMx->CCMR1 |= TIM_CCMR1_OC1M_2;
+
+		// Activamos la funcionalidad de pre-load
+		/* agregue acá su código */
+
+		pPWMHandler->pTIMx->CCMR1 |= TIM_CCMR1_OC1PE;
+
+		break;
+	}
+
+	case PWM_CHANNEL_2:{
+		pPWMHandler->pTIMx->CCMR1=0;
+		// Seleccionamos como salida el canal
+		/* agregue acá su código */
+
+		pPWMHandler->pTIMx->CCMR1 &= ~TIM_CCMR1_CC2S_0;
+		pPWMHandler->pTIMx->CCMR1 &= ~TIM_CCMR1_CC2S_1;
+		pPWMHandler->pTIMx->CCMR1 |= TIM_CCMR1_OC2FE;
+
+
+		// Configuramos el canal como PWM
+		/* agregue acá su código */
+
+		pPWMHandler->pTIMx->CCMR1 &= ~TIM_CCMR1_OC2M_0;
+		pPWMHandler->pTIMx->CCMR1 |= TIM_CCMR1_OC2M_1;
+		pPWMHandler->pTIMx->CCMR1 |= TIM_CCMR1_OC2M_2;
+
+		// Activamos la funcionalidad de pre-load
+		/* agregue acá su código */
+
+		pPWMHandler->pTIMx->CCMR1 |=TIM_CCMR1_OC2PE;
+		break;
+	}
+
+	case PWM_CHANNEL_3:{
+		pPWMHandler->pTIMx->CCMR2=0;
+		// Seleccionamos como salida el canal
+		/* agregue acá su código */
+
+		pPWMHandler->pTIMx->CCMR2 &= ~TIM_CCMR2_CC3S_0;
+		pPWMHandler->pTIMx->CCMR2 &= ~TIM_CCMR2_CC3S_1;
+		pPWMHandler->pTIMx->CCMR2 |= TIM_CCMR2_OC3FE;
+
+
+		// Configuramos el canal como PWM
+		/* agregue acá su código */
+
+		pPWMHandler->pTIMx->CCMR2 &= ~TIM_CCMR2_OC3M_0;
+		pPWMHandler->pTIMx->CCMR2 |= TIM_CCMR2_OC3M_1;
+		pPWMHandler->pTIMx->CCMR2 |= TIM_CCMR2_OC3M_2;
+
+		// Activamos la funcionalidad de pre-load
+		/* agregue acá su código */
+
+		pPWMHandler->pTIMx->CCMR1 |= TIM_CCMR2_OC3PE;
+		break;
+	}
+
+	case PWM_CHANNEL_4:{
+		pPWMHandler->pTIMx->CCMR2=0;
+			// Seleccionamos como salida el canal
+			/* agregue acá su código */
+
+			pPWMHandler->pTIMx->CCMR2 &= ~TIM_CCMR2_CC4S_0;
+			pPWMHandler->pTIMx->CCMR2 &= ~TIM_CCMR2_CC4S_1;
+			pPWMHandler->pTIMx->CCMR2 |= TIM_CCMR2_OC4FE;
+
+
+			// Configuramos el canal como PWM
+			/* agregue acá su código */
+
+			pPWMHandler->pTIMx->CCMR2 &= ~TIM_CCMR2_OC4M_0;
+			pPWMHandler->pTIMx->CCMR2 |= TIM_CCMR2_OC4M_1;
+			pPWMHandler->pTIMx->CCMR2 |= TIM_CCMR2_OC4M_2;
+
+			// Activamos la funcionalidad de pre-load
+			/* agregue acá su código */
+
+			pPWMHandler->pTIMx->CCMR1 |= TIM_CCMR2_OC4PE;
+			break;
+	}
+	default:{
+		__NOP();
+		break;
+		}
+	}
+}
+
+void setInitConfig(PWM_Handler_t *pPWMHandler){
+
+	pPWMHandler->pTIMx->CR1 &= ~(TIM_CR1_DIR);
+	pPWMHandler->pTIMx->ARR = pPWMHandler->config.period-1;
+	pPWMHandler->pTIMx->CNT=0;
+	pPWMHandler->pTIMx-> CR1 |= TIM_CR1_ARPE;
 }

@@ -24,16 +24,18 @@
 #include "timer_driver_hal.h"
 #include "exti_driver_hal.h"
 #include "adc_driver_hal.h"
+#include "pwm_driver_hal.h"
 
 
 GPIO_Handler_t userLed = { 0 };
 Timer_Handler_t blinkTimer = { 0 };
-
+GPIO_Handler_t PWMpin= { 0 };
 USART_Handler_t commSerial= { 0 };
 GPIO_Handler_t pinTx = {0};
 GPIO_Handler_t pinRx = {0};
 uint8_t receivedChar=0;
 uint8_t sendMsg=0;
+PWM_Handler_t pwm={0};
 char bufferData[64]={0};
 
 //Elementos para la conversion ADC
@@ -45,42 +47,18 @@ int main() {
 	initSys();
 while (1) {
 
-	 	if (sendMsg== 1){
+	 	if (sendMsg== 255){
 			sendMsg=0;
-			usart_writeMsg(&commSerial,"Hola Mundo !!\n\r");
 
 		}
 
 
 
-	if(receivedChar){
-		if(receivedChar=='p'){
-			usart_writeMsg(&commSerial, "Testing, testing!!\n\r");
-		}
-
-		if(receivedChar=='s'){
-			usart_writeMsg(&commSerial,"make simple ADC\n\r");
-			adc_StartSingleConv();
-
-		}
-
-		if(receivedChar=='C'){
-			usart_writeMsg(&commSerial,"make continuous ADC\n\r");
-			adc_StartContinuousConv();
-		}
-
-		if(receivedChar == 'S'){
-			usart_writeMsg(&commSerial,"stop continuous ADC\n\r");
-			adc_StopContinuousConv();
-		}
-
-		receivedChar=0;
 
 	}
 
 }
 
-}
 
 void initSys(void) {
 
@@ -98,7 +76,7 @@ void initSys(void) {
 	/* Configuramos el timer del blink (TIM2) */
 	blinkTimer.pTIMx = TIM2;
 	blinkTimer.TIMx_Config.TIMx_Prescaler = 16000;
-	blinkTimer.TIMx_Config.TIMx_Period = 500;
+	blinkTimer.TIMx_Config.TIMx_Period = 10;
 	blinkTimer.TIMx_Config.TIMx_mode = TIMER_UP_COUNTER;
 	blinkTimer.TIMx_Config.TIMx_InterruptEnable = TIMER_INT_ENABLE;
 
@@ -106,31 +84,31 @@ void initSys(void) {
 	timer_SetState(&blinkTimer, SET);
 
 	pinTx.pGPIOx = GPIOA;
-	pinTx.pinConfig.GPIO_PinNumber = PIN_2;
-	pinTx.pinConfig.GPIO_PinMode = GPIO_MODE_ALTFN;
-	pinTx.pinConfig.GPIO_PinOutputType = GPIO_OTYPE_PUSHPULL;
-	pinTx.pinConfig.GPIO_PinOutputSpeed = GPIO_OSPEEDR_FAST;
-	pinTx.pinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
-	pinTx.pinConfig.GPIO_PinAltFunMode = AF7;
+	pinTx.pinConfig.GPIO_PinNumber 			= PIN_2;
+	pinTx.pinConfig.GPIO_PinMode 			= GPIO_MODE_ALTFN;
+	pinTx.pinConfig.GPIO_PinOutputType 		= GPIO_OTYPE_PUSHPULL;
+	pinTx.pinConfig.GPIO_PinOutputSpeed 	= GPIO_OSPEEDR_FAST;
+	pinTx.pinConfig.GPIO_PinPuPdControl 	= GPIO_PUPDR_NOTHING;
+	pinTx.pinConfig.GPIO_PinAltFunMode 		= AF7;
 	gpio_Config(&pinTx);
 
 
 	pinRx.pGPIOx = GPIOA;
-	pinRx.pinConfig.GPIO_PinNumber = PIN_3;
-	pinRx.pinConfig.GPIO_PinMode = GPIO_MODE_ALTFN;
-	pinRx.pinConfig.GPIO_PinOutputType = GPIO_OTYPE_PUSHPULL;
-	pinRx.pinConfig.GPIO_PinOutputSpeed = GPIO_OSPEEDR_FAST;
-	pinRx.pinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
-	pinRx.pinConfig.GPIO_PinAltFunMode = AF7;
+	pinRx.pinConfig.GPIO_PinNumber			= PIN_3;
+	pinRx.pinConfig.GPIO_PinMode 			= GPIO_MODE_ALTFN;
+	pinRx.pinConfig.GPIO_PinOutputType 		= GPIO_OTYPE_PUSHPULL;
+	pinRx.pinConfig.GPIO_PinOutputSpeed 	= GPIO_OSPEEDR_FAST;
+	pinRx.pinConfig.GPIO_PinPuPdControl 	= GPIO_PUPDR_NOTHING;
+	pinRx.pinConfig.GPIO_PinAltFunMode 		= AF7;
 	gpio_Config(&pinRx);
 
 	commSerial.ptrUSARTx = USART2;
-	commSerial.USART_Config.baudrate = USART_BAUDRATE_115200;
-	commSerial.USART_Config.datasize = USART_DATASIZE_8BIT;
-	commSerial.USART_Config.mode = USART_MODE_RXTX;
-	commSerial.USART_Config.parity = USART_PARITY_NONE;
-	commSerial.USART_Config.stopbits = USART_STOPBIT_1;
-	commSerial.USART_Config.enableIntRX = USART_RX_INTERRUP_ENABLE;
+	commSerial.USART_Config.baudrate		= USART_BAUDRATE_115200;
+	commSerial.USART_Config.datasize 		= USART_DATASIZE_8BIT;
+	commSerial.USART_Config.mode 			= USART_MODE_RXTX;
+	commSerial.USART_Config.parity 			= USART_PARITY_NONE;
+	commSerial.USART_Config.stopbits 		= USART_STOPBIT_1;
+	commSerial.USART_Config.enableIntRX 	= USART_RX_INTERRUP_ENABLE;
 	usart_Config(&commSerial);
 
 	usart_WriteChar(&commSerial,0);
@@ -144,11 +122,32 @@ void initSys(void) {
 	potenciometro.interrupState		= ADC_INT_ENABLE;
 	adc_ConfigSingleChannel(&potenciometro);
 
+	/*Pin para el PWM*/
+
+	PWMpin.pGPIOx = GPIOC;
+	PWMpin.pinConfig.GPIO_PinNumber			= PIN_7;
+	PWMpin.pinConfig.GPIO_PinMode 			= GPIO_MODE_ALTFN;
+	PWMpin.pinConfig.GPIO_PinOutputType 	= GPIO_OTYPE_PUSHPULL;
+	PWMpin.pinConfig.GPIO_PinOutputSpeed 	= GPIO_OSPEEDR_FAST;
+	PWMpin.pinConfig.GPIO_PinPuPdControl 	= GPIO_PUPDR_NOTHING;
+	PWMpin.pinConfig.GPIO_PinAltFunMode 	= AF2;
+	gpio_Config(&PWMpin);
+
+	/*Configuración del PWM*/
+
+	pwm.pTIMx			 	= TIM3;
+	pwm.config.dutty  	 	= 0;
+	pwm.config.channel		= PWM_CHANNEL_2;
+	pwm.config.prescaler	= 16000;
+	pwm.config.period		= 1;
+	pwm_Config(&pwm);
+
 }
 
 void Timer2_Callback(void) {
 	gpio_TooglePin(&userLed);
-	sendMsg = 1;
+	updateDuttyCycle(&pwm, sendMsg);
+	sendMsg++;
 }
 
 void usart2_RxCallback(void) {
