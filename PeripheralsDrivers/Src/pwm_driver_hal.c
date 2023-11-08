@@ -57,7 +57,7 @@ void pwm_Config(PWM_Handler_t *pPWMHandler){
 	/* agregue acá su código */
 
 	pPWMHandler->pTIMx->CR1 &= ~(TIM_CR1_DIR);
-	pPWMHandler->pTIMx->ARR = pPWMHandler->config.period;
+	pPWMHandler->pTIMx->ARR = pPWMHandler->config.period-1;
 
 	/* 3. Configuramos los bits CCxS del registro TIMy_CCMR1, de forma que sea modo salida
 	 * (para cada canal hay un conjunto CCxS)

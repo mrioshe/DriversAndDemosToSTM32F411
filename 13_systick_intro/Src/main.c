@@ -52,43 +52,45 @@ int main() {
 	initSys();
 while (1) {
 
-//	if (sendMsg > 4){
-//
-//		usart_writeMsg(&commSerial,"Hola mundo\n\r!!");
-//
-//		//Pruebas al systick
-//
-//		gpio_TooglePin(&userLed);
-//		delay_ms(300);
-//		gpio_TooglePin(&userLed);
-//		delay_ms(300);
-//		gpio_TooglePin(&userLed);
-//		delay_ms(300);
-//		gpio_TooglePin(&userLed);
-//		delay_ms(300);
-//
-//		gpio_TooglePin(&userLed);
-//		delay_ms(250);
-//		gpio_TooglePin(&userLed);
-//		delay_ms(250);
-//		gpio_TooglePin(&userLed);
-//		delay_ms(250);
-//		gpio_TooglePin(&userLed);
-//		delay_ms(250);
-//
-//		usart_writeMsg(&commSerial,"Contando cada segundo\n\r");
-//
-//		gpio_TooglePin(&userLed);
-//		delay_ms(1000);
-//		gpio_TooglePin(&userLed);
-//		delay_ms(1000);
-//		gpio_TooglePin(&userLed);
-//		delay_ms(1000);
-//		gpio_TooglePin(&userLed);
-//		delay_ms(1000);
-//		sendMsg=0;
-//
-//		}
+	if (sendMsg > 4){
+
+		usart_writeMsg(&commSerial,"Hola mundo\n\r!!");
+
+		//Pruebas al systick
+
+		gpio_TooglePin(&userLed);
+		delay_ms(300);
+		gpio_TooglePin(&userLed);
+		delay_ms(300);
+		gpio_TooglePin(&userLed);
+		delay_ms(300);
+		gpio_TooglePin(&userLed);
+		delay_ms(300);
+
+		gpio_TooglePin(&userLed);
+		delay_ms(250);
+		gpio_TooglePin(&userLed);
+		delay_ms(250);
+		gpio_TooglePin(&userLed);
+		delay_ms(250);
+		gpio_TooglePin(&userLed);
+		delay_ms(250);
+
+		usart_writeMsg(&commSerial,"Contando cada segundo\n\r");
+
+		gpio_TooglePin(&userLed);
+		delay_ms(1000);
+		gpio_TooglePin(&userLed);
+		delay_ms(1000);
+		gpio_TooglePin(&userLed);
+		delay_ms(1000);
+		gpio_TooglePin(&userLed);
+		delay_ms(10000);
+		gpio_TooglePin(&userLed);
+		delay_ms(10000);
+		sendMsg=0;
+
+		}
 	}
 }
 
@@ -163,7 +165,7 @@ void initSys(void) {
 }
 
 void Timer2_Callback(void) {
-	gpio_TooglePin(&userLed);
+	//gpio_TooglePin(&userLed);
 	sendMsg ++;
 }
 
