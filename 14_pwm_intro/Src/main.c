@@ -36,6 +36,8 @@ GPIO_Handler_t pinRx = {0};
 uint8_t receivedChar=0;
 uint8_t sendMsg=0;
 uint16_t duttyValue=0;
+uint16_t PWMperiod=20000;
+PWM_Handler_t pwm2={0};
 PWM_Handler_t pwm={0};
 char bufferData[64]={0};
 
@@ -50,6 +52,8 @@ while (1) {
 
 	 	if (duttyValue== 20000){
 	 		duttyValue=0;
+	 		//PWMperiod=2000;
+
 
 		}
 
@@ -134,14 +138,31 @@ void initSys(void) {
 	PWMpin.pinConfig.GPIO_PinAltFunMode 	= AF2;
 	gpio_Config(&PWMpin);
 
+	PWMpin.pGPIOx = GPIOC;
+	PWMpin.pinConfig.GPIO_PinNumber			= PIN_9;
+	PWMpin.pinConfig.GPIO_PinMode 			= GPIO_MODE_ALTFN;
+	PWMpin.pinConfig.GPIO_PinOutputType 	= GPIO_OTYPE_PUSHPULL;
+	PWMpin.pinConfig.GPIO_PinOutputSpeed 	= GPIO_OSPEEDR_FAST;
+	PWMpin.pinConfig.GPIO_PinPuPdControl 	= GPIO_PUPDR_NOTHING;
+	PWMpin.pinConfig.GPIO_PinAltFunMode 	= AF2;
+	gpio_Config(&PWMpin);
+
 	/*Configuración del PWM*/
+
+
+
+	pwm2.pTIMx			 	= TIM3;
+	pwm2.config.timer		= TIMER_TIM3;
+	pwm2.config.dutty		= 20000-duttyValue;
+	pwm2.config.channel		= PWM_CHANNEL_4;
+	pwm_Config(&pwm2);
 
 	pwm.pTIMx			 	= TIM3;
 	pwm.config.timer		= TIMER_TIM3;
 	pwm.config.dutty		= duttyValue;
 	pwm.config.channel		= PWM_CHANNEL_2;
 	pwm.config.prescaler	= 16;
-	pwm.config.period		= 20000;
+	pwm.config.period		= PWMperiod;
 	pwm_Config(&pwm);
 
 	startPWMsignal(&pwm);
@@ -150,8 +171,11 @@ void initSys(void) {
 
 void Timer2_Callback(void) {
 	gpio_TooglePin(&userLed);
-	updateDuttyCycle(&pwm, duttyValue);
-	duttyValue=duttyValue+100;
+    duttyValue=duttyValue+100;
+    //PWMperiod=PWMperiod+300;
+    updateDuttyCycle(&pwm, duttyValue);
+    updateDuttyCycle(&pwm2, 20000-duttyValue);
+    //updateFrequency(&pwm, PWMperiod);
 }
 
 void usart2_RxCallback(void) {

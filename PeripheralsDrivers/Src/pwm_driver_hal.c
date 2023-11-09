@@ -132,32 +132,32 @@ void updateFrequency(PWM_Handler_t *pPWMHandler, uint16_t newFreq){
 
 /* El valor del dutty debe estar dado en valores de %, entre 0% y 100%*/
 void setDuttyCycle(PWM_Handler_t *pPWMHandler){
-	pPWMHandler->pTIMx->CCR1=0;
-	pPWMHandler->pTIMx->CCR2=0;
-	pPWMHandler->pTIMx->CCR3=0;
-	pPWMHandler->pTIMx->CCR4=0;
 
 	// Seleccionamos el canal para configurar su dutty
 	switch(pPWMHandler->config.channel){
 	case PWM_CHANNEL_1:{
+		pPWMHandler->pTIMx->CCR1=0;
 		pPWMHandler->pTIMx->CCR1 = pPWMHandler->config.dutty;
 
 		break;
 	}
 
 	case PWM_CHANNEL_2:{
+		pPWMHandler->pTIMx->CCR2=0;
 		pPWMHandler->pTIMx->CCR2 = pPWMHandler->config.dutty;
 
 		break;
 	}
 
 	case PWM_CHANNEL_3:{
+		pPWMHandler->pTIMx->CCR3=0;
 		pPWMHandler->pTIMx->CCR3 = pPWMHandler->config.dutty;
 
 		break;
 	}
 
 	case PWM_CHANNEL_4:{
+		pPWMHandler->pTIMx->CCR4=0;
 		pPWMHandler->pTIMx->CCR4 = pPWMHandler->config.dutty;
 
 		break;
