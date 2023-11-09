@@ -43,10 +43,11 @@ void pwm_Config(PWM_Handler_t *pPWMHandler){
 	enableOutput(pPWMHandler);
 
 
+
 }
 
 /* Función para activar el Timer y activar todo el módulo PWM */
-void startPwmSignal(PWM_Handler_t *pPWMHandler) {
+void startPWMsignal(PWM_Handler_t *pPWMHandler) {
 	/* agregue acá su código */
 
 	pPWMHandler->pTIMx->CR1 |= TIM_CR1_CEN;
@@ -54,7 +55,7 @@ void startPwmSignal(PWM_Handler_t *pPWMHandler) {
 }
 
 /* Función para desactivar el Timer y detener todo el módulo PWM*/
-void stopPwmSignal(PWM_Handler_t *pPWMHandler) {
+void stopPWMSignal(PWM_Handler_t *pPWMHandler) {
 	pPWMHandler->pTIMx->CR1 &= ~TIM_CR1_CEN;
 }
 

@@ -35,6 +35,7 @@ GPIO_Handler_t pinTx = {0};
 GPIO_Handler_t pinRx = {0};
 uint8_t receivedChar=0;
 uint8_t sendMsg=0;
+uint16_t duttyValue=0;
 PWM_Handler_t pwm={0};
 char bufferData[64]={0};
 
@@ -47,8 +48,8 @@ int main() {
 	initSys();
 while (1) {
 
-	 	if (sendMsg== 255){
-			sendMsg=0;
+	 	if (duttyValue== 20000){
+	 		duttyValue=0;
 
 		}
 
@@ -136,18 +137,21 @@ void initSys(void) {
 	/*Configuración del PWM*/
 
 	pwm.pTIMx			 	= TIM3;
-	pwm.config.dutty  	 	= 0;
+	pwm.config.timer		= TIMER_TIM3;
+	pwm.config.dutty		= duttyValue;
 	pwm.config.channel		= PWM_CHANNEL_2;
-	pwm.config.prescaler	= 16000;
-	pwm.config.period		= 1;
+	pwm.config.prescaler	= 16;
+	pwm.config.period		= 20000;
 	pwm_Config(&pwm);
+
+	startPWMsignal(&pwm);
 
 }
 
 void Timer2_Callback(void) {
 	gpio_TooglePin(&userLed);
-	updateDuttyCycle(&pwm, sendMsg);
-	sendMsg++;
+	updateDuttyCycle(&pwm, duttyValue);
+	duttyValue=duttyValue+100;
 }
 
 void usart2_RxCallback(void) {

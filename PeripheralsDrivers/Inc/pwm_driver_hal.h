@@ -33,7 +33,7 @@ enum{
 
 typedef struct
 {
-	uint8_t		dutty;
+	uint16_t	dutty;
 	uint8_t		timer;
 	uint8_t		channel;
 	uint32_t	prescaler;
@@ -56,6 +56,7 @@ void startPWMsignal(PWM_Handler_t *pPWMHandler);
 void stopPWMsignal(PWM_Handler_t *pPWMHandler);
 void enable_timerx(PWM_Handler_t *pPWMHandler);
 void config_channel_pwm(PWM_Handler_t *pPWMHandler);
+void setInitConfig(PWM_Handler_t *pPWMHandler);
 
 
 
