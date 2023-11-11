@@ -108,7 +108,6 @@ void setFrequency(PWM_Handler_t *pPWMHandler){
 	// Cargamos el valor del prescaler, nos define la velocidad (en ns) a la cual
 	// se incrementa el Timer
 	/* agregue acá su código */
-	pPWMHandler->pTIMx->PSC=0;
 
 	pPWMHandler->pTIMx->PSC=pPWMHandler->config.prescaler-1;
 
@@ -136,28 +135,28 @@ void setDuttyCycle(PWM_Handler_t *pPWMHandler){
 	// Seleccionamos el canal para configurar su dutty
 	switch(pPWMHandler->config.channel){
 	case PWM_CHANNEL_1:{
-		pPWMHandler->pTIMx->CCR1=0;
+
 		pPWMHandler->pTIMx->CCR1 = pPWMHandler->config.dutty;
 
 		break;
 	}
 
 	case PWM_CHANNEL_2:{
-		pPWMHandler->pTIMx->CCR2=0;
+
 		pPWMHandler->pTIMx->CCR2 = pPWMHandler->config.dutty;
 
 		break;
 	}
 
 	case PWM_CHANNEL_3:{
-		pPWMHandler->pTIMx->CCR3=0;
+
 		pPWMHandler->pTIMx->CCR3 = pPWMHandler->config.dutty;
 
 		break;
 	}
 
 	case PWM_CHANNEL_4:{
-		pPWMHandler->pTIMx->CCR4=0;
+
 		pPWMHandler->pTIMx->CCR4 = pPWMHandler->config.dutty;
 
 		break;
@@ -227,7 +226,6 @@ void config_channel_pwm (PWM_Handler_t *pPWMHandler){
 switch(pPWMHandler->config.channel){
 
 	case PWM_CHANNEL_1:{
-		pPWMHandler->pTIMx->CCMR1=0;
 		// Seleccionamos como salida el canal
 		/* agregue acá su código */
 
@@ -252,7 +250,6 @@ switch(pPWMHandler->config.channel){
 	}
 
 	case PWM_CHANNEL_2:{
-		pPWMHandler->pTIMx->CCMR1=0;
 		// Seleccionamos como salida el canal
 		/* agregue acá su código */
 
@@ -276,7 +273,7 @@ switch(pPWMHandler->config.channel){
 	}
 
 	case PWM_CHANNEL_3:{
-		pPWMHandler->pTIMx->CCMR2=0;
+
 		// Seleccionamos como salida el canal
 		/* agregue acá su código */
 
@@ -295,12 +292,12 @@ switch(pPWMHandler->config.channel){
 		// Activamos la funcionalidad de pre-load
 		/* agregue acá su código */
 
-		pPWMHandler->pTIMx->CCMR1 |= TIM_CCMR2_OC3PE;
+		pPWMHandler->pTIMx->CCMR2 |= TIM_CCMR2_OC3PE;
 		break;
 	}
 
 	case PWM_CHANNEL_4:{
-		pPWMHandler->pTIMx->CCMR2=0;
+
 			// Seleccionamos como salida el canal
 			/* agregue acá su código */
 
@@ -319,7 +316,7 @@ switch(pPWMHandler->config.channel){
 			// Activamos la funcionalidad de pre-load
 			/* agregue acá su código */
 
-			pPWMHandler->pTIMx->CCMR1 |= TIM_CCMR2_OC4PE;
+			pPWMHandler->pTIMx->CCMR2 |= TIM_CCMR2_OC4PE;
 			break;
 	}
 	default:{
@@ -333,6 +330,5 @@ void setInitConfig(PWM_Handler_t *pPWMHandler){
 
 	pPWMHandler->pTIMx->CR1 &= ~(TIM_CR1_DIR);
 	pPWMHandler->pTIMx->ARR = pPWMHandler->config.period-1;
-	pPWMHandler->pTIMx->CNT=0;
 	pPWMHandler->pTIMx-> CR1 |= TIM_CR1_ARPE;
 }

@@ -25,6 +25,7 @@
 #include "exti_driver_hal.h"
 #include "adc_driver_hal.h"
 #include <string.h>
+#include "pwm_driver_hal.h"
 
 //Declaracion de variables:
 
@@ -38,10 +39,15 @@ GPIO_Handler_t vcc_units_7seg={0};
 GPIO_Handler_t vcc_decs_7seg={0};
 GPIO_Handler_t pinTx = {0};
 GPIO_Handler_t pinRx = {0};
+GPIO_Handler_t PWMpin= { 0 };
+GPIO_Handler_t PWMpin2= { 0 };
 
 Timer_Handler_t blinkTimer={0};
 Timer_Handler_t frec_7segment={0};
 Timer_Handler_t frec_message={0};
+
+PWM_Handler_t pwm2={0};
+PWM_Handler_t pwm={0};
 
 EXTI_Config_t interrupt_sw={0};
 EXTI_Config_t interrupt_clk={0};
@@ -59,11 +65,16 @@ uint8_t flag_sendMsg={0};
 uint8_t flag_selector={0};
 uint8_t flag_switcheo={0};
 
+uint16_t duttyValue=0;
+uint16_t PWMperiod=20000;
+
 uint8_t counter={0};
 uint8_t digit_selector=0;
 uint8_t number_desc_aux[2]={0};
 uint8_t selector={0};
 uint8_t resolution_value={0};
+
+
 
 
 //funciones:
@@ -259,6 +270,10 @@ while (1) {
 
 	}
 
+ 	if (duttyValue== 20000){
+ 		duttyValue=0;
+ 		//PWMperiod=2000;
+	}
 
 }
 
@@ -445,11 +460,32 @@ void initSys(void) {
 	gpio_Config(&pinTx);
 	gpio_Config(&pinRx);
 
+	/*Pines para el PWM*/
+
+	PWMpin.pGPIOx = GPIOC;
+	PWMpin.pinConfig.GPIO_PinNumber			= PIN_7;
+	PWMpin.pinConfig.GPIO_PinMode 			= GPIO_MODE_ALTFN;
+	PWMpin.pinConfig.GPIO_PinOutputType 	= GPIO_OTYPE_PUSHPULL;
+	PWMpin.pinConfig.GPIO_PinOutputSpeed 	= GPIO_OSPEEDR_FAST;
+	PWMpin.pinConfig.GPIO_PinPuPdControl 	= GPIO_PUPDR_NOTHING;
+	PWMpin.pinConfig.GPIO_PinAltFunMode 	= AF2;
+
+	PWMpin2.pGPIOx = GPIOB;
+	PWMpin2.pinConfig.GPIO_PinNumber		= PIN_0;
+	PWMpin2.pinConfig.GPIO_PinMode 			= GPIO_MODE_ALTFN;
+	PWMpin2.pinConfig.GPIO_PinOutputType 	= GPIO_OTYPE_PUSHPULL;
+	PWMpin2.pinConfig.GPIO_PinOutputSpeed 	= GPIO_OSPEEDR_FAST;
+	PWMpin2.pinConfig.GPIO_PinPuPdControl 	= GPIO_PUPDR_NOTHING;
+	PWMpin2.pinConfig.GPIO_PinAltFunMode 	= AF2;
+
+	gpio_Config(&PWMpin);
+	gpio_Config(&PWMpin2);
+
 	/*CONFIGURACION TIMERS*/
 
 	// Configuramos el timer para el blinky
 
-    blinkTimer.pTIMx								=TIM3;
+    blinkTimer.pTIMx								=TIM9;
 	blinkTimer.TIMx_Config.TIMx_Prescaler			=16000; //Genera incrementos de 1 ms
 	blinkTimer.TIMx_Config.TIMx_Period				=250;   //DE la mano con el prescaler, se toma el periodo en ms
 	blinkTimer.TIMx_Config.TIMx_mode				=TIMER_UP_COUNTER;
@@ -465,7 +501,7 @@ void initSys(void) {
 
     // Timer que controla la frecuencia de refresco del mensaje
 
-	frec_message.pTIMx 								= TIM2;
+	frec_message.pTIMx 								= TIM10;
 	frec_message.TIMx_Config.TIMx_Prescaler 		= 16000;
 	frec_message.TIMx_Config.TIMx_Period 			= 2000;
 	frec_message.TIMx_Config.TIMx_mode 				= TIMER_UP_COUNTER;
@@ -524,6 +560,24 @@ void initSys(void) {
 
 	adc_ConfigSingleChannel(&adc_signal[0]);
 
+	/*Configuración del PWM*/
+
+	pwm2.pTIMx			 	= TIM3;
+	pwm2.config.timer		= TIMER_TIM3;
+	pwm2.config.dutty		= 20000-duttyValue;
+	pwm2.config.channel		= PWM_CHANNEL_3;
+	pwm_Config(&pwm2);
+
+	pwm.pTIMx			 	= TIM3;
+	pwm.config.timer		= TIMER_TIM3;
+	pwm.config.dutty		= duttyValue;
+	pwm.config.channel		= PWM_CHANNEL_2;
+	pwm.config.prescaler	= 16;
+	pwm.config.period		= PWMperiod;
+	pwm_Config(&pwm);
+
+
+
 	/*SETEO DE VALORES INICIALES*/
 
 	gpio_WritePin(&stateled,SET);
@@ -541,6 +595,7 @@ void initSys(void) {
 	counter=1;
 	selector=1;
 	segment_configuration_units(counter,1);
+	startPWMsignal(&pwm);
 
 
 
@@ -912,11 +967,15 @@ void callback_extInt9(void){
 //interrupcion del timer de frencuencia del 7 segmentos
 void Timer5_Callback(void){
 	flag_switcheo=1;
-
+    duttyValue=duttyValue+100;
+    //PWMperiod=PWMperiod+300;
+    updateDuttyCycle(&pwm, duttyValue);
+    updateDuttyCycle(&pwm2, 20000-duttyValue);
+    //updateFrequency(&pwm, PWMperiod);
 }
 
 //interrupcion del timer que configura la frecuencia del mensaje
-void Timer2_Callback(void) {
+void Timer10_Callback(void) {
 
 	//cuando se cumple el tiempo se inicia la conversion adc
 	adc_ConfigSingleChannel(&adc_signal[counter-1]);
@@ -926,10 +985,12 @@ void Timer2_Callback(void) {
 }
 
 //interrupcion del timer para activar/desactivar el led blinky
-void Timer3_Callback(void) {
+void Timer9_Callback(void) {
 	gpio_TooglePin(&stateled);
 
 }
+
+
 
 //interrupcion por recepcion en el USART1
 void usart1_RxCallback(void) {

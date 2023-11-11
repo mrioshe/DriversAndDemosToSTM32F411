@@ -30,6 +30,7 @@
 GPIO_Handler_t userLed = { 0 };
 Timer_Handler_t blinkTimer = { 0 };
 GPIO_Handler_t PWMpin= { 0 };
+GPIO_Handler_t PWMpin2= { 0 };
 USART_Handler_t commSerial= { 0 };
 GPIO_Handler_t pinTx = {0};
 GPIO_Handler_t pinRx = {0};
@@ -127,7 +128,7 @@ void initSys(void) {
 	potenciometro.interrupState		= ADC_INT_ENABLE;
 	adc_ConfigSingleChannel(&potenciometro);
 
-	/*Pin para el PWM*/
+	/*Pines para el PWM*/
 
 	PWMpin.pGPIOx = GPIOC;
 	PWMpin.pinConfig.GPIO_PinNumber			= PIN_7;
@@ -138,17 +139,16 @@ void initSys(void) {
 	PWMpin.pinConfig.GPIO_PinAltFunMode 	= AF2;
 	gpio_Config(&PWMpin);
 
-	PWMpin.pGPIOx = GPIOC;
-	PWMpin.pinConfig.GPIO_PinNumber			= PIN_9;
-	PWMpin.pinConfig.GPIO_PinMode 			= GPIO_MODE_ALTFN;
-	PWMpin.pinConfig.GPIO_PinOutputType 	= GPIO_OTYPE_PUSHPULL;
-	PWMpin.pinConfig.GPIO_PinOutputSpeed 	= GPIO_OSPEEDR_FAST;
-	PWMpin.pinConfig.GPIO_PinPuPdControl 	= GPIO_PUPDR_NOTHING;
-	PWMpin.pinConfig.GPIO_PinAltFunMode 	= AF2;
-	gpio_Config(&PWMpin);
+	PWMpin2.pGPIOx = GPIOA;
+	PWMpin2.pinConfig.GPIO_PinNumber			= PIN_7;
+	PWMpin2.pinConfig.GPIO_PinMode 			= GPIO_MODE_ALTFN;
+	PWMpin2.pinConfig.GPIO_PinOutputType 	= GPIO_OTYPE_PUSHPULL;
+	PWMpin2.pinConfig.GPIO_PinOutputSpeed 	= GPIO_OSPEEDR_FAST;
+	PWMpin2.pinConfig.GPIO_PinPuPdControl 	= GPIO_PUPDR_NOTHING;
+	PWMpin2.pinConfig.GPIO_PinAltFunMode 	= AF2;
+	gpio_Config(&PWMpin2);
 
 	/*Configuración del PWM*/
-
 
 
 	pwm2.pTIMx			 	= TIM3;
