@@ -16,6 +16,7 @@ void config_systick_ms(Systic_Handler_t *pSystick_Handler_t){
 	//reiniciamos el valor de la variable que cuenta tiempo
 	ticks=0;
 
+	// COnfiguramos frecuencia del systic
 	switch(pSystick_Handler_t->Systick_Config_t.systemClock){
 
 	case HSI_TIMER_16MHz:
@@ -62,7 +63,7 @@ uint64_t getTicks_ms(void){
 	return ticks;
 }
 
-void delay_ms(uint32_t wait_time_ms){
+void systick_Delay_ms(uint32_t wait_time_ms){
 	//captura el primer valor de tiempo para comparar
 	ticks_start=getTicks_ms();
 
@@ -92,4 +93,5 @@ void SysTick_Handler(void){
 		ticks++;
 
 	}
+
 }

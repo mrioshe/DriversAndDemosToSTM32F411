@@ -222,7 +222,6 @@ void enable_timerx(PWM_Handler_t *pPWMHandler){
 void config_channel_pwm (PWM_Handler_t *pPWMHandler){
 
 
-
 switch(pPWMHandler->config.channel){
 
 	case PWM_CHANNEL_1:{

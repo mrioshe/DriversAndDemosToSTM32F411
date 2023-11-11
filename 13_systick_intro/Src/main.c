@@ -59,35 +59,35 @@ while (1) {
 		//Pruebas al systick
 
 		gpio_TooglePin(&userLed);
-		delay_ms(300);
+		systick_Delay_ms(300);
 		gpio_TooglePin(&userLed);
-		delay_ms(300);
+		systick_Delay_ms(300);
 		gpio_TooglePin(&userLed);
-		delay_ms(300);
+		systick_Delay_ms(300);
 		gpio_TooglePin(&userLed);
-		delay_ms(300);
+		systick_Delay_ms(300);
 
 		gpio_TooglePin(&userLed);
-		delay_ms(250);
+		systick_Delay_ms(250);
 		gpio_TooglePin(&userLed);
-		delay_ms(250);
+		systick_Delay_ms(250);
 		gpio_TooglePin(&userLed);
-		delay_ms(250);
+		systick_Delay_ms(250);
 		gpio_TooglePin(&userLed);
-		delay_ms(250);
+		systick_Delay_ms(250);
 
 		usart_writeMsg(&commSerial,"Contando cada segundo\n\r");
 
 		gpio_TooglePin(&userLed);
-		delay_ms(1000);
+		systick_Delay_ms(1000);
 		gpio_TooglePin(&userLed);
-		delay_ms(1000);
+		systick_Delay_ms(1000);
 		gpio_TooglePin(&userLed);
-		delay_ms(1000);
+		systick_Delay_ms(1000);
 		gpio_TooglePin(&userLed);
-		delay_ms(10000);
+		systick_Delay_ms(10000);
 		gpio_TooglePin(&userLed);
-		delay_ms(10000);
+		systick_Delay_ms(10000);
 		sendMsg=0;
 
 		}

@@ -32,10 +32,10 @@ typedef struct
 	Systick_Config_t		Systick_Config_t;
 } Systic_Handler_t;
 
+uint64_t getTicksMs(void);
 
 void config_systick_ms(Systic_Handler_t *pSystick_Handler_t);
-uint64_t getTicksMs(void);
-void delay_ms(uint32_t wait_time_ms);
+void systick_Delay_ms(uint32_t wait_time_ms);
 
 
 #endif /* SYSTICK_DRIVER_HAL_H_ */
