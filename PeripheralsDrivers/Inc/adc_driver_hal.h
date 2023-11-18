@@ -125,7 +125,7 @@ void adc_ScanMode(uint8_t state);
 void adc_StartContinuousConv(void);
 void adc_StopContinuousConv(void);
 void adc_peripheralOnOFF(uint8_t state);
-void adc_ConfigMultiChannel(ADC_Config_t *adcConfig[], uint8_t numberOfChannels);
+void adc_ConfigMultiChannel(ADC_Config_t adcConfig[16], uint8_t numberOfChannels);
 void adc_defineSQ(ADC_Config_t *adcConfig,uint8_t position);
 uint16_t adc_GetValue(void);
 

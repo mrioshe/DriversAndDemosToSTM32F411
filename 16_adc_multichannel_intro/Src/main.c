@@ -55,7 +55,6 @@ while (1) {
 		}
 
 
-
 	if(receivedChar){
 		if(receivedChar=='p'){
 			usart_writeMsg(&commSerial, "Testing, testing!!\n\r");
@@ -101,7 +100,7 @@ void initSys(void) {
 	/* Configuramos el timer del blink (TIM2) */
 	blinkTimer.pTIMx = TIM2;
 	blinkTimer.TIMx_Config.TIMx_Prescaler = 16000;
-	blinkTimer.TIMx_Config.TIMx_Period = 500;
+	blinkTimer.TIMx_Config.TIMx_Period = 2000;
 	blinkTimer.TIMx_Config.TIMx_mode = TIMER_UP_COUNTER;
 	blinkTimer.TIMx_Config.TIMx_InterruptEnable = TIMER_INT_ENABLE;
 
@@ -146,7 +145,7 @@ void initSys(void) {
 	sensors[0].samplingPeriod	= SAMPLING_PERIOD_84_CYCLES;
 	sensors[0].interrupState	= ADC_INT_ENABLE;
 
-	sensors[1].channel			= CHANNEL_8;
+	sensors[1].channel			= CHANNEL_6;
 	sensors[1].resolution		= RESOLUTION_12_BIT;
 	sensors[1].dataAlignment 	= ALIGNMENT_RIGHT;
 	sensors[1].samplingPeriod	= SAMPLING_PERIOD_84_CYCLES;
@@ -160,8 +159,7 @@ void initSys(void) {
 
 
 	number_of_sensors=3;
-	adc_ConfigMultiChannel(&sensors,number_of_sensors);
-
+	adc_ConfigMultiChannel(sensors,number_of_sensors);
 
 }
 

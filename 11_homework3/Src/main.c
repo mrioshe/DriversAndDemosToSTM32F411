@@ -547,13 +547,13 @@ void initSys(void) {
 	adc_signal[0].interrupState			= ADC_INT_ENABLE;
 
 	adc_signal[1].channel				= CHANNEL_6;
-	adc_signal[1].resolution			= RESOLUTION_8_BIT;
+	adc_signal[1].resolution			= RESOLUTION_12_BIT;
 	adc_signal[1].dataAlignment 		= ALIGNMENT_RIGHT;
 	adc_signal[1].samplingPeriod		= SAMPLING_PERIOD_84_CYCLES;
 	adc_signal[1].interrupState			= ADC_INT_ENABLE;
 
 	adc_signal[2].channel				= CHANNEL_15;
-	adc_signal[2].resolution			= RESOLUTION_6_BIT;
+	adc_signal[2].resolution			= RESOLUTION_12_BIT;
 	adc_signal[2].dataAlignment 		= ALIGNMENT_RIGHT;
 	adc_signal[2].samplingPeriod		= SAMPLING_PERIOD_84_CYCLES;
 	adc_signal[2].interrupState			= ADC_INT_ENABLE;

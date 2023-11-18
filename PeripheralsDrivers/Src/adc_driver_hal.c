@@ -1250,9 +1250,9 @@ void adc_StopContinuousConv(void){
 
 uint16_t adc_GetValue(void){
 
-	//while (!(ADC1->SR & ADC_SR_EOC)){
-		//__NOP();
-	//}
+//	while (!(ADC1->SR & ADC_SR_EOC)){
+//		__NOP();
+//	}
 	adcRawData= ADC1->DR;
 	return adcRawData;
 }
@@ -1456,6 +1456,8 @@ void ADC_IRQHandler(void){
 
 void adc_defineSQ(ADC_Config_t *adcConfig,uint8_t position){
 
+	//Configuramos la longtitud de la secuencia
+
 	switch(position-1){
 
 	case SQ_1:
@@ -1528,39 +1530,86 @@ void adc_defineSQ(ADC_Config_t *adcConfig,uint8_t position){
 	}
 }
 
-void adc_ConfigMultiChannel(ADC_Config_t *adcConfig[], uint8_t numberOfChannels){
+void adc_ConfigMultiChannel(ADC_Config_t adcConfig[16], uint8_t numberOfChannels){
 
+	/*1. Configuramos los pines */
 
-	//Configuramos la longtitud de la secuencia
-	ADC1->SQR1 &= ~ADC_SQR1_L;
-	ADC1->SQR1 |= ((numberOfChannels-1)<<ADC_SQR1_L_Pos);
+    for (uint8_t i = 0; i <= numberOfChannels; i++) {
 
-	//Configuración de cada uno de los canales:
-
-    for (uint8_t i = 0; i < numberOfChannels; i++) {
-
-    	adc_ConfigSingleChannel(adcConfig[i]);
-    	// Configuracición de la secuencia:
-    	adc_defineSQ(adcConfig[i],i+1);
+    	adc_ConfigAnalogPin(adcConfig[i].channel);
 
   }
 
+		/*2. Activamos la señnal de relog para el ADC*/
+		adc_enable_clock_peripheral();
+
+		// Limpiamos los registros antes de comenzar a configurar
+		ADC1->CR1=0;
+		ADC1->CR2=0;
+
+		/*Comenzamos la configuración de ADC1*/
+
+		/*3. Resolucion de los diferentes canales del ADC*/
+
+	    for (uint8_t i = 0; i <= numberOfChannels; i++) {
+
+	    	adc_set_resolution(&adcConfig[i]);
+
+	    }
 
 
-    // Activamos el modo SCAN
+		/*4. Configramos el modo Scan como activado*/
 
-    adc_ScanMode(SCAN_ON);
-
-    //Configuramos para que la interrupción se de al final de la secuencia
-    ADC1->CR1 |= ADC_CR1_EOCIE;
-    ADC1->CR2 |= ADC_CR2_EOCS;
-
-    }
+	    adc_ScanMode(SCAN_ON);
 
 
+		/*5. Configuramos la alineación de los datos (derecha o izquierda)*/
+
+	    adc_set_alignment(&adcConfig[0]);
+
+		/*6. Desactivamos el "Continuos mode "*/
+		adc_StopContinuousConv();
+
+		/*7. Aca se debería configurar el sampling*/
+
+	    for (uint8_t i = 0; i <= numberOfChannels; i++) {
+
+	    	adc_set_sampling_and_hold(&adcConfig[i]);
+
+	    }
+
+		/*8. COnfiguramos la secuencia y cuántos elementos hay en la secuencias*/
+
+		ADC1->SQR1 &= ~ADC_SQR1_L;
+		ADC1->SQR1 |= ((numberOfChannels-1)<<ADC_SQR1_L_Pos);
+
+	    for (uint8_t i = 0; i < numberOfChannels; i++) {
+
+	    	 adc_defineSQ(&adcConfig[i],i+1);
+
+	    }
 
 
+		/*9. Configuramos el prescaler del ADC en 2:1 (el más rápido que se puede tener)*/
+		ADC->CCR &= ~ADC_CCR_ADCPRE;
 
+		/*10. Desactivamos las interrupciones globales*/
+		__disable_irq();
+
+		/*11. Configuramos la interrupción (si se encuentra activa), además de incribir/remover la interrupción en el NVIC*/
+
+		adc_config_interrupt(&adcConfig[0]);
+
+	    ADC1->CR2 |= ADC_CR2_EOCS;
+
+		/*12. Activamos el moduloADC*/
+		adc_peripheralOnOFF(ADC_ON);
+
+		/*13. Activamos las interrupciones globales*/
+		__enable_irq();
+
+
+  }
 
 __attribute__((weak)) void adc_CompleteCallback(void){
 	__NOP();
