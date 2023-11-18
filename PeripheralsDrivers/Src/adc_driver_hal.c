@@ -1454,6 +1454,114 @@ void ADC_IRQHandler(void){
 
 }
 
+void adc_defineSQ(ADC_Config_t *adcConfig,uint8_t position){
+
+	switch(position-1){
+
+	case SQ_1:
+			ADC1->SQR3 |= (adcConfig->channel<<ADC_SQR3_SQ1_Pos);
+		break;
+
+	case SQ_2:
+			ADC1->SQR3 |= (adcConfig->channel<<ADC_SQR3_SQ2_Pos);
+		break;
+
+	case SQ_3:
+			ADC1->SQR3 |= (adcConfig->channel<<ADC_SQR3_SQ3_Pos);
+		break;
+
+	case SQ_4:
+			ADC1->SQR3 |= (adcConfig->channel<<ADC_SQR3_SQ4_Pos);
+		break;
+
+	case SQ_5:
+			ADC1->SQR3 |= (adcConfig->channel<<ADC_SQR3_SQ5_Pos);
+		break;
+
+	case SQ_6:
+			ADC1->SQR3 |= (adcConfig->channel<<ADC_SQR3_SQ6_Pos);
+		break;
+
+	case SQ_7:
+			ADC1->SQR2 |= (adcConfig->channel<<ADC_SQR2_SQ7_Pos);
+		break;
+
+	case SQ_8:
+			ADC1->SQR2 |= (adcConfig->channel<<ADC_SQR2_SQ8_Pos);
+		break;
+
+	case SQ_9:
+			ADC1->SQR2 |= (adcConfig->channel<<ADC_SQR2_SQ9_Pos);
+		break;
+
+	case SQ_10:
+			ADC1->SQR2 |= (adcConfig->channel<<ADC_SQR2_SQ10_Pos);
+		break;
+
+	case SQ_11:
+			ADC1->SQR2 |= (adcConfig->channel<<ADC_SQR2_SQ11_Pos);
+		break;
+
+	case SQ_12:
+			ADC1->SQR2 |= (adcConfig->channel<<ADC_SQR2_SQ12_Pos);
+		break;
+
+	case SQ_13:
+			ADC1->SQR1 |= (adcConfig->channel<<ADC_SQR1_SQ13_Pos);
+		break;
+
+	case SQ_14:
+			ADC1->SQR1 |= (adcConfig->channel<<ADC_SQR1_SQ14_Pos);
+		break;
+
+	case SQ_15:
+			ADC1->SQR1 |= (adcConfig->channel<<ADC_SQR1_SQ15_Pos);
+		break;
+
+	case SQ_16:
+			ADC1->SQR1 |= (adcConfig->channel<<ADC_SQR1_SQ16_Pos);
+		break;
+
+	default:
+		__NOP();
+		break;
+	}
+}
+
+void adc_ConfigMultiChannel(ADC_Config_t *adcConfig[], uint8_t numberOfChannels){
+
+
+	//Configuramos la longtitud de la secuencia
+	ADC1->SQR1 &= ~ADC_SQR1_L;
+	ADC1->SQR1 |= ((numberOfChannels-1)<<ADC_SQR1_L_Pos);
+
+	//Configuración de cada uno de los canales:
+
+    for (uint8_t i = 0; i < numberOfChannels; i++) {
+
+    	adc_ConfigSingleChannel(adcConfig[i]);
+    	// Configuracición de la secuencia:
+    	adc_defineSQ(adcConfig[i],i+1);
+
+  }
+
+
+
+    // Activamos el modo SCAN
+
+    adc_ScanMode(SCAN_ON);
+
+    //Configuramos para que la interrupción se de al final de la secuencia
+    ADC1->CR1 |= ADC_CR1_EOCIE;
+    ADC1->CR2 |= ADC_CR2_EOCS;
+
+    }
+
+
+
+
+
+
 __attribute__((weak)) void adc_CompleteCallback(void){
 	__NOP();
 }

@@ -31,6 +31,25 @@ enum{
 	CHANNEL_15
 };
 
+enum{
+	SQ_1=0,
+	SQ_2,
+	SQ_3,
+	SQ_4,
+	SQ_5,
+	SQ_6,
+	SQ_7,
+	SQ_8,
+	SQ_9,
+	SQ_10,
+	SQ_11,
+	SQ_12,
+	SQ_13,
+	SQ_14,
+	SQ_15,
+	SQ_16
+};
+
 
 enum{
 	RESOLUTION_12_BIT=0,
@@ -106,6 +125,8 @@ void adc_ScanMode(uint8_t state);
 void adc_StartContinuousConv(void);
 void adc_StopContinuousConv(void);
 void adc_peripheralOnOFF(uint8_t state);
+void adc_ConfigMultiChannel(ADC_Config_t *adcConfig[], uint8_t numberOfChannels);
+void adc_defineSQ(ADC_Config_t *adcConfig,uint8_t position);
 uint16_t adc_GetValue(void);
 
 /*Configuraciones avanzadas del ADC*/
