@@ -46,8 +46,8 @@ uint8_t sendMsg=0;
 uint8_t sequencyData=0;
 uint8_t number_of_sensors=0;
 
-uint16_t duttyValue=10000;
-uint16_t PWMperiod=20000;
+uint16_t duttyValue=1000;
+uint16_t PWMperiod=2000;
 
 char bufferData[64]={0};
 
@@ -146,7 +146,7 @@ void initSys(void) {
 	pwm.config.timer		= TIMER_TIM3;
 	pwm.config.dutty		= duttyValue;
 	pwm.config.channel		= PWM_CHANNEL_1;
-	pwm.config.prescaler	= 16;
+	pwm.config.prescaler	= 1600;
 	pwm.config.period		= PWMperiod;
 	pwm_Config(&pwm);
 
@@ -175,8 +175,7 @@ void initSys(void) {
 
 	number_of_sensors=3;
 	adc_ConfigMultiChannel(sensors,number_of_sensors);
-	adc_peripheralOnOFF(ADC_ON);
-	adc_startTriggeredAdc(DETECTION_RISING_EDGE,EXTI_LINE11_EVENT);
+	adc_startTriggeredAdc(DETECTION_RISING_EDGE,TIM3_CH1_EVENT);
 
 }
 
