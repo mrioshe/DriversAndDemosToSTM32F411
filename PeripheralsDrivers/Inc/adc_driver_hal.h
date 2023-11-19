@@ -71,7 +71,7 @@ enum{
 	TIM5_CH1_EVENT,
 	TIM5_CH2_EVENT,
 	TIM5_CH3_EVENT,
-	EXTI_LINE11
+	EXTI_LINE11_EVENT
 };
 
 enum{
@@ -151,8 +151,8 @@ void adc_peripheralOnOFF(uint8_t state);
 void adc_ConfigMultiChannel(ADC_Config_t adcConfig[16], uint8_t numberOfChannels);
 void adc_defineSQ(ADC_Config_t *adcConfig,uint8_t position);
 void adc_startTriggeredAdc(uint8_t triggerPolarity,uint8_t event);
-void SetTriggerPolarity(triggerPolarity);
-void SetTriggerEvent(event);
+void SetTriggerPolarity(uint8_t triggerPolarity);
+void SetTriggerEvent(uint8_t event);
 uint16_t adc_GetValue(void);
 
 /*Configuraciones avanzadas del ADC*/

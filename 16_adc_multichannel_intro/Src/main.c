@@ -160,7 +160,7 @@ void initSys(void) {
 
 	number_of_sensors=3;
 	adc_ConfigMultiChannel(sensors,number_of_sensors);
-
+	adc_peripheralOnOFF(ADC_ON);
 }
 
 void Timer2_Callback(void) {

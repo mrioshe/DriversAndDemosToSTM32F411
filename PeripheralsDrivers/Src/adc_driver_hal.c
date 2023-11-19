@@ -1620,7 +1620,7 @@ void adc_startTriggeredAdc(uint8_t triggerPolarity,uint8_t event){
 
 }
 
-void SetTriggerPolarity(triggerPolarity){
+void SetTriggerPolarity(uint8_t  triggerPolarity){
 
 	//limpiamos los bits:
 		ADC1->CR2 &= ~ADC_CR2_EXTEN;
@@ -1649,7 +1649,7 @@ void SetTriggerPolarity(triggerPolarity){
 }
 
 
-void SetTriggerEvent(event){
+void SetTriggerEvent(uint8_t event){
 
 	//limpiamos los bits:
 		ADC1->CR2 &= ~ADC_CR2_EXTSEL;
@@ -1718,7 +1718,7 @@ void SetTriggerEvent(event){
 		ADC1->CR2 |= ADC_CR2_EXTSEL_3;
 		break;
 
-	case EXTI_LINE11:
+	case EXTI_LINE11_EVENT:
 		ADC1->CR2 |= ADC_CR2_EXTSEL_0;
 		ADC1->CR2 |= ADC_CR2_EXTSEL_1;
 		ADC1->CR2 |= ADC_CR2_EXTSEL_2;
