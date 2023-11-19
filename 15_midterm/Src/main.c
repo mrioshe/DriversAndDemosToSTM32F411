@@ -18,31 +18,24 @@
 
 #include <stdint.h>
 #include <stm32f4xx.h>
+
+#include <string.h>
+
+
+
 #include <stm32_assert.h>
+
 #include "usart_driver_hal.h"
 #include "gpio_driver_hal.h"
 #include "timer_driver_hal.h"
 #include "exti_driver_hal.h"
 #include "adc_driver_hal.h"
-#include <string.h>
 #include "pwm_driver_hal.h"
 #include "systick_driver_hal.h"
 
 //Declaracion de variables:
 
-GPIO_Handler_t sw={0};
 GPIO_Handler_t stateled={0};
-GPIO_Handler_t led_selector={0};
-GPIO_Handler_t dt={0};
-GPIO_Handler_t clk={0};
-GPIO_Handler_t leds_7segment[8]={0};
-GPIO_Handler_t vcc_units_7seg={0};
-GPIO_Handler_t vcc_decs_7seg={0};
-GPIO_Handler_t pinTx = {0};
-GPIO_Handler_t pinRx = {0};
-GPIO_Handler_t PWMpin= { 0 };
-GPIO_Handler_t PWMpin1= { 0 };
-GPIO_Handler_t PWMpin2= { 0 };
 
 Timer_Handler_t blinkTimer={0};
 Timer_Handler_t frec_7segment={0};
@@ -56,6 +49,19 @@ EXTI_Config_t interrupt_sw={0};
 EXTI_Config_t interrupt_clk={0};
 
 USART_Handler_t commSerial= { 0 };
+
+GPIO_Handler_t sw={0};
+GPIO_Handler_t led_selector={0};
+GPIO_Handler_t dt={0};
+GPIO_Handler_t clk={0};
+GPIO_Handler_t leds_7segment[8]={0};
+GPIO_Handler_t vcc_units_7seg={0};
+GPIO_Handler_t vcc_decs_7seg={0};
+GPIO_Handler_t pinTx = {0};
+GPIO_Handler_t pinRx = {0};
+GPIO_Handler_t PWMpin= { 0 };
+GPIO_Handler_t PWMpin1= { 0 };
+GPIO_Handler_t PWMpin2= { 0 };
 
 ADC_Config_t adc_signal[3]={0};
 
@@ -77,8 +83,6 @@ uint8_t digit_selector=0;
 uint8_t number_desc_aux[2]={0};
 uint8_t selector={0};
 uint8_t resolution_value={0};
-
-
 
 
 //funciones:
