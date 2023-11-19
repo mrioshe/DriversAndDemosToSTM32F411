@@ -1611,9 +1611,132 @@ void adc_ConfigMultiChannel(ADC_Config_t adcConfig[16], uint8_t numberOfChannels
 
   }
 
+void adc_startTriggeredAdc(uint8_t triggerPolarity,uint8_t event){
+
+	SetTriggerPolarity(triggerPolarity);
+	SetTriggerEvent(event);
+	// Se activa la conversión:
+	ADC1->CR2 |= ADC_CR2_SWSTART;
+
+}
+
+void SetTriggerPolarity(triggerPolarity){
+
+	//limpiamos los bits:
+		ADC1->CR2 &= ~ADC_CR2_EXTEN;
+
+	switch(triggerPolarity){
+
+	case TRIGGER_DETECTION_DISABLE:
+		ADC1->CR2 &= ~ADC_CR2_EXTEN;
+		break;
+
+	case DETECTION_RISING_EDGE:
+		ADC1->CR2 |= ADC_CR2_EXTEN_0;
+		break;
+
+	case DETECTION_FALLING_EDGE:
+		ADC1->CR2 |= ADC_CR2_EXTEN_1;
+		break;
+
+	case DETECTION_RISING_FALLING_EDGES:
+		ADC1->CR2 |= ADC_CR2_EXTEN;
+		break;
+		default:
+			__NOP();
+			break;
+	}
+}
+
+
+void SetTriggerEvent(event){
+
+	//limpiamos los bits:
+		ADC1->CR2 &= ~ADC_CR2_EXTSEL;
+
+	switch(event){
+
+	case TIM1_CH1_EVENT:
+		ADC1->CR2 &= ~ADC_CR2_EXTSEL;
+		break;
+
+	case TIM1_CH2_EVENT:
+		ADC1->CR2 |= ADC_CR2_EXTSEL_0;
+		break;
+
+	case TIM1_CH3_EVENT:
+		ADC1->CR2 |= ADC_CR2_EXTSEL_1;
+		break;
+
+	case TIM2_CH2_EVENT:
+		ADC1->CR2 |= ADC_CR2_EXTSEL_0;
+		ADC1->CR2 |= ADC_CR2_EXTSEL_1;
+		break;
+
+	case TIM2_CH3_EVENT:
+		ADC1->CR2 |= ADC_CR2_EXTSEL_2;
+		break;
+
+	case TIM2_CH4_EVENT:
+		ADC1->CR2 |= ADC_CR2_EXTSEL_0;
+		ADC1->CR2 |= ADC_CR2_EXTSEL_2;
+		break;
+
+	case TIM2_TRGO_EVENT:
+		ADC1->CR2 |= ADC_CR2_EXTSEL_1;
+		ADC1->CR2 |= ADC_CR2_EXTSEL_2;
+		break;
+
+	case TIM3_CH1_EVENT:
+		ADC1->CR2 |= ADC_CR2_EXTSEL_0;
+		ADC1->CR2 |= ADC_CR2_EXTSEL_1;
+		ADC1->CR2 |= ADC_CR2_EXTSEL_2;
+		break;
+
+	case TIM3_TRGO_EVENT:
+		ADC1->CR2 |= ADC_CR2_EXTSEL_3;
+		break;
+
+	case TIM4_CH4_EVENT:
+		ADC1->CR2 |= ADC_CR2_EXTSEL_0;
+		ADC1->CR2 |= ADC_CR2_EXTSEL_3;
+		break;
+
+	case TIM5_CH1_EVENT:
+		ADC1->CR2 |= ADC_CR2_EXTSEL_1;
+		ADC1->CR2 |= ADC_CR2_EXTSEL_3;
+		break;
+
+	case TIM5_CH2_EVENT:
+		ADC1->CR2 |= ADC_CR2_EXTSEL_0;
+		ADC1->CR2 |= ADC_CR2_EXTSEL_1;
+		ADC1->CR2 |= ADC_CR2_EXTSEL_3;
+		break;
+
+	case TIM5_CH3_EVENT:
+		ADC1->CR2 |= ADC_CR2_EXTSEL_2;
+		ADC1->CR2 |= ADC_CR2_EXTSEL_3;
+		break;
+
+	case EXTI_LINE11:
+		ADC1->CR2 |= ADC_CR2_EXTSEL_0;
+		ADC1->CR2 |= ADC_CR2_EXTSEL_1;
+		ADC1->CR2 |= ADC_CR2_EXTSEL_2;
+		ADC1->CR2 |= ADC_CR2_EXTSEL_3;
+		break;
+
+		default:
+			__NOP();
+			break;
+	}
+
+}
+
+
+
+
 __attribute__((weak)) void adc_CompleteCallback(void){
 	__NOP();
 }
 
-/*Configuracion para hacer conversiones en multiles canales y en un orden especifico*/
 /*Configuracion para trigger externo*/

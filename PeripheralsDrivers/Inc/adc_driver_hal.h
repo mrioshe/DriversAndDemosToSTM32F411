@@ -50,6 +50,29 @@ enum{
 	SQ_16
 };
 
+enum{
+	TRIGGER_DETECTION_DISABLE=0,
+	DETECTION_RISING_EDGE,
+	DETECTION_FALLING_EDGE,
+	DETECTION_RISING_FALLING_EDGES
+};
+
+enum{
+	TIM1_CH1_EVENT=0,
+	TIM1_CH2_EVENT,
+	TIM1_CH3_EVENT,
+	TIM2_CH2_EVENT,
+	TIM2_CH3_EVENT,
+	TIM2_CH4_EVENT,
+	TIM2_TRGO_EVENT,
+	TIM3_CH1_EVENT,
+	TIM3_TRGO_EVENT,
+	TIM4_CH4_EVENT,
+	TIM5_CH1_EVENT,
+	TIM5_CH2_EVENT,
+	TIM5_CH3_EVENT,
+	EXTI_LINE11
+};
 
 enum{
 	RESOLUTION_12_BIT=0,
@@ -127,6 +150,9 @@ void adc_StopContinuousConv(void);
 void adc_peripheralOnOFF(uint8_t state);
 void adc_ConfigMultiChannel(ADC_Config_t adcConfig[16], uint8_t numberOfChannels);
 void adc_defineSQ(ADC_Config_t *adcConfig,uint8_t position);
+void adc_startTriggeredAdc(uint8_t triggerPolarity,uint8_t event);
+void SetTriggerPolarity(triggerPolarity);
+void SetTriggerEvent(event);
 uint16_t adc_GetValue(void);
 
 /*Configuraciones avanzadas del ADC*/
