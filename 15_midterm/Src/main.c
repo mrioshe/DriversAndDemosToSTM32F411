@@ -89,6 +89,8 @@ void change_num(void);
 uint8_t get_resolution_value(ADC_Config_t *adcConfig);
 
 int main() {
+	// Iniciamos la unidad de punto flotante:
+	SCB->CPACR |=(0xF<<20);
 	// Iniciamos el sistema:
 	initSys();
 while (1) {
