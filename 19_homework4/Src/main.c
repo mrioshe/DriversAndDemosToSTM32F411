@@ -70,6 +70,13 @@ uint32_t dataSize=0;
 float32_t sineValue =0.0;
 float32_t sineArgValue=0.0;
 
+/*Arreglos para la toma de datos:*/
+uint16_t data1[512]={0};
+uint16_t data2[512]={0};
+uint16_t data3[512]={0};
+
+uint16_t counterData=1;
+
 /*Elementos para generar una señal*/
 
 #define SINE_DATA_SIZE 4096 // Tamaño del arreglo de datos.
@@ -97,6 +104,30 @@ void createSignal(void);
 int main() {
 	initSys();
 while (1) {
+
+		if (receivedChar=='a'){
+			createSignal();
+			sprintf(bufferData,"La información de la señal 1 es... \n");
+			usart_writeMsg(&commSerial,bufferData);
+			receivedChar='\0';
+
+		}
+
+		if (receivedChar=='b'){
+			createSignal();
+			sprintf(bufferData,"La información de la señal 1 es... \n");
+			usart_writeMsg(&commSerial,bufferData);
+			receivedChar='\0';
+
+		}
+
+		if (receivedChar=='c'){
+			createSignal();
+			sprintf(bufferData,"CLa información de la señal 1 es... \n");
+			usart_writeMsg(&commSerial,bufferData);
+			receivedChar='\0';
+
+		}
 
 	 	if (receivedChar=='C'){
 	 		createSignal();
@@ -294,7 +325,7 @@ void initSys(void) {
 
 	number_of_sensors=3;
 	adc_ConfigMultiChannel(sensors,number_of_sensors);
-	adc_startTriggeredAdc(DETECTION_RISING_EDGE,TIM3_CH1_EVENT);
+
 
 }
 
@@ -308,22 +339,46 @@ void createSignal(void){
 
 void Timer2_Callback(void) {
 	gpio_TooglePin(&userLed);
-	sendMsg++;
 }
 
 void usart2_RxCallback(void) {
 	receivedChar = usart_getRxData2();
+	adc_startTriggeredAdc(DETECTION_RISING_EDGE,TIM3_CH1_EVENT);
 
 }
 
-
 void adc_CompleteCallback(void) {
 
-	sensors[sequencyData].adcData = adc_GetValue();
-	sequencyData++;
-	if(sequencyData>=number_of_sensors){
-		sequencyData=0;
+	if(counterData !=(512*3)){
+		sensors[sequencyData].adcData = adc_GetValue();
+
+		switch(sequencyData){
+
+		case 0:
+			data1[couterData]=sensors[sequencyData].adcData;
+			break;
+		case 1:
+			data2[couterData]=sensors[sequencyData].adcData;
+			break;
+		case 2:
+			data3[couterData]=sensors[sequencyData].adcData;
+			break;
+		default:
+			_NOP();
+			break;
+		}
+
+		sequencyData++;
+		if(sequencyData>=number_of_sensors){
+			sequencyData=0;
+		}
+		counterData++;
+	} else if(counterData ==(512*3)){
+		counterData=0;
+		adc_StopTriggeredAdc();
 	}
+
+
 }
 
 

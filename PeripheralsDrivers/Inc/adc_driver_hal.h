@@ -151,6 +151,7 @@ void adc_peripheralOnOFF(uint8_t state);
 void adc_ConfigMultiChannel(ADC_Config_t adcConfig[16], uint8_t numberOfChannels);
 void adc_defineSQ(ADC_Config_t *adcConfig,uint8_t position);
 void adc_startTriggeredAdc(uint8_t triggerPolarity,uint8_t event);
+void adc_StopTriggeredAdc(void);
 void SetTriggerPolarity(uint8_t triggerPolarity);
 void SetTriggerEvent(uint8_t event);
 uint16_t adc_GetValue(void);

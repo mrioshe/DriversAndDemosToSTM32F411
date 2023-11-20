@@ -1616,6 +1616,7 @@ void adc_startTriggeredAdc(uint8_t triggerPolarity,uint8_t event){
 	SetTriggerPolarity(triggerPolarity);
 	SetTriggerEvent(event);
 	// Se activa la conversión:
+	adc_peripheralOnOFF(ADC_ON);
 	ADC1->CR2 |= ADC_CR2_SWSTART;
 
 }
@@ -1732,7 +1733,12 @@ void SetTriggerEvent(uint8_t event){
 
 }
 
+void adc_StopTriggeredAdc(void){
 
+	SetTriggerPolarity(TRIGGER_DETECTION_DISABLE);
+	adc_peripheralOnOFF(ADC_OFF);
+
+}
 
 
 __attribute__((weak)) void adc_CompleteCallback(void){

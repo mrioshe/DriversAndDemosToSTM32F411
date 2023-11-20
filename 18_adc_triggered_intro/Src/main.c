@@ -25,6 +25,7 @@
 #include "exti_driver_hal.h"
 #include "adc_driver_hal.h"
 #include "pwm_driver_hal.h"
+#include "systick_driver_hal.h"
 
 
 GPIO_Handler_t userLed = { 0 };
@@ -40,6 +41,7 @@ GPIO_Handler_t pinTx = {0};
 GPIO_Handler_t pinRx = {0};
 char bufferData[64]={0};
 
+Systic_Handler_t systick = {0};
 
 PWM_Handler_t pwm={0};
 
@@ -61,7 +63,10 @@ int main() {
 	initSys();
 while (1) {
 
-	 	__NOP();
+	adc_startTriggeredAdc(DETECTION_RISING_EDGE,TIM3_CH1_EVENT);
+	systick_Delay_ms(2000);
+	adc_StopTriggeredAdc();
+	systick_Delay_ms(2000);
 }
 
 }
@@ -175,8 +180,13 @@ void initSys(void) {
 
 
 	number_of_sensors=3;
+
+	systick.Systick							= SysTick;
+	systick.Systick_Config_t.systemClock	=HSI_TIMER_16MHz;
+	config_systick_ms(&systick);
+
 	adc_ConfigMultiChannel(sensors,number_of_sensors);
-	adc_startTriggeredAdc(DETECTION_RISING_EDGE,TIM3_CH1_EVENT);
+
 
 }
 
