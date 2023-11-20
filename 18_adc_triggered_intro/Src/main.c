@@ -38,6 +38,8 @@ EXTI_Config_t adcTriggerSignal={0};
 USART_Handler_t commSerial= { 0 };
 GPIO_Handler_t pinTx = {0};
 GPIO_Handler_t pinRx = {0};
+char bufferData[64]={0};
+
 
 PWM_Handler_t pwm={0};
 
@@ -49,7 +51,6 @@ uint8_t number_of_sensors=0;
 uint16_t duttyValue=1000;
 uint16_t PWMperiod=2000;
 
-char bufferData[64]={0};
 
 //Elementos para la conversion ADC
 ADC_Config_t sensors[3] ={0};
