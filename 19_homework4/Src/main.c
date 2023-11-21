@@ -30,6 +30,7 @@
 #include "exti_driver_hal.h"
 #include "adc_driver_hal.h"
 #include "pwm_driver_hal.h"
+#include "systick_driver_hal.h"
 
 #include "arm_math.h"
 
@@ -52,36 +53,45 @@ char bufferData[64]={0};
 
 PWM_Handler_t pwm={0};
 
-uint16_t duttyValue=20000;
-uint16_t PWMperiod=40000;
+uint16_t duttyValue=2;
+uint16_t PWMperiod=4;
+
 uint8_t sequencyData=0;
+uint8_t flagAdcComplete=0;
 
 //Elementos para la conversion ADC
 ADC_Config_t sensors[3] ={0};
+uint8_t number_of_sensors={0};
 
-/*arreglos para pruebas de las librerias de CMSIS*/
-
-float32_t srcNumber[4] = {-0.987,32.26,-45.21,-987.321};
-float32_t destNumber[4] ={0};
-uint32_t dataSize=0;
+float32_t maxValue=0;
+float32_t maxFftValue=0;
+float32_t minValue=0;
 
 /*Para utilizar la función seno*/
 
-float32_t sineValue =0.0;
-float32_t sineArgValue=0.0;
+Systic_Handler_t systick = {0};
 
+#define ARRAY_SIZE 512
+#define SINE_DATA_SIZE 4096
 /*Arreglos para la toma de datos:*/
-uint16_t data1[512]={0};
-uint16_t data2[512]={0};
-uint16_t data3[512]={0};
+float32_t data1[ARRAY_SIZE]={0};
+float32_t data2[ARRAY_SIZE]={0};
+float32_t data3[ARRAY_SIZE]={0};
 
-uint16_t counterData=1;
+/*Contador para almacenar los datos en los arreglos*/
+uint16_t counterData=0;
+
+/*Variable auxiliar para almacenar el indice donde está el máximo valor*/
+float32_t maxIndex;
+float32_t minIndex;
+uint32_t maxFftIndex;
+float32_t DominantFrecuency;
 
 /*Elementos para generar una señal*/
 
 #define SINE_DATA_SIZE 4096 // Tamaño del arreglo de datos.
-float32_t fs=8000.0; //Frecuencia de muestreo
-float32_t f0=250.0; //Frecuencia fundamental de la señal
+float32_t fs=40000.0; //Frecuencia de muestreo
+float32_t f0=500; //Frecuencia fundamental de la señal
 float32_t dt=0.0; //periodo de muestreo (1/fs)
 float32_t stopTime=1.0; //periodo de muestreo (1/fs)
 float32_t amplitud=5; //amplitud de la señal generada
@@ -98,34 +108,100 @@ arm_status statusInitFFT=ARM_MATH_ARGUMENT_ERROR;
 uint16_t fftSize=1024;
 
 
+
 void initSys(void);
 void createSignal(void);
 
 int main() {
+
 	initSys();
 while (1) {
 
-		if (receivedChar=='a'){
-			createSignal();
-			sprintf(bufferData,"La información de la señal 1 es... \n");
-			usart_writeMsg(&commSerial,bufferData);
-			receivedChar='\0';
-
+	if (receivedChar=='a'){
+		adc_startTriggeredAdc(DETECTION_RISING_EDGE,TIM3_CH1_EVENT);
+		systick_Delay_ms(1);
+		if(flagAdcComplete){
+			flagAdcComplete=0;
+			arm_max_no_idx_f32(data1, ARRAY_SIZE,&maxValue);
+			arm_min_no_idx_f32(data1, ARRAY_SIZE,&minValue);
+			statusInitFFT=arm_rfft_fast_init_f32(&config_Rfft_fast_f32,fftSize);
+			arm_rfft_fast_f32(&config_Rfft_fast_f32,data1,transformedSignal,ifftFlag);
+			arm_abs_f32(transformedSignal, data1,fftSize);
+			arm_max_f32(data1, fftSize, &maxFftValue, &maxFftIndex);
 		}
 
-		if (receivedChar=='b'){
-			createSignal();
-			sprintf(bufferData,"La información de la señal 1 es... \n");
-			usart_writeMsg(&commSerial,bufferData);
-			receivedChar='\0';
+		DominantFrecuency=(maxFftIndex-1)*fs/(2*fftSize);
 
+		sprintf(bufferData,"La información de la señal 1 es:  \n\r");
+				usart_writeMsg(&commSerial,bufferData);
+				receivedChar='\0';
+		sprintf(bufferData,"Valor máximo: %f \n\r", (3.3*maxValue)/4096);
+				usart_writeMsg(&commSerial,bufferData);
+				receivedChar='\0';
+		sprintf(bufferData,"Valor mínimo: %f \n\r", (3.3*minValue)/4096);
+				usart_writeMsg(&commSerial,bufferData);
+				receivedChar='\0';
+		sprintf(bufferData,"Frecuencia dominante obtenida por FFT: %#.6f  \n\r", DominantFrecuency);
+				usart_writeMsg(&commSerial,bufferData);
+				receivedChar='\0';
+	}
+
+		if (receivedChar=='b'){
+			adc_startTriggeredAdc(DETECTION_RISING_EDGE,TIM3_CH1_EVENT);
+			systick_Delay_ms(1);
+			if(flagAdcComplete){
+				flagAdcComplete=0;
+				arm_max_no_idx_f32(data2, ARRAY_SIZE,&maxValue);
+				arm_min_no_idx_f32(data2, ARRAY_SIZE,&minValue);
+				statusInitFFT=arm_rfft_fast_init_f32(&config_Rfft_fast_f32,fftSize);
+				arm_rfft_fast_f32(&config_Rfft_fast_f32,data2,transformedSignal,ifftFlag);
+				arm_abs_f32(transformedSignal, data2,fftSize);
+				arm_max_f32(data2, fftSize, &maxFftValue, &maxFftIndex);
+			}
+
+			DominantFrecuency=(maxFftIndex-1)*fs/(2*fftSize);
+
+			sprintf(bufferData,"La información de la señal 2 es:  \n\r");
+					usart_writeMsg(&commSerial,bufferData);
+					receivedChar='\0';
+			sprintf(bufferData,"Valor máximo: %f \n\r", (3.3*maxValue)/4096);
+					usart_writeMsg(&commSerial,bufferData);
+					receivedChar='\0';
+			sprintf(bufferData,"Valor mínimo: %f \n\r", (3.3*minValue)/4096);
+					usart_writeMsg(&commSerial,bufferData);
+					receivedChar='\0';
+			sprintf(bufferData,"Frecuencia dominante obtenida por FFT: %#.6f  \n\r", DominantFrecuency);
+					usart_writeMsg(&commSerial,bufferData);
+					receivedChar='\0';
 		}
 
 		if (receivedChar=='c'){
-			createSignal();
-			sprintf(bufferData,"CLa información de la señal 1 es... \n");
-			usart_writeMsg(&commSerial,bufferData);
-			receivedChar='\0';
+			adc_startTriggeredAdc(DETECTION_RISING_EDGE,TIM3_CH1_EVENT);
+			systick_Delay_ms(1);
+			if(flagAdcComplete){
+				flagAdcComplete=0;
+				arm_max_no_idx_f32(data3, ARRAY_SIZE,&maxValue);
+				arm_min_no_idx_f32(data3, ARRAY_SIZE,&minValue);
+				statusInitFFT=arm_rfft_fast_init_f32(&config_Rfft_fast_f32,fftSize);
+				arm_rfft_fast_f32(&config_Rfft_fast_f32,sineSignal,transformedSignal,ifftFlag);
+				arm_abs_f32(transformedSignal, sineSignal,fftSize);
+				arm_max_f32(sineSignal, fftSize, &maxFftValue, &maxFftIndex);
+			}
+
+			DominantFrecuency=(maxFftIndex-1)*fs/(2*fftSize);
+
+			sprintf(bufferData,"La información de la señal 3 es:  \n\r");
+					usart_writeMsg(&commSerial,bufferData);
+					receivedChar='\0';
+			sprintf(bufferData,"Valor máximo: %f \n\r", (3.3*maxValue)/4096);
+					usart_writeMsg(&commSerial,bufferData);
+					receivedChar='\0';
+			sprintf(bufferData,"Valor mínimo: %f \n\r", (3.3*minValue)/4096);
+					usart_writeMsg(&commSerial,bufferData);
+					receivedChar='\0';
+			sprintf(bufferData,"Frecuencia dominante obtenida por FFT: %#.6f  \n\r", DominantFrecuency);
+					usart_writeMsg(&commSerial,bufferData);
+					receivedChar='\0';
 
 		}
 
@@ -136,93 +212,7 @@ while (1) {
 			receivedChar='\0';
 
 		}
-
-	 	if (receivedChar=='P'){
-
-	 		stopTime=0.0;
-	 		int i=0;
-
-	 		sprintf(bufferData,"Signal values:time - Sine \n");
-	 		usart_writeMsg(&commSerial,bufferData);
-
-	 		while(stopTime<0.01){
-	 			stopTime=dt*i;
-	 			i++;
-	 			sprintf(bufferData,"%#.5f ; %#.6f\n",stopTime,sineSignal[i]);
-	 			usart_writeMsg(&commSerial,bufferData);
-
-	 		}
-	 		receivedChar='\0';
-		}
-
-
-
-	 	if (receivedChar=='A'){
-
-	 		stopTime=0.0;
-	 		int i=0;
-
-	 		sprintf(bufferData,"Valor absoluto \n");
-	 		usart_writeMsg(&commSerial,bufferData);
-
-	 		arm_abs_f32(sineSignal,transformedSignal,SINE_DATA_SIZE);
-
-	 		while(stopTime<0.01){
-	 			stopTime=dt*i;
-	 			i++;
-	 			sprintf(bufferData,"%#.5f ; %#.6f\n",stopTime,transformedSignal[i]);
-	 			usart_writeMsg(&commSerial,bufferData);
-
-	 		}
-	 		receivedChar='\0';
-		}
-
-	 	if (receivedChar=='I'){
-
-	 		statusInitFFT=arm_rfft_fast_init_f32(&config_Rfft_fast_f32,fftSize);
-
-	 		if(statusInitFFT==ARM_MATH_SUCCESS){
-	 			sprintf(bufferData, "Initialization... SUCCESS! \n");
-	 			usart_writeMsg(&commSerial,bufferData);
-	 		}
-
-	 		receivedChar='\0';
-
-		}
-
-	 	if (receivedChar=='F'){
-
-	 		stopTime=0.0;
-	 		int i=0;
-	 		int j=0;
-
-	 		sprintf(bufferData,"FFT \n");
-	 		usart_writeMsg(&commSerial,bufferData);
-
-	 		if(statusInitFFT==ARM_MATH_SUCCESS){
-
-		 		arm_rfft_fast_f32(&config_Rfft_fast_f32,sineSignal,transformedSignal,ifftFlag);
-
-		 		arm_abs_f32(transformedSignal, sineSignal,fftSize);
-
-		 		for(i=1;i<fftSize;i++){
-		 			if(i%2){
-		 				sprintf(bufferData,"%u ; %#.6f\n",j,2*sineSignal[i]);
-		 				usart_writeMsg(&commSerial,bufferData);
-		 				j++;
-		 			}
-		 		}
-	 		}
-
-	 		else{
-	 			usart_writeMsg(&commSerial,"FFT no Initialized");
-	 		}
-
-	 		receivedChar='\0';
-		}
-
-}
-
+	}
 }
 
 void initSys(void) {
@@ -243,42 +233,13 @@ void initSys(void) {
 	/* Configuramos el timer del blink (TIM2) */
 	blinkTimer.pTIMx = TIM2;
 	blinkTimer.TIMx_Config.TIMx_Prescaler = 16000;
-	blinkTimer.TIMx_Config.TIMx_Period = 2000;
+	blinkTimer.TIMx_Config.TIMx_Period = 500;
 	blinkTimer.TIMx_Config.TIMx_mode = TIMER_UP_COUNTER;
 	blinkTimer.TIMx_Config.TIMx_InterruptEnable = TIMER_INT_ENABLE;
 
 	timer_Config(&blinkTimer);
 	timer_SetState(&blinkTimer, SET);
 
-	pinTx.pGPIOx = GPIOA;
-	pinTx.pinConfig.GPIO_PinNumber = PIN_2;
-	pinTx.pinConfig.GPIO_PinMode = GPIO_MODE_ALTFN;
-	pinTx.pinConfig.GPIO_PinOutputType = GPIO_OTYPE_PUSHPULL;
-	pinTx.pinConfig.GPIO_PinOutputSpeed = GPIO_OSPEEDR_FAST;
-	pinTx.pinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
-	pinTx.pinConfig.GPIO_PinAltFunMode = AF7;
-	gpio_Config(&pinTx);
-
-
-	pinRx.pGPIOx = GPIOA;
-	pinRx.pinConfig.GPIO_PinNumber = PIN_3;
-	pinRx.pinConfig.GPIO_PinMode = GPIO_MODE_ALTFN;
-	pinRx.pinConfig.GPIO_PinOutputType = GPIO_OTYPE_PUSHPULL;
-	pinRx.pinConfig.GPIO_PinOutputSpeed = GPIO_OSPEEDR_FAST;
-	pinRx.pinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
-	pinRx.pinConfig.GPIO_PinAltFunMode = AF7;
-	gpio_Config(&pinRx);
-
-	commSerial.ptrUSARTx = USART2;
-	commSerial.USART_Config.baudrate = USART_BAUDRATE_115200;
-	commSerial.USART_Config.datasize = USART_DATASIZE_8BIT;
-	commSerial.USART_Config.mode = USART_MODE_RXTX;
-	commSerial.USART_Config.parity = USART_PARITY_NONE;
-	commSerial.USART_Config.stopbits = USART_STOPBIT_1;
-	commSerial.USART_Config.enableIntRX = USART_RX_INTERRUP_ENABLE;
-	usart_Config(&commSerial);
-
-	usart_WriteChar(&commSerial,0);
 
 	/*Configurando la conversion ADC*/
 
@@ -325,6 +286,41 @@ void initSys(void) {
 
 	number_of_sensors=3;
 	adc_ConfigMultiChannel(sensors,number_of_sensors);
+	SCB->CPACR |= (0xF<<20);
+
+	pinTx.pGPIOx = GPIOA;
+		pinTx.pinConfig.GPIO_PinNumber = PIN_2;
+		pinTx.pinConfig.GPIO_PinMode = GPIO_MODE_ALTFN;
+		pinTx.pinConfig.GPIO_PinOutputType = GPIO_OTYPE_PUSHPULL;
+		pinTx.pinConfig.GPIO_PinOutputSpeed = GPIO_OSPEEDR_FAST;
+		pinTx.pinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+		pinTx.pinConfig.GPIO_PinAltFunMode = AF7;
+		gpio_Config(&pinTx);
+
+
+		pinRx.pGPIOx = GPIOA;
+		pinRx.pinConfig.GPIO_PinNumber = PIN_3;
+		pinRx.pinConfig.GPIO_PinMode = GPIO_MODE_ALTFN;
+		pinRx.pinConfig.GPIO_PinOutputType = GPIO_OTYPE_PUSHPULL;
+		pinRx.pinConfig.GPIO_PinOutputSpeed = GPIO_OSPEEDR_FAST;
+		pinRx.pinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+		pinRx.pinConfig.GPIO_PinAltFunMode = AF7;
+		gpio_Config(&pinRx);
+
+		commSerial.ptrUSARTx = USART2;
+		commSerial.USART_Config.baudrate = USART_BAUDRATE_115200;
+		commSerial.USART_Config.datasize = USART_DATASIZE_8BIT;
+		commSerial.USART_Config.mode = USART_MODE_RXTX;
+		commSerial.USART_Config.parity = USART_PARITY_NONE;
+		commSerial.USART_Config.stopbits = USART_STOPBIT_1;
+		commSerial.USART_Config.enableIntRX = USART_RX_INTERRUP_ENABLE;
+		usart_Config(&commSerial);
+
+		usart_WriteChar(&commSerial,0);
+
+		systick.Systick							= SysTick;
+		systick.Systick_Config_t.systemClock	=HSI_TIMER_16MHz;
+		config_systick_ms(&systick);
 
 
 }
@@ -339,43 +335,48 @@ void createSignal(void){
 
 void Timer2_Callback(void) {
 	gpio_TooglePin(&userLed);
+	sendMsg=1;
 }
 
 void usart2_RxCallback(void) {
 	receivedChar = usart_getRxData2();
-	adc_startTriggeredAdc(DETECTION_RISING_EDGE,TIM3_CH1_EVENT);
+
 
 }
 
 void adc_CompleteCallback(void) {
 
-	if(counterData !=(512*3)){
+	if(counterData !=(512)){
 		sensors[sequencyData].adcData = adc_GetValue();
 
 		switch(sequencyData){
 
 		case 0:
-			data1[couterData]=sensors[sequencyData].adcData;
+			data1[counterData]=sensors[sequencyData].adcData;
 			break;
 		case 1:
-			data2[couterData]=sensors[sequencyData].adcData;
+			data2[counterData]=sensors[sequencyData].adcData;
 			break;
 		case 2:
-			data3[couterData]=sensors[sequencyData].adcData;
+			data3[counterData]=sensors[sequencyData].adcData;
 			break;
 		default:
-			_NOP();
+			__NOP();
 			break;
 		}
 
 		sequencyData++;
 		if(sequencyData>=number_of_sensors){
 			sequencyData=0;
+			counterData++;
 		}
-		counterData++;
-	} else if(counterData ==(512*3)){
-		counterData=0;
+
+	} else if(counterData ==(512)){
+		counterData=1;
+		sequencyData=0;
+		flagAdcComplete=1;
 		adc_StopTriggeredAdc();
+
 	}
 
 
@@ -387,8 +388,4 @@ void assert_failed(uint8_t*file,uint32_t line){
 		//problems
 	}
 }
-void assert_failed(uint8_t*file,uint32_t line){
-	while(1){
-		//problems
-	}
-}
+

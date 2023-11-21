@@ -163,6 +163,7 @@ while (1) {
 
 		 		arm_abs_f32(transformedSignal, sineSignal,fftSize);
 
+
 		 		for(i=1;i<fftSize;i++){
 		 			if(i%2){
 		 				sprintf(bufferData,"%u ; %#.6f\n",j,2*sineSignal[i]);
@@ -238,7 +239,7 @@ void initSys(void) {
 
 	usart_WriteChar(&commSerial,0);
 
-	/*Configurando la conversion ADC*/
+	SCB->CPACR |= (0xF<<20);
 
 }
 
