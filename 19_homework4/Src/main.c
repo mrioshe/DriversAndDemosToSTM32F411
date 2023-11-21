@@ -53,8 +53,8 @@ char bufferData[64]={0};
 
 PWM_Handler_t pwm={0};
 
-uint16_t duttyValue=2;
-uint16_t PWMperiod=4;
+uint16_t duttyValue=12;
+uint16_t PWMperiod=25;
 
 uint8_t sequencyData=0;
 uint8_t flagAdcComplete=0;
@@ -119,31 +119,48 @@ while (1) {
 
 	if (receivedChar=='a'){
 		adc_startTriggeredAdc(DETECTION_RISING_EDGE,TIM3_CH1_EVENT);
-		systick_Delay_ms(1);
+		systick_Delay_ms(30);
 		if(flagAdcComplete){
+
+
 			flagAdcComplete=0;
 			arm_max_no_idx_f32(data1, ARRAY_SIZE,&maxValue);
 			arm_min_no_idx_f32(data1, ARRAY_SIZE,&minValue);
 			statusInitFFT=arm_rfft_fast_init_f32(&config_Rfft_fast_f32,fftSize);
 			arm_rfft_fast_f32(&config_Rfft_fast_f32,data1,transformedSignal,ifftFlag);
 			arm_abs_f32(transformedSignal, data1,fftSize);
+
+
+
+	 		int i=0;
+	 		int j=0;
+	 		for(i=1;i<fftSize;i++){
+	 			if(i%2){
+	 				sprintf(bufferData,"%u ; %#.6f\n",j,2*data1[i]);
+	 				usart_writeMsg(&commSerial,bufferData);
+	 				j++;
+	 			}
+	 		}
+	 		receivedChar='\0';
+
+
 			arm_max_f32(data1, fftSize, &maxFftValue, &maxFftIndex);
 		}
 
 		DominantFrecuency=(maxFftIndex-1)*fs/(2*fftSize);
 
-		sprintf(bufferData,"La información de la señal 1 es:  \n\r");
-				usart_writeMsg(&commSerial,bufferData);
-				receivedChar='\0';
-		sprintf(bufferData,"Valor máximo: %f \n\r", (3.3*maxValue)/4096);
-				usart_writeMsg(&commSerial,bufferData);
-				receivedChar='\0';
-		sprintf(bufferData,"Valor mínimo: %f \n\r", (3.3*minValue)/4096);
-				usart_writeMsg(&commSerial,bufferData);
-				receivedChar='\0';
-		sprintf(bufferData,"Frecuencia dominante obtenida por FFT: %#.6f  \n\r", DominantFrecuency);
-				usart_writeMsg(&commSerial,bufferData);
-				receivedChar='\0';
+//		sprintf(bufferData,"La información de la señal 1 es:  \n\r");
+//				usart_writeMsg(&commSerial,bufferData);
+//				receivedChar='\0';
+//		sprintf(bufferData,"Valor máximo: %f \n\r", (3.3*maxValue)/4096);
+//				usart_writeMsg(&commSerial,bufferData);
+//				receivedChar='\0';
+//		sprintf(bufferData,"Valor mínimo: %f \n\r", (3.3*minValue)/4096);
+//				usart_writeMsg(&commSerial,bufferData);
+//				receivedChar='\0';
+//		sprintf(bufferData,"Frecuencia dominante obtenida por FFT: %#.6f  \n\r", DominantFrecuency);
+//				usart_writeMsg(&commSerial,bufferData);
+//				receivedChar='\0';
 	}
 
 		if (receivedChar=='b'){
@@ -156,7 +173,19 @@ while (1) {
 				statusInitFFT=arm_rfft_fast_init_f32(&config_Rfft_fast_f32,fftSize);
 				arm_rfft_fast_f32(&config_Rfft_fast_f32,data2,transformedSignal,ifftFlag);
 				arm_abs_f32(transformedSignal, data2,fftSize);
+
+		 		int i=0;
+		 		int j=0;
+		 		for(i=1;i<fftSize;i++){
+		 			if(i%2){
+		 				sprintf(bufferData,"%u ; %#.6f\n",j,2*data2[i]);
+		 				usart_writeMsg(&commSerial,bufferData);
+		 				j++;
+		 			}
+		 		}
 				arm_max_f32(data2, fftSize, &maxFftValue, &maxFftIndex);
+
+
 			}
 
 			DominantFrecuency=(maxFftIndex-1)*fs/(2*fftSize);
@@ -211,6 +240,22 @@ while (1) {
 			usart_writeMsg(&commSerial,bufferData);
 			receivedChar='\0';
 
+		}
+
+
+
+
+	 	if (receivedChar=='P'){
+			adc_startTriggeredAdc(DETECTION_RISING_EDGE,TIM3_CH1_EVENT);
+			systick_Delay_ms(30);
+	 		dt=1/fs;
+
+	 		for (int i=0;i< ARRAY_SIZE/4;i++){
+	 			stopTime=dt*i;
+	 			sprintf(bufferData,"%#.5f ; %#.6f\n",stopTime,data1[i]*3.3/4096);
+	 			usart_writeMsg(&commSerial,bufferData);
+	 		}
+	 		receivedChar='\0';
 		}
 	}
 }

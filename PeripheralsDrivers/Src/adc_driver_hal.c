@@ -1253,7 +1253,7 @@ uint16_t adc_GetValue(void){
 //	while (!(ADC1->SR & ADC_SR_EOC)){
 //		__NOP();
 //	}
-	adcRawData= ADC1->DR;
+//	adcRawData= ADC1->DR;
 	return adcRawData;
 }
 
