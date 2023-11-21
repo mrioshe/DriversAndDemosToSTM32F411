@@ -126,6 +126,7 @@ while (1) {
 			flagAdcComplete=0;
 			arm_max_no_idx_f32(data1, ARRAY_SIZE,&maxValue);
 			arm_min_no_idx_f32(data1, ARRAY_SIZE,&minValue);
+
 			statusInitFFT=arm_rfft_fast_init_f32(&config_Rfft_fast_f32,fftSize);
 			arm_rfft_fast_f32(&config_Rfft_fast_f32,data1,transformedSignal,ifftFlag);
 			arm_abs_f32(transformedSignal, data1,fftSize);
@@ -147,20 +148,20 @@ while (1) {
 			arm_max_f32(data1, fftSize, &maxFftValue, &maxFftIndex);
 		}
 
-		DominantFrecuency=(maxFftIndex-1)*fs/(2*fftSize);
+		DominantFrecuency=((maxFftIndex-1)*fs)/(2*fftSize);
 
-//		sprintf(bufferData,"La información de la señal 1 es:  \n\r");
-//				usart_writeMsg(&commSerial,bufferData);
-//				receivedChar='\0';
-//		sprintf(bufferData,"Valor máximo: %f \n\r", (3.3*maxValue)/4096);
-//				usart_writeMsg(&commSerial,bufferData);
-//				receivedChar='\0';
-//		sprintf(bufferData,"Valor mínimo: %f \n\r", (3.3*minValue)/4096);
-//				usart_writeMsg(&commSerial,bufferData);
-//				receivedChar='\0';
-//		sprintf(bufferData,"Frecuencia dominante obtenida por FFT: %#.6f  \n\r", DominantFrecuency);
-//				usart_writeMsg(&commSerial,bufferData);
-//				receivedChar='\0';
+		sprintf(bufferData,"La información de la señal 1 es:  \n");
+				usart_writeMsg(&commSerial,bufferData);
+				receivedChar='\0';
+		sprintf(bufferData,"Valor máximo: %f \n", (3.3*maxValue)/4096);
+				usart_writeMsg(&commSerial,bufferData);
+				receivedChar='\0';
+		sprintf(bufferData,"Valor mínimo: %f \n", (3.3*minValue)/4096);
+				usart_writeMsg(&commSerial,bufferData);
+				receivedChar='\0';
+		sprintf(bufferData,"Frecuencia dominante obtenida por FFT: %#.6f  \n\r", DominantFrecuency);
+				usart_writeMsg(&commSerial,bufferData);
+				receivedChar='\0';
 	}
 
 		if (receivedChar=='b'){
