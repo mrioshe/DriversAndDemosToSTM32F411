@@ -53,7 +53,7 @@ void setDuttyCycle(PWM_Handler_t *pPWMHandler);
 void updateDuttyCycle(PWM_Handler_t *pPWMHandler, uint16_t newDutty);
 void enableOutput(PWM_Handler_t *pPWMHandler);
 void startPWMsignal(PWM_Handler_t *pPWMHandler);
-void stopPWMsignal(PWM_Handler_t *pPWMHandler);
+void stopPWMSignal(PWM_Handler_t *pPWMHandler);
 void enable_timerx(PWM_Handler_t *pPWMHandler);
 void config_channel_pwm(PWM_Handler_t *pPWMHandler);
 void setInitConfig(PWM_Handler_t *pPWMHandler);

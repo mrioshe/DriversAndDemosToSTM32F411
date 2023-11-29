@@ -10,6 +10,7 @@
 
 #include "stm32f4xx.h"
 #include "pwm_driver_hal.h"
+#include "systick_driver_hal.h"
 
 enum{
 	LASER_VELOCITY_200Hz=0,
@@ -35,30 +36,14 @@ enum{
 	LASER_POWER_8000Hz
 };
 
-enum{
-	MOTOR_Y=0,
-	MOTOR_X,
-};
-
-enum{
-	LASER_ENABLE=0,
-	LASER_DISABLE,
-};
-
-enum{
-	DIRECTION_1=0,
-	DIRECTION_2,
-};
-
 
 
 typedef struct
 {
 	uint16_t	laser_power;
 	uint16_t	velocity;
-	uint16_t	motor;
-	uint8_t		laser_state;
 	uint8_t		direction;
+	uint8_t		time_step; //Variable que controla la resolución
 
 	} laser_engraving_Config_t;
 
@@ -66,22 +51,24 @@ typedef struct
 {
 	PWM_Handler_t	 	*pPWM_motor;
 	PWM_Handler_t	 	*pPWM_laser;
-	GPIO_Handler_t		*pGIPO_enable;
+	GPIO_Handler_t		*pGIPO_enable_motor;
+	GPIO_Handler_t		*pGIPO_enable_laser;
+	GPIO_Handler_t		*pGIPO_motor_direction;
 	laser_engraving_Config_t 	config;
 } 	laser_engraving_t;
 
 void laser_init_config(laser_engraving_t *pLaser_engraving_t);
 void motor_enable(laser_engraving_t *pLaser_engraving_t);
-void x_movement(laser_engraving_t *pLaser_engraving_t);
-void y_movement(laser_engraving_t *pLaser_engraving_t);
-void set_velocity(laser_engraving_t *pLaser_engraving_t);
-void set_power(laser_engraving_t *pLaser_engraving_t);
+void laser_enable(laser_engraving_t *pLaser_engraving_t);
+void motor_disable(laser_engraving_t *pLaser_engraving_t);
+void laser_disable(laser_engraving_t *pLaser_engraving_t);
+void movement(laser_engraving_t *pLaser_engraving_t);
+void set_velocity(laser_engraving_t *pLaser_engraving_t,uint8_t newVelocity);
+void set_power(laser_engraving_t *pLaser_engraving_t,uint8_t newPower);
 void engraving(laser_engraving_t *pLaser_engraving_t);
-void make_circle(laser_engraving_t *pLaser_engraving_t);
-void make_square(laser_engraving_t *pLaser_engraving_t);
 void start_continuous_engraving(laser_engraving_t *pLaser_engraving_t);
 void stop_continuous_engraving(laser_engraving_t *pLaser_engraving_t);
-void change_motor_direction(laser_engraving_t *pLaser_engraving_t);
+void set_motor_direction(laser_engraving_t *pLaser_engraving_t);
 
 
 
