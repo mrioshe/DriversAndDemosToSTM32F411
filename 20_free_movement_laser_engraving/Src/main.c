@@ -84,6 +84,29 @@ initSys();
 while (1) {
 
 
+	if(receivedChar=='p'){
+		usart_writeMsg(&commSerial, "Testing, testing!!\n\r");
+	}
+
+	if(receivedChar=='s'){
+		usart_writeMsg(&commSerial,"make simple ADC\n\r");
+		adc_StartSingleConv();
+
+	}
+
+	if(receivedChar=='C'){
+		usart_writeMsg(&commSerial,"make continuous ADC\n\r");
+		adc_StartContinuousConv();
+	}
+
+	if(receivedChar == 'S'){
+		usart_writeMsg(&commSerial,"stop continuous ADC\n\r");
+		adc_StopContinuousConv();
+	}
+
+	receivedChar=0;
+
+
 	}
 }
 
