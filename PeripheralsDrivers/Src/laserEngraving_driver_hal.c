@@ -1,5 +1,5 @@
 /*
- * laser_engraving_driver.c
+ * laserEngraving_driver_hal.h.c
  *
  *  Created on: Nov 28, 2023
  *      Author: if401-09
@@ -112,7 +112,7 @@ void set_power(laser_engraving_t *pLaser_engraving_t,uint8_t newPower){
 }
 
 void motor_enable(laser_engraving_t *pLaser_engraving_t){
-	gpio_WritePin(pLaser_engraving_t->pGIPO_enable_motor,1);
+	gpio_WritePin(pLaser_engraving_t->pGIPO_enable_motor,0);
 }
 
 void laser_enable(laser_engraving_t *pLaser_engraving_t){
@@ -120,7 +120,7 @@ void laser_enable(laser_engraving_t *pLaser_engraving_t){
 }
 
 void motor_disable(laser_engraving_t *pLaser_engraving_t){
-	gpio_WritePin(pLaser_engraving_t->pGIPO_enable_motor,0);
+	gpio_WritePin(pLaser_engraving_t->pGIPO_enable_motor,1);
 }
 
 void laser_disable(laser_engraving_t *pLaser_engraving_t){

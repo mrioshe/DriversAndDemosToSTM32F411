@@ -1,5 +1,5 @@
 /*
- * pwm_driver_hal.h
+ * laserEngraving_driver_hal.h
  *
  *  Created on: Nov 6, 2023
  *      Author: mauricio
@@ -36,7 +36,10 @@ enum{
 	LASER_POWER_8000Hz
 };
 
-
+enum{
+	DIRECTION1=0,
+	DIRECTION2
+};
 
 typedef struct
 {
@@ -49,12 +52,12 @@ typedef struct
 
 typedef struct
 {
-	PWM_Handler_t	 	*pPWM_motor;
-	PWM_Handler_t	 	*pPWM_laser;
-	GPIO_Handler_t		*pGIPO_enable_motor;
-	GPIO_Handler_t		*pGIPO_enable_laser;
-	GPIO_Handler_t		*pGIPO_motor_direction;
-	laser_engraving_Config_t 	config;
+	PWM_Handler_t	 			*pPWM_motor;
+	PWM_Handler_t	 			*pPWM_laser;
+	GPIO_Handler_t				*pGIPO_enable_motor;
+	GPIO_Handler_t				*pGIPO_enable_laser;
+	GPIO_Handler_t				*pGIPO_motor_direction;
+	laser_engraving_Config_t 	 config;
 } 	laser_engraving_t;
 
 void laser_init_config(laser_engraving_t *pLaser_engraving_t);
