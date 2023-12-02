@@ -71,36 +71,36 @@ void set_power(laser_engraving_t *pLaser_engraving_t,uint8_t newPower){
 
 	switch(newPower){
 	case(LASER_POWER_1000Hz):
-		updateFrequency(pLaser_engraving_t->pPWM_motor, 1000);
-		updateDuttyCycle(pLaser_engraving_t->pPWM_motor,300);
+		updateFrequency(pLaser_engraving_t->pPWM_laser, 1000);
+		updateDuttyCycle(pLaser_engraving_t->pPWM_laser,300);
 			break;
 	case(LASER_POWER_2000Hz):
-		updateFrequency(pLaser_engraving_t->pPWM_motor, 500);
-		updateDuttyCycle(pLaser_engraving_t->pPWM_motor,200);
+		updateFrequency(pLaser_engraving_t->pPWM_laser, 500);
+		updateDuttyCycle(pLaser_engraving_t->pPWM_laser,200);
 			break;
 	case(LASER_POWER_3000Hz):
-		updateFrequency(pLaser_engraving_t->pPWM_motor, 333.33);
-		updateDuttyCycle(pLaser_engraving_t->pPWM_motor,166);
+		updateFrequency(pLaser_engraving_t->pPWM_laser, 333.33);
+		updateDuttyCycle(pLaser_engraving_t->pPWM_laser,166);
 			break;
 	case(LASER_POWER_4000Hz):
-		updateFrequency(pLaser_engraving_t->pPWM_motor, 250);
-		updateDuttyCycle(pLaser_engraving_t->pPWM_motor,120);
+		updateFrequency(pLaser_engraving_t->pPWM_laser, 250);
+		updateDuttyCycle(pLaser_engraving_t->pPWM_laser,120);
 			break;
 	case(LASER_POWER_5000Hz):
-		updateFrequency(pLaser_engraving_t->pPWM_motor, 200);
-		updateDuttyCycle(pLaser_engraving_t->pPWM_motor,140);
+		updateFrequency(pLaser_engraving_t->pPWM_laser, 200);
+		updateDuttyCycle(pLaser_engraving_t->pPWM_laser,140);
 			break;
 	case(LASER_POWER_6000Hz):
-		updateFrequency(pLaser_engraving_t->pPWM_motor, 166);
-		updateDuttyCycle(pLaser_engraving_t->pPWM_motor,133);
+		updateFrequency(pLaser_engraving_t->pPWM_laser, 166);
+		updateDuttyCycle(pLaser_engraving_t->pPWM_laser,133);
 			break;
 	case(LASER_POWER_7000Hz):
-		updateFrequency(pLaser_engraving_t->pPWM_motor, 142);
-		updateDuttyCycle(pLaser_engraving_t->pPWM_motor,128);
+		updateFrequency(pLaser_engraving_t->pPWM_laser, 142);
+		updateDuttyCycle(pLaser_engraving_t->pPWM_laser,128);
 			break;
 	case(LASER_POWER_8000Hz):
-		updateFrequency(pLaser_engraving_t->pPWM_motor, 125);
-		updateDuttyCycle(pLaser_engraving_t->pPWM_motor,120);
+		updateFrequency(pLaser_engraving_t->pPWM_laser, 125);
+		updateDuttyCycle(pLaser_engraving_t->pPWM_laser,120);
 
 			break;
 	default:

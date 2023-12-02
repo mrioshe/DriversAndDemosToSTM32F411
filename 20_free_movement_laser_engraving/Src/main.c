@@ -114,11 +114,64 @@ while (1) {
 	}
 
 	if(receivedChar == 'l'){
-		usart_writeMsg(&commSerial, "Grabando \n\rs");
+		usart_writeMsg(&commSerial, "Grabando \n\r");
 		engraving(&motorx);
 		receivedChar=0;
 	}
 
+	if(receivedChar == 'q'){
+		usart_writeMsg(&commSerial, "Laser activado \n\r");
+		start_continuous_engraving(&motorx);
+		receivedChar=0;
+	}
+
+	if(receivedChar == 'r'){
+		usart_writeMsg(&commSerial, "Laser desactivado \n\r");
+		stop_continuous_engraving(&motorx);
+		receivedChar=0;
+	}
+
+	if(receivedChar == 'm'){
+		usart_writeMsg(&commSerial, "Aumentando la velocidad de ambos motores \n\r");
+		if(motorx.config.velocity==LASER_VELOCITY_2000Hz){
+			__NOP();
+		} else{
+			motorx.config.velocity=motorx.config.velocity++;
+			motory.config.velocity=motory.config.velocity++;
+		}
+		receivedChar=0;
+	}
+
+	if(receivedChar == 'n'){
+		usart_writeMsg(&commSerial, "Disminuyendo la velocidad de ambos motores\n\r");
+		if(motorx.config.velocity==LASER_VELOCITY_200Hz){
+				__NOP();
+			} else{
+				motorx.config.velocity=motorx.config.velocity--;
+				motory.config.velocity=motory.config.velocity--;
+			}
+			receivedChar=0;
+	}
+
+	if(receivedChar == 'p'){
+		usart_writeMsg(&commSerial, "Aumentando la potencia \n\r");
+		if(motorx.config.laser_power==LASER_POWER_8000Hz){
+			__NOP();
+		} else{
+			motorx.config.laser_power=motorx.config.laser_power++;
+		}
+		receivedChar=0;
+	}
+
+	if(receivedChar == 'o'){
+		usart_writeMsg(&commSerial, "Disminuyendo la potencia \n\r");
+		if(motorx.config.laser_power==LASER_POWER_1000Hz){
+				__NOP();
+			} else{
+				motorx.config.laser_power=motorx.config.laser_power--;
+			}
+			receivedChar=0;
+	}
 
 	}
 }
@@ -315,7 +368,7 @@ void initSys(void) {
 	motorx.pPWM_laser 				= &PWMlaser;
 	motorx.pPWM_motor 				= &PWMmotorx;
 	motorx.config.direction			= DIRECTION1;
-	motorx.config.laser_power		= LASER_POWER_1000Hz;
+	motorx.config.laser_power		= LASER_POWER_4000Hz;
 	motorx.config.time_step			= 100;					//valor en ms
 	motorx.config.velocity			= LASER_VELOCITY_1000Hz;
 
