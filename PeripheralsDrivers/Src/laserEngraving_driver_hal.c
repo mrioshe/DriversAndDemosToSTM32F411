@@ -15,8 +15,8 @@
 
 void laser_init_config(laser_engraving_t *pLaser_engraving_t){
 
-	set_velocity(pLaser_engraving_t,LASER_VELOCITY_200Hz);
-	set_power(pLaser_engraving_t,LASER_POWER_1000Hz);
+	set_velocity(pLaser_engraving_t,pLaser_engraving_t->config.velocity);
+	set_power(pLaser_engraving_t,pLaser_engraving_t->config.laser_power);
 	laser_disable(pLaser_engraving_t);
 	set_motor_direction(pLaser_engraving_t,0);
 	motor_disable(pLaser_engraving_t);
@@ -143,9 +143,9 @@ void set_motor_direction(laser_engraving_t *pLaser_engraving_t, uint8_t newDirec
 void movement(laser_engraving_t *pLaser_engraving_t){
 
 	motor_enable(pLaser_engraving_t);
-	startPWMsignal(pLaser_engraving_t->pPWM_laser);
+//	startPWMsignal(pLaser_engraving_t->pPWM_motor);
 	systick_Delay_ms(pLaser_engraving_t->config.time_step);
-	stopPWMSignal(pLaser_engraving_t->pPWM_laser);
+//	stopPWMSignal(pLaser_engraving_t->pPWM_motor);
 	motor_disable(pLaser_engraving_t);
 }
 

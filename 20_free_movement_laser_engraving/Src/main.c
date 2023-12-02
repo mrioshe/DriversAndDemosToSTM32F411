@@ -202,21 +202,23 @@ void initSys(void) {
 	PWMpinLaser.pinConfig.GPIO_PinPuPdControl 		= GPIO_PUPDR_NOTHING;
 	PWMpinLaser.pinConfig.GPIO_PinAltFunMode 		= AF2;
 
-	PWMpinMotorx.pGPIOx = GPIOA;
-	PWMpinMotorx.pinConfig.GPIO_PinNumber			= PIN_1;
+	PWMpinMotorx.pGPIOx = GPIOB;
+	PWMpinMotorx.pinConfig.GPIO_PinNumber			= PIN_7;
 	PWMpinMotorx.pinConfig.GPIO_PinMode 			= GPIO_MODE_ALTFN;
 	PWMpinMotorx.pinConfig.GPIO_PinOutputType 		= GPIO_OTYPE_PUSHPULL;
 	PWMpinMotorx.pinConfig.GPIO_PinOutputSpeed 		= GPIO_OSPEEDR_FAST;
-	PWMpinMotorx.pinConfig.GPIO_PinPuPdControl	 	= GPIO_PUPDR_NOTHING;
+	PWMpinMotorx.pinConfig.GPIO_PinPuPdControl 		= GPIO_PUPDR_NOTHING;
 	PWMpinMotorx.pinConfig.GPIO_PinAltFunMode 		= AF2;
 
-	PWMpinMotory.pGPIOx = GPIOB;
-	PWMpinMotory.pinConfig.GPIO_PinNumber			= PIN_7;
+	PWMpinMotory.pGPIOx = GPIOA;
+	PWMpinMotory.pinConfig.GPIO_PinNumber			= PIN_1;
 	PWMpinMotory.pinConfig.GPIO_PinMode 			= GPIO_MODE_ALTFN;
 	PWMpinMotory.pinConfig.GPIO_PinOutputType 		= GPIO_OTYPE_PUSHPULL;
 	PWMpinMotory.pinConfig.GPIO_PinOutputSpeed 		= GPIO_OSPEEDR_FAST;
-	PWMpinMotory.pinConfig.GPIO_PinPuPdControl 		= GPIO_PUPDR_NOTHING;
+	PWMpinMotory.pinConfig.GPIO_PinPuPdControl	 	= GPIO_PUPDR_NOTHING;
 	PWMpinMotory.pinConfig.GPIO_PinAltFunMode 		= AF2;
+
+
 
 	gpio_Config(&PWMpinLaser);
 	gpio_Config(&PWMpinMotorx);
@@ -231,24 +233,24 @@ void initSys(void) {
 //	PWMlaser.config.prescaler	= 16;
 //	PWMlaser.config.period		= PWMperiod;
 
-	PWMlaser.pTIMx			 	= TIM4;
-	PWMlaser.config.timer		= TIMER_TIM4;
+	PWMlaser.pTIMx			 	= TIM3;
+	PWMlaser.config.timer		= TIMER_TIM3;
 	PWMlaser.config.dutty		= duttyValue;
-	PWMlaser.config.channel		= PWM_CHANNEL_2;
+	PWMlaser.config.channel		= PWM_CHANNEL_1;
 	PWMlaser.config.prescaler	= 16;
 	PWMlaser.config.period		= PWMperiod;
 
-	PWMmotorx.pTIMx			 	= TIM5;
-	PWMmotorx.config.timer		= TIMER_TIM5;
+	PWMmotorx.pTIMx			 	= TIM4;
+	PWMmotorx.config.timer		= TIMER_TIM4;
 	PWMmotorx.config.dutty		= duttyValue;
 	PWMmotorx.config.channel	= PWM_CHANNEL_2;
 	PWMmotorx.config.prescaler	= 16;
 	PWMmotorx.config.period		= PWMperiod;
 
-	PWMmotory.pTIMx			 	= TIM3;
-	PWMmotory.config.timer		= TIMER_TIM3;
+	PWMmotory.pTIMx			 	= TIM5;
+	PWMmotory.config.timer		= TIMER_TIM5;
 	PWMmotory.config.dutty		= duttyValue;
-	PWMmotory.config.channel	= PWM_CHANNEL_1;
+	PWMmotory.config.channel	= PWM_CHANNEL_2;
 	PWMmotory.config.prescaler	= 16;
 	PWMmotory.config.period		= PWMperiod;
 
@@ -257,11 +259,11 @@ void initSys(void) {
 	pwm_Config(&PWMmotorx);
 	pwm_Config(&PWMmotory);
 
-//	startPWMsignal(&PWMlaser);
+////	startPWMsignal(&PWMlaser);
 	startPWMsignal(&PWMmotorx);
 	startPWMsignal(&PWMmotory);
-	gpio_WritePin(&enablePinMotorx,1);
-	gpio_WritePin(&enablePinMotory,1);
+//	gpio_WritePin(&enablePinMotorx,1);
+//	gpio_WritePin(&enablePinMotory,1);
 
 
 	/*Activamos FPU*/
@@ -314,8 +316,8 @@ void initSys(void) {
 	motorx.pPWM_motor 				= &PWMmotorx;
 	motorx.config.direction			= DIRECTION1;
 	motorx.config.laser_power		= LASER_POWER_1000Hz;
-	motorx.config.time_step			= 1000;					//valor en ms
-	motorx.config.velocity			= LASER_VELOCITY_2000Hz;
+	motorx.config.time_step			= 100;					//valor en ms
+	motorx.config.velocity			= LASER_VELOCITY_1000Hz;
 
 	motory.pGIPO_enable_laser 		= &enablePinLaser;
 	motory.pGIPO_enable_motor 		= &enablePinMotory;
@@ -324,8 +326,8 @@ void initSys(void) {
 	motory.pPWM_motor 				= &PWMmotory;
 	motory.config.direction			= DIRECTION1;
 	motory.config.laser_power		= LASER_POWER_1000Hz;
-	motory.config.time_step			= 1000;					//valor en ms
-	motory.config.velocity			= LASER_VELOCITY_2000Hz;
+	motory.config.time_step			= 100;					//valor en ms
+	motory.config.velocity			= LASER_VELOCITY_1000Hz;
 
 	laser_init_config(&motorx);
 	laser_init_config(&motory);
