@@ -76,104 +76,18 @@ Systic_Handler_t systick = {0};
 
 laser_engraving_t motorx={0};
 laser_engraving_t motory={0};
+uint8_t LaserStatus={0};
 
 
 void initSys(void);
-
+void getMovement(ADC_Config_t AxisSensorx,ADC_Config_t AxisSensory,laser_engraving_t *pLaserx_engraving_t,laser_engraving_t *pLasery_engraving_t);
+void ChangeLaserStatus(laser_engraving_t *pLaser_engraving_t, uint8_t LaserStatus);
 int main() {
 
 initSys();
 while (1) {
 
-	if(receivedChar=='w'){
-		usart_writeMsg(&commSerial, "Moviendo hacia arriba\n\r");
-		set_motor_direction(&motory,1);
-		movement(&motory);
-
-		receivedChar=0;
-	}
-
-	if(receivedChar=='a'){
-		usart_writeMsg(&commSerial, "Moviendo hacia la izquierda\n\r");
-		set_motor_direction(&motorx,1);
-		movement(&motorx);
-		receivedChar=0;
-
-	}
-
-	if(receivedChar=='s'){
-		usart_writeMsg(&commSerial, "Moviendo hacia abajo\n\r");
-		set_motor_direction(&motory,0);
-		movement(&motory);
-		receivedChar=0;
-	}
-
-	if(receivedChar == 'd'){
-		usart_writeMsg(&commSerial, "Moviendo hacia la derecha\n\r");
-		set_motor_direction(&motorx,0);
-		movement(&motorx);
-		receivedChar=0;
-	}
-
-	if(receivedChar == 'l'){
-		usart_writeMsg(&commSerial, "Grabando \n\r");
-		engraving(&motorx);
-		receivedChar=0;
-	}
-
-	if(receivedChar == 'q'){
-		usart_writeMsg(&commSerial, "Laser activado \n\r");
-		start_continuous_engraving(&motorx);
-		receivedChar=0;
-	}
-
-	if(receivedChar == 'r'){
-		usart_writeMsg(&commSerial, "Laser desactivado \n\r");
-		stop_continuous_engraving(&motorx);
-		receivedChar=0;
-	}
-
-	if(receivedChar == 'm'){
-		usart_writeMsg(&commSerial, "Aumentando la velocidad de ambos motores \n\r");
-		if(motorx.config.velocity==LASER_VELOCITY_2000Hz){
-			__NOP();
-		} else{
-			motorx.config.velocity=motorx.config.velocity++;
-			motory.config.velocity=motory.config.velocity++;
-		}
-		receivedChar=0;
-	}
-
-	if(receivedChar == 'n'){
-		usart_writeMsg(&commSerial, "Disminuyendo la velocidad de ambos motores\n\r");
-		if(motorx.config.velocity==LASER_VELOCITY_200Hz){
-				__NOP();
-			} else{
-				motorx.config.velocity=motorx.config.velocity--;
-				motory.config.velocity=motory.config.velocity--;
-			}
-			receivedChar=0;
-	}
-
-	if(receivedChar == 'p'){
-		usart_writeMsg(&commSerial, "Aumentando la potencia \n\r");
-		if(motorx.config.laser_power==LASER_POWER_8000Hz){
-			__NOP();
-		} else{
-			motorx.config.laser_power=motorx.config.laser_power++;
-		}
-		receivedChar=0;
-	}
-
-	if(receivedChar == 'o'){
-		usart_writeMsg(&commSerial, "Disminuyendo la potencia \n\r");
-		if(motorx.config.laser_power==LASER_POWER_1000Hz){
-				__NOP();
-			} else{
-				motorx.config.laser_power=motorx.config.laser_power--;
-			}
-			receivedChar=0;
-	}
+	getMovement(AxisSensors[0],AxisSensors[1],&motorx,&motory);
 
 	}
 }
@@ -424,6 +338,81 @@ void initSys(void) {
 
 }
 
+void getMovement(ADC_Config_t AxisSensorx,ADC_Config_t AxisSensory,laser_engraving_t *pLaserx_engraving_t,laser_engraving_t *pLasery_engraving_t){
+
+	if((AxisSensorx.adcData <=1024) && (AxisSensory.adcData <=1024)){
+		StartSimulataneousMovement(pLaserx_engraving_t,pLasery_engraving_t,DIRECTION2, DIRECTION1);
+		while((AxisSensorx.adcData <=1024) && (AxisSensory.adcData <=1024)){
+			__NOP();
+		}
+		StopSimulataneousMovement(pLaserx_engraving_t,pLasery_engraving_t);
+
+	}else if(((AxisSensorx.adcData > 1024) && (AxisSensorx.adcData<=3072)) && (AxisSensory.adcData <=1024)){
+		StartContinuosMovement(pLasery_engraving_t,DIRECTION1);
+		while(((AxisSensorx.adcData > 1024) && (AxisSensorx.adcData<=3072)) && (AxisSensory.adcData <=1024)){
+			__NOP();
+		}
+		StopSimulataneousMovement(pLaserx_engraving_t,pLasery_engraving_t);
+
+	}else if((AxisSensorx.adcData>3072) && (AxisSensory.adcData <=1024)){
+		StartSimulataneousMovement(pLaserx_engraving_t,pLasery_engraving_t,DIRECTION1, DIRECTION1);
+		while((AxisSensorx.adcData>3072) && (AxisSensory.adcData <=1024)){
+			__NOP();
+		}
+		StopSimulataneousMovement(pLaserx_engraving_t,pLasery_engraving_t);
+
+	}else if( (AxisSensorx.adcData<=1024) && ((AxisSensory.adcData >1024) && (AxisSensory.adcData <= 3072))){
+		StartContinuosMovement(pLaserx_engraving_t,DIRECTION2);
+		while((AxisSensorx.adcData<=1024) && ((AxisSensory.adcData >1024) && (AxisSensory.adcData <= 3072))){
+			__NOP();
+		}
+		StopSimulataneousMovement(pLaserx_engraving_t,pLasery_engraving_t);
+
+	} else if(((AxisSensorx.adcData >1024) && (AxisSensorx.adcData <= 3072)) && ((AxisSensory.adcData >1024) && (AxisSensory.adcData <= 3072))){
+		StopSimulataneousMovement(pLaserx_engraving_t,pLasery_engraving_t);
+		while(((AxisSensorx.adcData >1024) && (AxisSensorx.adcData <= 3072)) && ((AxisSensory.adcData >1024) && (AxisSensory.adcData <= 3072))){
+			__NOP();
+		}
+	} else if((AxisSensorx.adcData>3072) && ((AxisSensory.adcData >1024) && (AxisSensory.adcData <= 3072))){
+		StartContinuosMovement(pLaserx_engraving_t,DIRECTION1);
+		while((AxisSensorx.adcData>3072) && ((AxisSensory.adcData >1024) && (AxisSensory.adcData <= 3072))){
+			__NOP();
+		}
+		StopSimulataneousMovement(pLaserx_engraving_t,pLasery_engraving_t);
+
+	}else if((AxisSensorx.adcData<=1024) && (AxisSensory.adcData >3072)){
+		StartSimulataneousMovement(pLaserx_engraving_t,pLasery_engraving_t,DIRECTION2, DIRECTION2);
+		while((AxisSensorx.adcData<=1024) && (AxisSensory.adcData >3072)){
+			__NOP();
+		}
+		StopSimulataneousMovement(pLaserx_engraving_t,pLasery_engraving_t);
+
+	}else if (((AxisSensorx.adcData >1024) && (AxisSensorx.adcData <= 3072))&& (AxisSensory.adcData >3072)){
+		StartContinuosMovement(pLasery_engraving_t,DIRECTION2);
+		while(((AxisSensorx.adcData >1024) && (AxisSensorx.adcData <= 3072))&& (AxisSensory.adcData >3072)){
+			__NOP();
+		}
+		StopSimulataneousMovement(pLaserx_engraving_t,pLasery_engraving_t);
+
+	} else if((AxisSensorx.adcData >3072)&& (AxisSensory.adcData >3072)){
+		StartSimulataneousMovement(pLaserx_engraving_t,pLasery_engraving_t,DIRECTION1, DIRECTION2);
+		while((AxisSensorx.adcData >3072)&& (AxisSensory.adcData >3072)){
+			__NOP();
+		}
+		StopSimulataneousMovement(pLaserx_engraving_t,pLasery_engraving_t);
+	}
+
+}
+
+void ChangeLaserStatus(laser_engraving_t *pLaser_engraving_t, uint8_t LaserStatus){
+	if(LaserStatus){
+		start_continuous_engraving(pLaser_engraving_t);
+	} else{
+		stop_continuous_engraving(pLaser_engraving_t);
+	}
+
+}
+
 
 void Timer2_Callback(void) {
 	gpio_TooglePin(&userLed);
@@ -443,6 +432,11 @@ void adc_CompleteCallback(void) {
 		sequencyData=0;
 	}
 
+}
+
+void callback_extInt10(void){
+	ChangeLaserStatus(&motorx,LaserStatus);
+	LaserStatus=!LaserStatus;
 }
 
 
