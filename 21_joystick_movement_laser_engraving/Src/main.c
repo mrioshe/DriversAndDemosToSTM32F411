@@ -46,6 +46,7 @@ GPIO_Handler_t SWpin={0};
 EXTI_Config_t SWinterrupt={0};
 
 Timer_Handler_t blinkTimer = { 0 };
+Timer_Handler_t GetDataTimer = { 0 };
 
 USART_Handler_t commSerial= { 0 };
 GPIO_Handler_t pinTx = {0};
@@ -78,16 +79,17 @@ laser_engraving_t motorx={0};
 laser_engraving_t motory={0};
 uint8_t LaserStatus={0};
 
+uint8_t newVar={0};
 
 void initSys(void);
-void getMovement(ADC_Config_t AxisSensorx,ADC_Config_t AxisSensory,laser_engraving_t *pLaserx_engraving_t,laser_engraving_t *pLasery_engraving_t);
+void getMovement(laser_engraving_t *pLaserx_engraving_t,laser_engraving_t *pLasery_engraving_t);
 void ChangeLaserStatus(laser_engraving_t *pLaser_engraving_t, uint8_t LaserStatus);
 int main() {
 
 initSys();
 while (1) {
 
-	getMovement(AxisSensors[0],AxisSensors[1],&motorx,&motory);
+	getMovement(&motorx,&motory);
 
 	}
 }
@@ -125,6 +127,17 @@ void initSys(void) {
 
 	timer_Config(&blinkTimer);
 	timer_SetState(&blinkTimer, SET);
+
+	/*Configuramos el timer para leer el adc*/
+
+	GetDataTimer.pTIMx = TIM10;
+	GetDataTimer.TIMx_Config.TIMx_Prescaler = 16000;
+	GetDataTimer.TIMx_Config.TIMx_Period = 16;
+	GetDataTimer.TIMx_Config.TIMx_mode = TIMER_UP_COUNTER;
+	GetDataTimer.TIMx_Config.TIMx_InterruptEnable = TIMER_INT_ENABLE;
+
+	timer_Config(&GetDataTimer);
+	timer_SetState(&GetDataTimer, SET);
 
 
 	/*Configuración pines para control de motores y laser*/
@@ -210,6 +223,25 @@ void initSys(void) {
 	exti_Config(&SWinterrupt);
 
 	/*Configuración de los PWM*/
+
+
+	// Sensor en dirección x
+
+	AxisSensors[0].channel			= CHANNEL_9;
+	AxisSensors[0].resolution		= RESOLUTION_12_BIT;
+	AxisSensors[0].dataAlignment 	= ALIGNMENT_RIGHT;
+	AxisSensors[0].samplingPeriod	= SAMPLING_PERIOD_84_CYCLES;
+	AxisSensors[0].interrupState	= ADC_INT_ENABLE;
+	// Sensor en dirección x
+	AxisSensors[1].channel			= CHANNEL_15;
+	AxisSensors[1].resolution		= RESOLUTION_12_BIT;
+	AxisSensors[1].dataAlignment 	= ALIGNMENT_RIGHT;
+	AxisSensors[1].samplingPeriod	= SAMPLING_PERIOD_84_CYCLES;
+	AxisSensors[1].interrupState	= ADC_INT_ENABLE;
+
+	adc_ConfigMultiChannel(AxisSensors,2);
+	adc_peripheralOnOFF(ADC_ON);
+
 
 //	PWMlaser.pTIMx			 	= TIM5;
 //	PWMlaser.config.timer		= TIMER_TIM5;
@@ -310,96 +342,102 @@ void initSys(void) {
 	motory.pPWM_laser 				= &PWMlaser;
 	motory.pPWM_motor 				= &PWMmotory;
 	motory.config.direction			= DIRECTION1;
-	motory.config.laser_power		= LASER_POWER_1000Hz;
+	motory.config.laser_power		= LASER_POWER_8000Hz;
 	motory.config.time_step			= 100;					//valor en ms
-	motory.config.velocity			= LASER_VELOCITY_1000Hz;
+	motory.config.velocity			= LASER_VELOCITY_2000Hz;
 
 
 	laser_init_config(&motorx);
 	laser_init_config(&motory);
 
-	// Sensor en dirección x
 
-	AxisSensors[0].channel			= CHANNEL_9;
-	AxisSensors[0].resolution		= RESOLUTION_12_BIT;
-	AxisSensors[0].dataAlignment 	= ALIGNMENT_RIGHT;
-	AxisSensors[0].samplingPeriod	= SAMPLING_PERIOD_84_CYCLES;
-	AxisSensors[0].interrupState	= ADC_INT_ENABLE;
-
-	AxisSensors[1].channel			= CHANNEL_15;
-	AxisSensors[1].resolution		= RESOLUTION_12_BIT;
-	AxisSensors[1].dataAlignment 	= ALIGNMENT_RIGHT;
-	AxisSensors[1].samplingPeriod	= SAMPLING_PERIOD_84_CYCLES;
-	AxisSensors[1].interrupState	= ADC_INT_ENABLE;
-
-	adc_ConfigMultiChannel(AxisSensors,2);
-	adc_peripheralOnOFF(ADC_ON);
 
 
 }
 
-void getMovement(ADC_Config_t AxisSensorx,ADC_Config_t AxisSensory,laser_engraving_t *pLaserx_engraving_t,laser_engraving_t *pLasery_engraving_t){
+void getMovement(laser_engraving_t *pLaserx_engraving_t,laser_engraving_t *pLasery_engraving_t){
 
-	if((AxisSensorx.adcData <=1024) && (AxisSensory.adcData <=1024)){
-		StartSimulataneousMovement(pLaserx_engraving_t,pLasery_engraving_t,DIRECTION2, DIRECTION1);
-		while((AxisSensorx.adcData <=1024) && (AxisSensory.adcData <=1024)){
-			__NOP();
-		}
-		StopSimulataneousMovement(pLaserx_engraving_t,pLasery_engraving_t);
 
-	}else if(((AxisSensorx.adcData > 1024) && (AxisSensorx.adcData<=3072)) && (AxisSensory.adcData <=1024)){
-		StartContinuosMovement(pLasery_engraving_t,DIRECTION1);
-		while(((AxisSensorx.adcData > 1024) && (AxisSensorx.adcData<=3072)) && (AxisSensory.adcData <=1024)){
-			__NOP();
-		}
-		StopSimulataneousMovement(pLaserx_engraving_t,pLasery_engraving_t);
-
-	}else if((AxisSensorx.adcData>3072) && (AxisSensory.adcData <=1024)){
+	newVar = 0; //Variable to check the status
+	if((AxisSensors[0].adcData <=1024) && (AxisSensors[1].adcData <=1024)){
+		newVar = 1;
 		StartSimulataneousMovement(pLaserx_engraving_t,pLasery_engraving_t,DIRECTION1, DIRECTION1);
-		while((AxisSensorx.adcData>3072) && (AxisSensory.adcData <=1024)){
+		while((AxisSensors[0].adcData <=1024) && (AxisSensors[1].adcData <=1024)){
 			__NOP();
 		}
 		StopSimulataneousMovement(pLaserx_engraving_t,pLasery_engraving_t);
+		newVar = 0;
 
-	}else if( (AxisSensorx.adcData<=1024) && ((AxisSensory.adcData >1024) && (AxisSensory.adcData <= 3072))){
-		StartContinuosMovement(pLaserx_engraving_t,DIRECTION2);
-		while((AxisSensorx.adcData<=1024) && ((AxisSensory.adcData >1024) && (AxisSensory.adcData <= 3072))){
+	}else if(((AxisSensors[0].adcData > 1024) && (AxisSensors[0].adcData<=3072)) && (AxisSensors[1].adcData <=1024)){
+		newVar = 2;
+		StartContinuosMovement(pLasery_engraving_t,DIRECTION1);
+		while(((AxisSensors[0].adcData > 1024) && (AxisSensors[0].adcData<=3072)) && (AxisSensors[1].adcData <=1024)){
 			__NOP();
 		}
 		StopSimulataneousMovement(pLaserx_engraving_t,pLasery_engraving_t);
+		newVar = 0;
 
-	} else if(((AxisSensorx.adcData >1024) && (AxisSensorx.adcData <= 3072)) && ((AxisSensory.adcData >1024) && (AxisSensory.adcData <= 3072))){
-		StopSimulataneousMovement(pLaserx_engraving_t,pLasery_engraving_t);
-		while(((AxisSensorx.adcData >1024) && (AxisSensorx.adcData <= 3072)) && ((AxisSensory.adcData >1024) && (AxisSensory.adcData <= 3072))){
+	}else if((AxisSensors[0].adcData>3072) && (AxisSensors[1].adcData <=1024)){
+		newVar = 3;
+		StartSimulataneousMovement(pLaserx_engraving_t,pLasery_engraving_t,DIRECTION2, DIRECTION1);
+		while((AxisSensors[0].adcData>3072) && (AxisSensors[1].adcData <=1024)){
 			__NOP();
 		}
-	} else if((AxisSensorx.adcData>3072) && ((AxisSensory.adcData >1024) && (AxisSensory.adcData <= 3072))){
+		StopSimulataneousMovement(pLaserx_engraving_t,pLasery_engraving_t);
+		newVar = 0;
+
+	}else if( (AxisSensors[0].adcData<=1024) && ((AxisSensors[1].adcData >1024) && (AxisSensors[1].adcData <= 3072))){
+		newVar = 4;
 		StartContinuosMovement(pLaserx_engraving_t,DIRECTION1);
-		while((AxisSensorx.adcData>3072) && ((AxisSensory.adcData >1024) && (AxisSensory.adcData <= 3072))){
+		while((AxisSensors[0].adcData<=1024) && ((AxisSensors[1].adcData >1024) && (AxisSensors[1].adcData <= 3072))){
 			__NOP();
 		}
 		StopSimulataneousMovement(pLaserx_engraving_t,pLasery_engraving_t);
+		newVar = 0;
 
-	}else if((AxisSensorx.adcData<=1024) && (AxisSensory.adcData >3072)){
-		StartSimulataneousMovement(pLaserx_engraving_t,pLasery_engraving_t,DIRECTION2, DIRECTION2);
-		while((AxisSensorx.adcData<=1024) && (AxisSensory.adcData >3072)){
+	} else if(((AxisSensors[0].adcData >1024) && (AxisSensors[0].adcData <= 3072)) && ((AxisSensors[1].adcData >1024) && (AxisSensors[1].adcData <= 3072))){
+		newVar = 5;
+		StopSimulataneousMovement(pLaserx_engraving_t,pLasery_engraving_t);
+		while(((AxisSensors[0].adcData >1024) && (AxisSensors[0].adcData <= 3072)) && ((AxisSensors[1].adcData >1024) && (AxisSensors[1].adcData <= 3072))){
+			__NOP();
+		}
+		newVar = 0;
+
+	} else if((AxisSensors[0].adcData>3072) && ((AxisSensors[1].adcData >1024) && (AxisSensors[1].adcData <= 3072))){
+		newVar = 6;
+		StartContinuosMovement(pLaserx_engraving_t,DIRECTION2);
+		while((AxisSensors[0].adcData>3072) && ((AxisSensors[1].adcData >1024) && (AxisSensors[1].adcData <= 3072))){
 			__NOP();
 		}
 		StopSimulataneousMovement(pLaserx_engraving_t,pLasery_engraving_t);
+		newVar = 0;
 
-	}else if (((AxisSensorx.adcData >1024) && (AxisSensorx.adcData <= 3072))&& (AxisSensory.adcData >3072)){
-		StartContinuosMovement(pLasery_engraving_t,DIRECTION2);
-		while(((AxisSensorx.adcData >1024) && (AxisSensorx.adcData <= 3072))&& (AxisSensory.adcData >3072)){
-			__NOP();
-		}
-		StopSimulataneousMovement(pLaserx_engraving_t,pLasery_engraving_t);
-
-	} else if((AxisSensorx.adcData >3072)&& (AxisSensory.adcData >3072)){
+	}else if((AxisSensors[0].adcData<=1024) && (AxisSensors[1].adcData >3072)){
+		newVar = 7;
 		StartSimulataneousMovement(pLaserx_engraving_t,pLasery_engraving_t,DIRECTION1, DIRECTION2);
-		while((AxisSensorx.adcData >3072)&& (AxisSensory.adcData >3072)){
+		while((AxisSensors[0].adcData<=1024) && (AxisSensors[1].adcData >3072)){
 			__NOP();
 		}
 		StopSimulataneousMovement(pLaserx_engraving_t,pLasery_engraving_t);
+		newVar = 0;
+
+	}else if (((AxisSensors[0].adcData >1024) && (AxisSensors[0].adcData <= 3072))&& (AxisSensors[1].adcData >3072)){
+		newVar = 8;
+		StartContinuosMovement(pLasery_engraving_t,DIRECTION2);
+		while(((AxisSensors[0].adcData >1024) && (AxisSensors[0].adcData <= 3072))&& (AxisSensors[1].adcData >3072)){
+			__NOP();
+		}
+		StopSimulataneousMovement(pLaserx_engraving_t,pLasery_engraving_t);
+		newVar = 0;
+
+	} else if((AxisSensors[0].adcData >3072)&& (AxisSensors[1].adcData >3072)){
+		newVar = 9;
+		StartSimulataneousMovement(pLaserx_engraving_t,pLasery_engraving_t,DIRECTION2, DIRECTION2);
+		while((AxisSensors[0].adcData >3072)&& (AxisSensors[1].adcData >3072)){
+			__NOP();
+		}
+		StopSimulataneousMovement(pLaserx_engraving_t,pLasery_engraving_t);
+		newVar = 0;
 	}
 
 }
@@ -437,6 +475,10 @@ void adc_CompleteCallback(void) {
 void callback_extInt10(void){
 	ChangeLaserStatus(&motorx,LaserStatus);
 	LaserStatus=!LaserStatus;
+}
+
+void Timer10_Callback(void){
+	adc_StartSingleConv();
 }
 
 
