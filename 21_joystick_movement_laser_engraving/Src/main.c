@@ -334,7 +334,7 @@ void initSys(void) {
 	motorx.config.direction			= DIRECTION1;
 	motorx.config.laser_power		= LASER_POWER_4000Hz;
 	motorx.config.time_step			= 100;					//valor en ms
-	motorx.config.velocity			= LASER_VELOCITY_1000Hz;
+	motorx.config.velocity			= LASER_VELOCITY_200Hz;
 
 	motory.pGIPO_enable_laser 		= &enablePinLaser;
 	motory.pGIPO_enable_motor 		= &enablePinMotory;
@@ -342,9 +342,9 @@ void initSys(void) {
 	motory.pPWM_laser 				= &PWMlaser;
 	motory.pPWM_motor 				= &PWMmotory;
 	motory.config.direction			= DIRECTION1;
-	motory.config.laser_power		= LASER_POWER_8000Hz;
+	motory.config.laser_power		= LASER_POWER_1000Hz;
 	motory.config.time_step			= 100;					//valor en ms
-	motory.config.velocity			= LASER_VELOCITY_2000Hz;
+	motory.config.velocity			= LASER_VELOCITY_200Hz;
 
 
 	laser_init_config(&motorx);
@@ -444,9 +444,31 @@ void getMovement(laser_engraving_t *pLaserx_engraving_t,laser_engraving_t *pLase
 
 void ChangeLaserStatus(laser_engraving_t *pLaser_engraving_t, uint8_t LaserStatus){
 	if(LaserStatus){
+
+		PWMpinLaser.pGPIOx = GPIOC;
+		PWMpinLaser.pinConfig.GPIO_PinNumber			= PIN_6;
+		PWMpinLaser.pinConfig.GPIO_PinMode 				= GPIO_MODE_ALTFN;
+		PWMpinLaser.pinConfig.GPIO_PinOutputType 		= GPIO_OTYPE_PUSHPULL;
+		PWMpinLaser.pinConfig.GPIO_PinOutputSpeed 		= GPIO_OSPEEDR_FAST;
+		PWMpinLaser.pinConfig.GPIO_PinPuPdControl 		= GPIO_PUPDR_NOTHING;
+		PWMpinLaser.pinConfig.GPIO_PinAltFunMode 		= AF2;
+		gpio_Config(&PWMpinLaser);
+		pwm_Config(&PWMlaser);
 		start_continuous_engraving(pLaser_engraving_t);
+
 	} else{
+
 		stop_continuous_engraving(pLaser_engraving_t);
+
+		PWMpinLaser.pGPIOx = GPIOC;
+		PWMpinLaser.pinConfig.GPIO_PinNumber			= PIN_6;
+		PWMpinLaser.pinConfig.GPIO_PinMode 				= GPIO_MODE_OUT;
+		PWMpinLaser.pinConfig.GPIO_PinOutputType 		= GPIO_OTYPE_PUSHPULL;
+		PWMpinLaser.pinConfig.GPIO_PinOutputSpeed 		= GPIO_OSPEEDR_FAST;
+		PWMpinLaser.pinConfig.GPIO_PinPuPdControl 		= GPIO_PUPDR_NOTHING;
+		gpio_Config(&userLed);
+		gpio_WritePin(&userLed,RESET);
+
 	}
 
 }
