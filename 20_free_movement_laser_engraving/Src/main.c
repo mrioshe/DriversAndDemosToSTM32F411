@@ -136,8 +136,8 @@ while (1) {
 		if(motorx.config.velocity==LASER_VELOCITY_2000Hz){
 			__NOP();
 		} else{
-			motorx.config.velocity=motorx.config.velocity++;
-			motory.config.velocity=motory.config.velocity++;
+			motorx.config.velocity++;
+			motory.config.velocity++;
 		}
 		receivedChar=0;
 	}
@@ -147,8 +147,8 @@ while (1) {
 		if(motorx.config.velocity==LASER_VELOCITY_200Hz){
 				__NOP();
 			} else{
-				motorx.config.velocity=motorx.config.velocity--;
-				motory.config.velocity=motory.config.velocity--;
+				motorx.config.velocity--;
+				motory.config.velocity--;
 			}
 			receivedChar=0;
 	}
@@ -158,7 +158,7 @@ while (1) {
 		if(motorx.config.laser_power==LASER_POWER_8000Hz){
 			__NOP();
 		} else{
-			motorx.config.laser_power=motorx.config.laser_power++;
+			motorx.config.laser_power++;
 		}
 		receivedChar=0;
 	}
@@ -168,7 +168,7 @@ while (1) {
 		if(motorx.config.laser_power==LASER_POWER_1000Hz){
 				__NOP();
 			} else{
-				motorx.config.laser_power=motorx.config.laser_power--;
+				motorx.config.laser_power--;
 			}
 			receivedChar=0;
 	}
@@ -315,8 +315,8 @@ void initSys(void) {
 ////	startPWMsignal(&PWMlaser);
 	startPWMsignal(&PWMmotorx);
 	startPWMsignal(&PWMmotory);
-//	gpio_WritePin(&enablePinMotorx,1);
-//	gpio_WritePin(&enablePinMotory,1);
+	gpio_WritePin(&enablePinMotorx,1);
+	gpio_WritePin(&enablePinMotory,1);
 
 
 	/*Activamos FPU*/
@@ -369,7 +369,7 @@ void initSys(void) {
 	motorx.pPWM_motor 				= &PWMmotorx;
 	motorx.config.direction			= DIRECTION1;
 	motorx.config.laser_power		= LASER_POWER_4000Hz;
-	motorx.config.time_step			= 100;					//valor en ms
+	motorx.config.time_step			= 500;					//valor en ms
 	motorx.config.velocity			= LASER_VELOCITY_1000Hz;
 
 	motory.pGIPO_enable_laser 		= &enablePinLaser;
@@ -379,7 +379,7 @@ void initSys(void) {
 	motory.pPWM_motor 				= &PWMmotory;
 	motory.config.direction			= DIRECTION1;
 	motory.config.laser_power		= LASER_POWER_1000Hz;
-	motory.config.time_step			= 100;					//valor en ms
+	motory.config.time_step			= 1000;					//valor en ms
 	motory.config.velocity			= LASER_VELOCITY_1000Hz;
 
 	laser_init_config(&motorx);

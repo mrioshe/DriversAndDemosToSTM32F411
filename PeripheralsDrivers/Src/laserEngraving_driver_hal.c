@@ -30,33 +30,44 @@ void set_velocity(laser_engraving_t *pLaser_engraving_t,uint8_t newVelocity){
 	switch(newVelocity){
 	case(LASER_VELOCITY_200Hz):
 		updateFrequency(pLaser_engraving_t->pPWM_motor, 5000);
+		updateDuttyCycle(pLaser_engraving_t->pPWM_motor,2500);
+
 			break;
 	case(LASER_VELOCITY_400Hz):
 		updateFrequency(pLaser_engraving_t->pPWM_motor, 2500);
+		updateDuttyCycle(pLaser_engraving_t->pPWM_motor,2500/2);
 			break;
 	case(LASER_VELOCITY_600Hz):
 		updateFrequency(pLaser_engraving_t->pPWM_motor, 1666);
+		updateDuttyCycle(pLaser_engraving_t->pPWM_motor,1666/2);
 			break;
 	case(LASER_VELOCITY_800Hz):
 		updateFrequency(pLaser_engraving_t->pPWM_motor, 1250);
+		updateDuttyCycle(pLaser_engraving_t->pPWM_motor, 1250/2);
 			break;
 	case(LASER_VELOCITY_1000Hz):
 		updateFrequency(pLaser_engraving_t->pPWM_motor, 1000);
+		updateDuttyCycle(pLaser_engraving_t->pPWM_motor, 1000/2);
 			break;
 	case(LASER_VELOCITY_1200Hz):
 		updateFrequency(pLaser_engraving_t->pPWM_motor, 833);
+		updateDuttyCycle(pLaser_engraving_t->pPWM_motor, 833/2);
 			break;
 	case(LASER_VELOCITY_1400Hz):
 		updateFrequency(pLaser_engraving_t->pPWM_motor, 714);
+		updateDuttyCycle(pLaser_engraving_t->pPWM_motor, 714/2);
 			break;
 	case(LASER_VELOCITY_1600Hz):
 		updateFrequency(pLaser_engraving_t->pPWM_motor, 625);
+		updateDuttyCycle(pLaser_engraving_t->pPWM_motor, 625/2);
 			break;
 	case(LASER_VELOCITY_1800Hz):
 		updateFrequency(pLaser_engraving_t->pPWM_motor, 555);
+		updateDuttyCycle(pLaser_engraving_t->pPWM_motor, 555/2);
 			break;
 	case(LASER_VELOCITY_2000Hz):
 		updateFrequency(pLaser_engraving_t->pPWM_motor, 500);
+		updateDuttyCycle(pLaser_engraving_t->pPWM_motor, 500/2);
 			break;
 	default:
 		__NOP();
@@ -143,9 +154,9 @@ void set_motor_direction(laser_engraving_t *pLaser_engraving_t, uint8_t newDirec
 void movement(laser_engraving_t *pLaser_engraving_t){
 
 	motor_enable(pLaser_engraving_t);
-//	startPWMsignal(pLaser_engraving_t->pPWM_motor);
+	startPWMsignal(pLaser_engraving_t->pPWM_motor);
 	systick_Delay_ms(pLaser_engraving_t->config.time_step);
-//	stopPWMSignal(pLaser_engraving_t->pPWM_motor);
+	stopPWMSignal(pLaser_engraving_t->pPWM_motor);
 	motor_disable(pLaser_engraving_t);
 }
 
