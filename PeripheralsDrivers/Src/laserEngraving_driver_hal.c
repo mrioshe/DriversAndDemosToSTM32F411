@@ -81,6 +81,9 @@ void set_power(laser_engraving_t *pLaser_engraving_t,uint8_t newPower){
 	// IMPORTANTE, SE TRABAJA CON FRECUENCIA BASE DE 1 MHz, se debe configurar el prescaler del timer en 16
 
 	switch(newPower){
+	case(LASER_POWER_0):
+		stopPWMSignal(pLaser_engraving_t->pPWM_laser);
+		break;
 	case(LASER_POWER_1000Hz):
 		updateFrequency(pLaser_engraving_t->pPWM_laser, 1000);
 		updateDuttyCycle(pLaser_engraving_t->pPWM_laser,300);
