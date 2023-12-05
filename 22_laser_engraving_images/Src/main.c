@@ -74,18 +74,20 @@ laser_engraving_t motorx={0};
 laser_engraving_t motory={0};
 uint8_t LaserStatus={0};
 
-uint16_t imageHeight=437;
+uint16_t imageHeight=451;
 uint16_t imageWidth=640;
 uint8_t rowData[640]={0};
-uint8_t counterRow={0};
-uint8_t counterRowAux={0};
-uint8_t counterColum={0};
+uint16_t counterRow={0};
+uint16_t counterRowAux={0};
+uint16_t counterColum={0};
 
 uint8_t flagStart={0};
 uint8_t flagRowComplete={0};
 
 void initSys(void);
 void EngravingImage(void);
+int8_t char2int(char number2convert);
+
 int main() {
 
 	initSys();
@@ -330,6 +332,29 @@ void initSys(void) {
 
 }
 
+int8_t char2int(char number2convert){
+	uint8_t numberconverted;
+	if(number2convert=='0'){
+		numberconverted=0;
+	} else if(number2convert=='1'){
+		numberconverted=1;
+	} else if(number2convert=='2'){
+		numberconverted=2;
+	} else if(number2convert=='3'){
+		numberconverted=3;
+	} else if(number2convert=='4'){
+		numberconverted=4;
+	} else if(number2convert=='5'){
+		numberconverted=5;
+	} else if(number2convert=='6'){
+		numberconverted=6;
+	} else if(number2convert=='7'){
+		numberconverted=7;
+	}
+
+	return numberconverted;
+}
+
 void EngravingImage(void){
 
 	usart_writeMsg(&commSerial, "s");
@@ -341,10 +366,10 @@ void EngravingImage(void){
 			//In this point, the data transmition by python to row j is complete
 			counterRow=0;
 			if(counterRow%2==0){
-				StartContinuosMovement(&motorx,DIRECTION2);
+				StartContinuosMovement(&motorx,DIRECTION1);
 				for(int j=0;j<imageWidth;j++){
-					set_power(&motorx,rowData[j]);
 					start_continuous_engraving(&motorx);
+					set_power(&motory,rowData[j]);
 					systick_Delay_ms(motorx.config.time_step);
 					stop_continuous_engraving(&motorx);
 				}
@@ -353,9 +378,9 @@ void EngravingImage(void){
 				movement(&motory);
 				counterRow++;
 			}else if(counterRow%2==1){
-				StartContinuosMovement(&motorx,DIRECTION1);
+				StartContinuosMovement(&motorx,DIRECTION2);
 				for(int j=0;j<imageWidth;j++){
-					set_power(&motorx,rowData[j]);
+					set_power(&motory,rowData[j]);
 					start_continuous_engraving(&motorx);
 					systick_Delay_ms(motorx.config.time_step);
 					stop_continuous_engraving(&motorx);
@@ -365,7 +390,6 @@ void EngravingImage(void){
 				movement(&motory);
 				counterRow++;
 			}
-			usart_writeMsg(&commSerial, "c");
 			counterRowAux++;
 	}
 
@@ -379,12 +403,13 @@ void Timer2_Callback(void) {
 
 void usart2_RxCallback(void) {
 	receivedChar = usart_getRxData2();
-	rowData[counterColum]=receivedChar;
-	receivedChar=0;
+	rowData[counterColum]=char2int(receivedChar);
+//	receivedChar=0;
+	usart_writeMsg(&commSerial, "c");
 	counterColum++;
-	if (counterColum>(imageWidth-1)){
-		flagRowComplete=1;
+	if (counterColum==(imageWidth-1)){
 		counterColum=0;
+		flagRowComplete=1;
 	}
 }
 
