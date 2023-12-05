@@ -93,7 +93,7 @@ while (1) {
 
 	if(receivedChar=='a'){
 		usart_writeMsg(&commSerial, "Moviendo hacia la izquierda\n\r");
-		set_motor_direction(&motorx,0);
+		set_motor_direction(&motorx,1);
 		movement(&motorx);
 		receivedChar=0;
 
@@ -108,7 +108,7 @@ while (1) {
 
 	if(receivedChar == 'd'){
 		usart_writeMsg(&commSerial, "Moviendo hacia la derecha\n\r");
-		set_motor_direction(&motorx,1);
+		set_motor_direction(&motorx,0);
 		movement(&motorx);
 		receivedChar=0;
 	}
