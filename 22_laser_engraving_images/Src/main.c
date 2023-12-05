@@ -74,11 +74,15 @@ laser_engraving_t motorx={0};
 laser_engraving_t motory={0};
 uint8_t LaserStatus={0};
 
+uint16_t imageHeight=437;
 uint16_t imageWidth=640;
 uint8_t rowData[640]={0};
-uint8_t counter={0};
+uint8_t counterRow={0};
+uint8_t counterRowAux={0};
+uint8_t counterColum={0};
 
 uint8_t flagStart={0};
+uint8_t flagRowComplete={0};
 
 void initSys(void);
 void EngravingImage(void);
@@ -281,7 +285,7 @@ void initSys(void) {
 	gpio_Config(&pinRx);
 
 	commSerial.ptrUSARTx = USART2;
-	commSerial.USART_Config.baudrate = USART_BAUDRATE_115200;
+	commSerial.USART_Config.baudrate = USART_BAUDRATE_921600;
 	commSerial.USART_Config.datasize = USART_DATASIZE_8BIT;
 	commSerial.USART_Config.mode = USART_MODE_RXTX;
 	commSerial.USART_Config.parity = USART_PARITY_NONE;
@@ -306,7 +310,7 @@ void initSys(void) {
 	motorx.pPWM_motor 				= &PWMmotorx;
 	motorx.config.direction			= DIRECTION1;
 	motorx.config.laser_power		= LASER_POWER_4000Hz;
-	motorx.config.time_step			= 100;					//valor en ms
+	motorx.config.time_step			= 5;					//valor en ms
 	motorx.config.velocity			= LASER_VELOCITY_200Hz;
 
 	motory.pGIPO_enable_laser 		= &enablePinLaser;
@@ -316,7 +320,7 @@ void initSys(void) {
 	motory.pPWM_motor 				= &PWMmotory;
 	motory.config.direction			= DIRECTION1;
 	motory.config.laser_power		= LASER_POWER_1000Hz;
-	motory.config.time_step			= 100;					//valor en ms
+	motory.config.time_step			= 5;					//valor en ms
 	motory.config.velocity			= LASER_VELOCITY_200Hz;
 
 
@@ -329,6 +333,42 @@ void initSys(void) {
 void EngravingImage(void){
 
 	usart_writeMsg(&commSerial, "s");
+	while(counterRowAux<imageHeight){
+		while(!flagRowComplete){
+				__NOP();
+			}
+			flagRowComplete=0;
+			//In this point, the data transmition by python to row j is complete
+			counterRow=0;
+			if(counterRow%2==0){
+				StartContinuosMovement(&motorx,DIRECTION2);
+				for(int j=0;j<imageWidth;j++){
+					set_power(&motorx,rowData[j]);
+					start_continuous_engraving(&motorx);
+					systick_Delay_ms(motorx.config.time_step);
+					stop_continuous_engraving(&motorx);
+				}
+				StopSimulataneousMovement(&motorx,&motory);
+				set_motor_direction(&motory,DIRECTION1);
+				movement(&motory);
+				counterRow++;
+			}else if(counterRow%2==1){
+				StartContinuosMovement(&motorx,DIRECTION1);
+				for(int j=0;j<imageWidth;j++){
+					set_power(&motorx,rowData[j]);
+					start_continuous_engraving(&motorx);
+					systick_Delay_ms(motorx.config.time_step);
+					stop_continuous_engraving(&motorx);
+				}
+				StopSimulataneousMovement(&motorx,&motory);
+				set_motor_direction(&motory,DIRECTION1);
+				movement(&motory);
+				counterRow++;
+			}
+			usart_writeMsg(&commSerial, "c");
+			counterRowAux++;
+	}
+
 }
 
 
@@ -339,9 +379,13 @@ void Timer2_Callback(void) {
 
 void usart2_RxCallback(void) {
 	receivedChar = usart_getRxData2();
-	rowData[counter]=recivedChar;
-	counter++;
-
+	rowData[counterColum]=receivedChar;
+	receivedChar=0;
+	counterColum++;
+	if (counterColum>(imageWidth-1)){
+		flagRowComplete=1;
+		counterColum=0;
+	}
 }
 
 void callback_extInt10(void){
